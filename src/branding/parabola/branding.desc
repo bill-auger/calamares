@@ -1,0 +1,23 @@
+---
+componentName: parabola
+
+strings:
+  productName:         Parabola GNU/Linux-Libre
+  shortProductName:    Parabola
+  version:             2017-06
+  shortVersion:        2017-06
+  versionedName:       Parabola GNU/Linux-Libre
+  shortVersionedName:  Parabola
+  bootloaderEntryName: Parabola GNU/Linux-Libre
+
+images:
+  productLogo:    "squid.png"
+  productIcon:    "Parabola_logo,_GNU_and_Bola.svg.png"
+  productWelcome: "languages.png"
+
+slideshow: "show.qml"
+
+style:
+  sidebarBackground: "#454948"
+  sidebarText:       "#efefef"
+  sidebarTextSelect: "#9E4F5D"
