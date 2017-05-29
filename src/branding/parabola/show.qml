@@ -28,27 +28,27 @@ Presentation
     id: presentation
 
     Timer {
-        interval: 20000
-        running: true
-        repeat: true
+        interval:    5000
+        running:     true
+        repeat:      true
         onTriggered: presentation.goToNextSlide()
     }
     
     Slide {
 
         Image {
-            id: background1
-            source: "Wallpaper_Parabola_Landscape_r800x450px.png"
-            width: 800; height: 450
-            fillMode: Image.PreserveAspectFit
+            id:       background1
+            source:   "Wallpaper_Parabola_Landscape_r800x450px.png"
+//             width:    800; height: 450
+            fillMode:         Image.PreserveAspectCrop
             anchors.centerIn: parent
         }
         Text {
             anchors.horizontalCenter: background1.horizontalCenter
-            anchors.top: background1.bottom
+            anchors.bottom: background1.bottom
             text: "slide-1"
             wrapMode: Text.WordWrap
-            width: 800
+//             width: 800
             horizontalAlignment: Text.Center
         }
     }
@@ -59,8 +59,8 @@ Presentation
             id: background2
             source: "Wallpaper_Parabola_Landscape_r800x450px.png"
             width: 800; height: 450
-            fillMode: Image.PreserveAspectFit
-            anchors.centerIn: parent
+            fillMode: Image.PreserveAspectCrop
+//             anchors.centerIn: parent
         }
         Text {
             anchors.horizontalCenter: background2.horizontalCenter
@@ -77,7 +77,7 @@ Presentation
         Image {
             id: background3
             source: "Wallpaper_Parabola_Landscape_r800x450px.png"
-            width: 800; height: 450
+//             width: 800; height: 450
             fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
         }
@@ -98,7 +98,7 @@ Presentation
             source: "Wallpaper_Parabola_Landscape_r800x450px.png"
             width: 800; height: 450
             fillMode: Image.PreserveAspectFit
-            anchors.centerIn: parent
+//             anchors.centerIn: parent
         }
         Text {
             anchors.horizontalCenter: background4.horizontalCenter
@@ -115,8 +115,8 @@ Presentation
         Image {
             id: background5
             source: "Wallpaper_Parabola_Landscape_r800x450px.png"
-            width: 800; height: 450
-            fillMode: Image.PreserveAspectFit
+//             width: 800; height: 450
+            fillMode: Image.Stretch
             anchors.centerIn: parent
         }
         Text {
