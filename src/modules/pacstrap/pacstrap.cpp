@@ -47,59 +47,10 @@ PacstrapCppJob::prettyName() const
 }
 
 
-static QString variantListToString( const QVariantList& variantList );
-static QString variantMapToString( const QVariantMap& variantMap );
-static QString variantHashToString( const QVariantHash& variantHash );
-
-
-static QString
-variantToString( const QVariant& variant )
+QString
+PacstrapCppJob::prettyStatusMessage() const
 {
-    switch ( variant.type() )
-    {
-    case QVariant::Map:
-        return variantMapToString( variant.toMap() );
-
-    case QVariant::Hash:
-        return variantHashToString( variant.toHash() );
-
-    case QVariant::List:
-    case QVariant::StringList:
-        return variantListToString( variant.toList() );
-
-    default:
-        return variant.toString();
-    }
-}
-
-
-static QString
-variantListToString( const QVariantList& variantList )
-{
-    QStringList result;
-    for ( const QVariant& variant : variantList )
-        result.append( variantToString( variant ) );
-    return '{' + result.join(',') + '}';
-}
-
-
-static QString
-variantMapToString( const QVariantMap& variantMap )
-{
-    QStringList result;
-    for ( auto it = variantMap.constBegin(); it != variantMap.constEnd(); ++it )
-        result.append( it.key() + '=' + variantToString( it.value() ) );
-    return '[' + result.join(',') + ']';
-}
-
-
-static QString
-variantHashToString( const QVariantHash& variantHash )
-{
-    QStringList result;
-    for ( auto it = variantHash.constBegin(); it != variantHash.constEnd(); ++it )
-        result.append( it.key() + '=' + variantToString( it.value() ) );
-    return '<' + result.join(',') + '>';
+    return m_status;
 }
 
 
@@ -112,28 +63,12 @@ PacstrapCppJob::exec()
 
 // QProcess::execute( "echo SKIPPING parabola-prepare.desc" );
 
+    setTargetDevice();
 
     Calamares::GlobalStorage *globalStorage = Calamares::JobQueue::instance()->globalStorage();
+    QString target_device = globalStorage->value("target-device").toString();
     QString mountpoint = "/tmp/pacstrap";
-    QString target_device = "";
-    QVariantList partitions = globalStorage->value( "partitions" ).toList() ;
 
-    // locate target device for root filesystem
-    foreach (const QVariant &partition, partitions)
-    {
-cDebug() << QString("[PACSTRAPCPP]: partition=%1").arg(variantToString(partition));
-
-        QVariantMap variantMap = partition.toMap();
-        QString device = variantMap.value("device").toString();
-        QString fs = variantMap.value("fs").toString();
-        QString mount_point = variantMap.value("mountPoint").toString();
-        QString uuid = variantMap.value("uuid").toString();
-
-        if (mount_point == "/")
-            target_device = device;
-
-if (mount_point == "/")cDebug() << QString("[PACSTRAPCPP]: target_device=%1").arg(device);
-    }
     if (target_device == "")
         return Calamares::JobResult::error("Target device for root filesystem is unspecified.");
 
@@ -143,21 +78,24 @@ if (mount_point == "/")cDebug() << QString("[PACSTRAPCPP]: target_device=%1").ar
                                         pacman-key --refresh-keys                  \"";
     QString mkdir_cmd = QString( "/bin/sh -c \"mkdir %1\"" ).arg( mountpoint );
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
-    QString pacstrap_cmd = QString( "/bin/sh -c \"pacstrap -c %1 base linux-libre\"" ).arg( mountpoint );
-//     QString pacstrap_kernel_cmd = QString( "/bin/sh -c \"pacstrap -c %1 linux-libre\"" ).arg( mountpoint );
+    QString pacstrap_cmd = QString( "/bin/sh -c \"pacstrap -c %1 base\"" ).arg( mountpoint );
+    QString kernel_cmd = QString( "/bin/sh -c \"pacstrap -c %1 linux-libre sudo\"" ).arg( mountpoint );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
 
 cDebug() << QString("[PACSTRAPCPP]: pacstrap_cmd=%1").arg(pacstrap_cmd);
-QProcess::execute( "/bin/sh -c \"ls /tmp/\"" );
+// QProcess::execute( "/bin/sh -c \"ls /tmp/\"" );
 
     // boot-strap install root filesystem
+    m_status = tr( "Bootstrapping root filesystem" ); emit progress( 1 );
 //     QProcess::execute( keyring_cmd );
     QProcess::execute( mkdir_cmd );
     QProcess::execute( mount_cmd );
     QProcess::execute( pacstrap_cmd );
+    m_status = tr( "Installing linux-libre kernel" ); emit progress( 5 );
+//     QProcess::execute( kernel_cmd );
     QProcess::execute( umount_cmd );
 
-    emit progress( 0.1 );
+    emit progress( 1 );
 
     return Calamares::JobResult::ok();
 // return Calamares::JobResult::error("just cuz");
@@ -169,5 +107,35 @@ PacstrapCppJob::setConfigurationMap( const QVariantMap& configurationMap )
 {
   m_configurationMap = configurationMap;
 }
+
+
+void
+PacstrapCppJob::setTargetDevice()
+{
+    Calamares::GlobalStorage *globalStorage = Calamares::JobQueue::instance()->globalStorage();
+    QString target_device = "";
+    QVariantList partitions = globalStorage->value( "partitions" ).toList() ;
+
+    // locate target device for root filesystem
+    foreach (const QVariant &partition, partitions)
+    {
+QStringList result; for ( auto it = partition.toMap().constBegin(); it != partition.toMap().constEnd(); ++it ) result.append( it.key() + '=' + it.value().toString() );
+cDebug() << QString("[DESKTOPCPP]: partition=%1").arg('[' + result.join(',') + ']');
+
+        QVariantMap partition_map = partition.toMap();
+        QString device = partition_map.value("device").toString();
+        QString fs = partition_map.value("fs").toString();
+        QString mount_point = partition_map.value("mountPoint").toString();
+        QString uuid = partition_map.value("uuid").toString();
+
+        if (mount_point == "/")
+            target_device = device;
+
+if (mount_point == "/") cDebug() << QString("[PACSTRAPCPP]: target_device=%1").arg(device);
+    }
+
+    globalStorage->insert( "target-device", target_device );
+}
+
 
 CALAMARES_PLUGIN_FACTORY_DEFINITION( PacstrapCppJobFactory, registerPlugin<PacstrapCppJob>(); )

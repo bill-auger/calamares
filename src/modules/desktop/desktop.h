@@ -16,8 +16,8 @@
  *   along with Calamares. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PACSTRAPCPPJOB_H
-#define PACSTRAPCPPJOB_H
+#ifndef DESKTOPCPPJOB_H
+#define DESKTOPCPPJOB_H
 
 #include <QObject>
 #include <QVariantMap>
@@ -28,13 +28,13 @@
 
 #include <PluginDllMacro.h>
 
-class PLUGINDLLEXPORT PacstrapCppJob : public Calamares::CppJob
+class PLUGINDLLEXPORT DesktopCppJob : public Calamares::CppJob
 {
     Q_OBJECT
 
 public:
-    explicit PacstrapCppJob( QObject* parent = nullptr );
-    virtual ~PacstrapCppJob();
+    explicit DesktopCppJob( QObject* parent = nullptr );
+    virtual ~DesktopCppJob();
 
     QString prettyName() const override;
     QString prettyStatusMessage() const override;
@@ -45,12 +45,13 @@ public:
 
 private:
 
-    void setTargetDevice();
+    static QString packageListToString( const QVariantList& package_list );
+
 
     QVariantMap m_configurationMap;
     QString m_status;
 };
 
-CALAMARES_PLUGIN_FACTORY_DECLARATION( PacstrapCppJobFactory )
+CALAMARES_PLUGIN_FACTORY_DECLARATION( DesktopCppJobFactory )
 
-#endif // PACSTRAPCPPJOB_H
+#endif // DESKTOPCPPJOB_H
