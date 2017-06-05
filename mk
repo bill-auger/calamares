@@ -1,12 +1,14 @@
 #!/bin/bash
 
 
-# sudo pacman -S arch-install-scripts
+# sudo pacman -S base-devel git extra-cmake-modules qt5-tools yaml-cpp polkit-qt5 \
+#                kpmcore boost
+# sudo pacman -S squashfs-tools arch-install-scripts
 
 
 if [ ! -d build ]
 then mkdir build
-else rm build/Makefile > /dev/null
+else rm -f build/Makefile 2> /dev/null
 fi
 # if [ ! -d /etc/calamares/ ]
 # then sudo mkdir                         /etc/calamares
@@ -18,6 +20,7 @@ fi
 cd build
 cmake -DCMAKE_BUILD_TYPE=Debug                                               \
       -DCMAKE_INSTALL_PREFIX=/usr                                            \
+      -DWITH_CRASHREPORTER=OFF                                               \
       -DSKIP_MODULES="dracut dracutlukscfg dummycpp dummyprocess dummypython \
                       dummypythonqt grubcfg initramfs initramfscfg           \
                       interactiveterminal license luksbootkeyfile            \

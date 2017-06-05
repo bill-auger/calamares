@@ -46,6 +46,8 @@ public:
 private:
 
     void setTargetDevice();
+    static QString packageListToString( const QVariantList& package_list );
+
 
     QVariantMap m_configurationMap;
     QString m_status;

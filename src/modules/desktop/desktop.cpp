@@ -66,9 +66,10 @@ DesktopCppJob::exec()
     if (target_device == "")
         return Calamares::JobResult::error("Target device for root filesystem is unspecified.");
 
+cDebug() << QString("[PACSTRAPCPP]: DesktopCppJob::exec() default_desktop=%1").arg(globalStorage->value("default-desktop").toString());
 
-//     QString default_desktop = globalStorage->value("default-desktop").toString();
-    QString default_desktop = "mate"; // TODO: per user option
+    QString default_desktop = globalStorage->value("default-desktop").toString();
+default_desktop = "mate"; // TODO: per user option via globalStorage
     QVariantList package_list = m_configurationMap.value("xserver").toList() +
                                 m_configurationMap.value("applications").toList() +
                                 m_configurationMap.value("utilities").toList() +
@@ -78,12 +79,12 @@ DesktopCppJob::exec()
     QString packages = packageListToString(package_list) ;
 
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
-    QString install_cmd = QString( "/bin/sh -c \"pacstrap -c %1 %2\"" ).arg( mountpoint, packages );
+    QString pacstrap_cmd = QString( "/bin/sh -c \"pacstrap -c %1 %2\"" ).arg( mountpoint, packages );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
 
     // install graphical desktop
     QProcess::execute( mount_cmd );
-    QProcess::execute( install_cmd );
+    QProcess::execute( pacstrap_cmd );
     QProcess::execute( umount_cmd );
 
     emit progress( 10 );

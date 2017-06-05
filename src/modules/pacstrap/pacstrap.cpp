@@ -68,6 +68,10 @@ PacstrapCppJob::exec()
     Calamares::GlobalStorage *globalStorage = Calamares::JobQueue::instance()->globalStorage();
     QString target_device = globalStorage->value("target-device").toString();
     QString mountpoint = "/tmp/pacstrap";
+    QVariantList package_list = m_configurationMap.value("base").toList() +
+                                m_configurationMap.value("kernel").toList() +
+                                m_configurationMap.value("bootloader").toList();
+    QString packages = packageListToString(package_list) ;
 
     if (target_device == "")
         return Calamares::JobResult::error("Target device for root filesystem is unspecified.");
@@ -76,22 +80,22 @@ PacstrapCppJob::exec()
     QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring && \
                                         pacman-key --populate parabola          && \
                                         pacman-key --refresh-keys                  \"";
-    QString mkdir_cmd = QString( "/bin/sh -c \"mkdir %1\"" ).arg( mountpoint );
+    QString mkdir_cmd = QString( "/bin/sh -c \"mkdir %1 2> /dev/null\"" ).arg( mountpoint );
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
-    QString pacstrap_cmd = QString( "/bin/sh -c \"pacstrap -c %1 base\"" ).arg( mountpoint );
-    QString kernel_cmd = QString( "/bin/sh -c \"pacstrap -c %1 linux-libre sudo\"" ).arg( mountpoint );
+    QString pacstrap_cmd = QString( "/bin/sh -c \"pacstrap -c %1 %2\"" ).arg( mountpoint, packages );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
 
 cDebug() << QString("[PACSTRAPCPP]: pacstrap_cmd=%1").arg(pacstrap_cmd);
 // QProcess::execute( "/bin/sh -c \"ls /tmp/\"" );
 
     // boot-strap install root filesystem
-    m_status = tr( "Bootstrapping root filesystem" ); emit progress( 1 );
+    m_status = tr( "Installing root filesystem" ); emit progress( 1 );
 //     QProcess::execute( keyring_cmd );
     QProcess::execute( mkdir_cmd );
     QProcess::execute( mount_cmd );
     QProcess::execute( pacstrap_cmd );
-    m_status = tr( "Installing linux-libre kernel" ); emit progress( 5 );
+//     m_status = tr( "Installing linux-libre kernel" ); emit progress( 5 );
+    emit progress( 5 );
 //     QProcess::execute( kernel_cmd );
     QProcess::execute( umount_cmd );
 
@@ -135,6 +139,17 @@ if (mount_point == "/") cDebug() << QString("[PACSTRAPCPP]: target_device=%1").a
     }
 
     globalStorage->insert( "target-device", target_device );
+}
+
+
+QString
+PacstrapCppJob::packageListToString( const QVariantList& package_list )
+{
+    QStringList result;
+    for ( const QVariant& package : package_list )
+        result.append( package.toString() );
+
+    return result.join(' ');
 }
 
 

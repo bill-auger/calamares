@@ -8,7 +8,6 @@ strings:
   shortVersion:        2017-06
   versionedName:       Parabola GNU/Linux-Libre
   shortVersionedName:  Parabola
-  bootloaderEntryName: Parabola GNU/Linux-Libre
 
 images:
   productLogo:    "squid.png"
