@@ -63,13 +63,14 @@ DesktopCppJob::exec()
     QString target_device = globalStorage->value("target-device").toString();
     QString mountpoint = "/tmp/pacstrap";
 
-    if (target_device == "")
+    if (target_device.isEmpty())
         return Calamares::JobResult::error("Target device for root filesystem is unspecified.");
 
-cDebug() << QString("[PACSTRAPCPP]: DesktopCppJob::exec() default_desktop=%1").arg(globalStorage->value("default-desktop").toString());
+cDebug() << QString("[DESKTOPCPP]: DesktopCppJob::exec() default_desktop=%1").arg(globalStorage->value("default-desktop").toString());
+
+globalStorage->insert( "default-desktop", "mate" ); // TODO: per user option via globalStorage
 
     QString default_desktop = globalStorage->value("default-desktop").toString();
-default_desktop = "mate"; // TODO: per user option via globalStorage
     QVariantList package_list = m_configurationMap.value("xserver").toList() +
                                 m_configurationMap.value("applications").toList() +
                                 m_configurationMap.value("utilities").toList() +
@@ -80,11 +81,19 @@ default_desktop = "mate"; // TODO: per user option via globalStorage
 
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
     QString pacstrap_cmd = QString( "/bin/sh -c \"pacstrap -c %1 %2\"" ).arg( mountpoint, packages );
+    QString wallpaper_cmd = QString( "/bin/sh -c \"cp /etc/wallpaper.png %1/etc/\"" ).arg( mountpoint );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
 
-    // install graphical desktop
+    // boot-strap install graphical desktop
     QProcess::execute( mount_cmd );
     QProcess::execute( pacstrap_cmd );
+
+cDebug() << QString( "[DESKTOPCPP]: ls skel" );        QProcess::execute( QString( "/bin/sh -c \"ls -al /etc/skel/\"" ) );
+cDebug() << QString( "[DESKTOPCPP]: ls chroot/skel" ); QProcess::execute( QString( "/bin/sh -c \"ls -al %1/etc/skel/\"" ).arg( mountpoint ) );
+cDebug() << QString( "[DESKTOPCPP]: ls wallpaper" );   QProcess::execute( QString( "/bin/sh -c \"ls -al %1/etc/wallpaper.png\"" ).arg( mountpoint ) );
+cDebug() << QString( "[DESKTOPCPP]: ls sudoers" );     QProcess::execute( QString( "/bin/sh -c \"ls -al %1/etc/sudoers*\"" ).arg( mountpoint ) );
+
+    QProcess::execute( wallpaper_cmd );
     QProcess::execute( umount_cmd );
 
     emit progress( 10 );

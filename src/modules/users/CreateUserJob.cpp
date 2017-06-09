@@ -192,5 +192,40 @@ QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( sudoersFi.filePath(
                                             tr( "chown terminated with error code %1." )
                                                 .arg( ec ) );
 
+
+    /* parabola-specific configuration */
+
+//    Calamares::GlobalStorage* globalStorage = Calamares::JobQueue::instance()->globalStorage();
+    QString default_desktop = gs->value("default-desktop").toString();
+/*
+    if [ -x /usr/bin/setxkbmap ]; then
+        echo "setxkbmap $(cat /.codecheck | grep XKBMAP= | cut -d '=' -f 2)" >> /home/${user#*=}/.bashrc
+    fi
+*/
+
+cDebug() << QString("CreateUserJob::exec() default_desktop=%1").arg(default_desktop);
+
+    if (default_desktop == "mate")
+    {
+/*
+        QVariantList commands = m_configurationMap.value("gsettings-commands").toList();
+
+        for ( const QVariant& command : commands )
+          CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName + command.toString() } );
+*/
+        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName + 
+            "gsettings set org.mate.interface gtk-theme 'Radiance-Purple'" } );
+        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName +
+            "gsettings set org.mate.Marco.general theme 'Radiance-Purple'" } );
+        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName +
+            "gsettings set org.mate.interface icon-theme 'RAVE-X-Dark-Purple'" } );
+        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName +
+            "gsettings set org.mate.peripherals-mouse cursor-size '18'" } );
+        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName +
+            "gsettings set org.mate.peripherals-mouse cursor-theme 'mate'" } );
+        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName +
+            "gsettings set org.mate.background picture-filename '/etc/wallpaper.png'" } );
+    }
+
     return Calamares::JobResult::ok();
 }

@@ -73,7 +73,7 @@ PacstrapCppJob::exec()
                                 m_configurationMap.value("bootloader").toList();
     QString packages = packageListToString(package_list) ;
 
-    if (target_device == "")
+    if (target_device.isEmpty())
         return Calamares::JobResult::error("Target device for root filesystem is unspecified.");
 
 
@@ -83,9 +83,12 @@ PacstrapCppJob::exec()
     QString mkdir_cmd = QString( "/bin/sh -c \"mkdir %1 2> /dev/null\"" ).arg( mountpoint );
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
     QString pacstrap_cmd = QString( "/bin/sh -c \"pacstrap -c %1 %2\"" ).arg( mountpoint, packages );
+    QString grub_theme_cmd = QString( "/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"" ).arg( mountpoint );
+QString grub_theme_kludge_cmd = QString( "/bin/sh -c \"echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub\"" ).arg( mountpoint );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
 
 cDebug() << QString("[PACSTRAPCPP]: pacstrap_cmd=%1").arg(pacstrap_cmd);
+cDebug() << QString("[PACSTRAPCPP]: grub_theme_cmd=%1").arg(grub_theme_cmd);
 // QProcess::execute( "/bin/sh -c \"ls /tmp/\"" );
 
     // boot-strap install root filesystem
@@ -95,6 +98,12 @@ cDebug() << QString("[PACSTRAPCPP]: pacstrap_cmd=%1").arg(pacstrap_cmd);
     QProcess::execute( mount_cmd );
     QProcess::execute( pacstrap_cmd );
 //     m_status = tr( "Installing linux-libre kernel" ); emit progress( 5 );
+
+cDebug() << QString( "[PACSTRAPCPP]: grub_theme_cmd IN" );  QProcess::execute( QString( "/bin/sh -c \"cat %1/etc/default/grub\"" ).arg( mountpoint ) );
+    QProcess::execute( grub_theme_cmd );
+QProcess::execute( grub_theme_kludge_cmd );
+cDebug() << QString( "[PACSTRAPCPP]: grub_theme_cmd OUT" ); QProcess::execute( QString( "/bin/sh -c \"cat %1/etc/default/grub\"" ).arg( mountpoint ) );
+
     emit progress( 5 );
 //     QProcess::execute( kernel_cmd );
     QProcess::execute( umount_cmd );
@@ -102,7 +111,7 @@ cDebug() << QString("[PACSTRAPCPP]: pacstrap_cmd=%1").arg(pacstrap_cmd);
     emit progress( 1 );
 
     return Calamares::JobResult::ok();
-// return Calamares::JobResult::error("just cuz");
+//return Calamares::JobResult::error("just cuz");
 }
 
 
@@ -124,7 +133,7 @@ PacstrapCppJob::setTargetDevice()
     foreach (const QVariant &partition, partitions)
     {
 QStringList result; for ( auto it = partition.toMap().constBegin(); it != partition.toMap().constEnd(); ++it ) result.append( it.key() + '=' + it.value().toString() );
-cDebug() << QString("[DESKTOPCPP]: partition=%1").arg('[' + result.join(',') + ']');
+cDebug() << QString("[PACSTRAPCPP]: partition=%1").arg('[' + result.join(',') + ']');
 
         QVariantMap partition_map = partition.toMap();
         QString device = partition_map.value("device").toString();

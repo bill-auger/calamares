@@ -10,7 +10,7 @@ strings:
   shortVersionedName:  Parabola
 
 images:
-  productLogo:    "squid.png"
+  productLogo:    "parabolaicon.png"
   productIcon:    "Parabola_logo,_GNU_and_Bola.svg.png"
   productWelcome: "languages.png"
 
