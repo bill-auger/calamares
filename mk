@@ -1,9 +1,13 @@
 #!/bin/bash
 
 
-# sudo pacman -S base-devel git extra-cmake-modules qt5-tools yaml-cpp polkit-qt5 \
-#                kpmcore boost
-# sudo pacman -S squashfs-tools arch-install-scripts
+# PKGS="$(pacman -Qg base-devel | cut -d ' ' -f 2)"
+# pacman -Qi $PKGS > /dev/null || sudo pacman -S $PKGS
+PKGS="git extra-cmake-modules qt5-tools yaml-cpp polkit-qt5 \
+      kpmcore boost os-prober"
+pacman -Qi $PKGS > /dev/null || sudo pacman -S $PKGS
+PKGS="squashfs-tools arch-install-scripts"
+pacman -Qi $PKGS > /dev/null || sudo pacman -S $PKGS
 
 
 if [ ! -d build ]

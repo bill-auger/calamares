@@ -19,9 +19,9 @@ backup=( 'usr/share/calamares/modules/bootloader.conf'
          'usr/share/calamares/modules/initcpio.conf'
          'usr/share/calamares/modules/unpackfs.conf' )
 
-_git_tag="${pkgver}-parabola"
+_git_tag="${pkgver}-parabola-alpha1"
 source=("https://notabug.org/bill-auger/calamares/archive/v${_git_tag}.tar.gz")
-sha256sums=('fa9ecaa6093112e1f9bcfea16cd20a0e8b03f192defa40e9d213207117f9d4f7')
+sha256sums=('6ae55f567d5eafdb781dc84988dec184637fa7cf8bd55d7a2157b2d920880d52')
 
 
 build() {
