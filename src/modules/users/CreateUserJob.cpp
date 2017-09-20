@@ -82,11 +82,11 @@ CreateUserJob::exec()
         else
             sudoersFilename += QStringLiteral( "10-parabola-installer" );
 */
-        QMap<QString, QVariant> brandingMap = gs->value( "branding" ).toMap();
-        QString distroName = brandingMap.value( "shortProductName" ).toString();
-        distroName = distroName.replace(QRegExp("[^A-Za-z0-9]"), "-");
-        QString sudoersFilename = QString( "etc/sudoers.d/10-%1-installer" ).arg( distroName );
-        QFileInfo sudoersFi( destDir.absoluteFilePath( sudoersFilename ) );
+    QMap<QString, QVariant> brandingMap = gs->value( "branding" ).toMap();
+    QString distroName = brandingMap.value( "shortProductName" ).toString();
+    distroName = distroName.replace(QRegExp("[^A-Za-z0-9]"), "-");
+    QString sudoersFilename = QString( "etc/sudoers.d/10-%1-installer" ).arg( distroName );
+    QFileInfo sudoersFi( destDir.absoluteFilePath( sudoersFilename ) );
 
     cDebug() << QString("[CREATEUSER]: preparing sudoers") ;
 
@@ -236,7 +236,7 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - targ
 */
 
     CalamaresUtils::System* sys = CalamaresUtils::System::instance() ;
-    QString userCmd = QString("sudo -u %1 ").arg(m_userName) ;
+//     QString userCmd = QString("sudo -u %1 ").arg(m_userName) ;
     if (default_desktop == "mate")
     {
       cDebug() << QString("[CREATEUSER]: configuring mate desktop") ;
@@ -247,6 +247,7 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - targ
             CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName + command.toString() } );
         sys->targetEnvCall( { "sh", "-c", userCmd + gsettingsCmd } );
 */
+/*
         QString gsettingsCmd ;
         gsettingsCmd += QString( "gsettings set org.mate.interface gtk-theme 'Radiance-Purple'" );
         gsettingsCmd += QString(";");
@@ -259,9 +260,18 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - targ
         gsettingsCmd += QString( "gsettings set org.mate.peripherals-mouse cursor-theme 'mate'" );
         gsettingsCmd += QString(";");
         gsettingsCmd += QString( "gsettings set org.mate.background picture-filename '/etc/wallpaper.png'" );
-
         sys->targetEnvCall({ "sh" , "-c" , userCmd + gsettingsCmd }) ;
-    }
+*/
+
+cDebug() << QString("[CREATEUSER]: pwd") ; QProcess::execute(QString("/bin/sh -c \"pwd\"")) ;
+
+//     QString dotfiles_cmd = QString("cp -r /home/parabola/.* %1/home/%2/").arg(destDir.absolutePath() , m_userName) ;
+    QString dotfiles_cmd = QString("cp -r ../desktop/skel/%1* %2/home/%3/").arg(default_desktop , destDir.absolutePath() , m_userName) ;
+    QString chown_cmd    = QString("chown -R %1:users /home/%1/.*").arg(m_userName) ;
+
+    QProcess::execute(QString("/bin/sh -c \"%1\"" ).arg(dotfiles_cmd)) ;
+    sys->targetEnvCall({ "sh" , "-c" , chown_cmd }) ;
+  }
 
     return Calamares::JobResult::ok();
 }
