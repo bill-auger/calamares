@@ -74,14 +74,33 @@ CreateUserJob::exec()
     if ( gs->contains( "sudoersGroup" ) &&
          !gs->value( "sudoersGroup" ).toString().isEmpty() )
     {
-        QFileInfo sudoersFi( destDir.absoluteFilePath( "etc/sudoers.d/10-installer" ) );
+/*
+        QString sudoersFilename = QStringLiteral( "etc/sudoers.d/" );
+        if ( gs->contains( "sudoersFilename" ) &&
+             !gs->value( "sudoersFilename" ).toString().isEmpty() )
+            sudoersFilename += gs->value( "sudoersFilename" ).toString();
+        else
+            sudoersFilename += QStringLiteral( "10-parabola-installer" );
+*/
+        QMap<QString, QVariant> brandingMap = gs->value( "branding" ).toMap();
+        QString distroName = brandingMap.value( "shortProductName" ).toString();
+        distroName = distroName.replace(QRegExp("[^A-Za-z0-9]"), "-");
+        QString sudoersFilename = QString( "etc/sudoers.d/10-%1-installer" ).arg( distroName );
+        QFileInfo sudoersFi( destDir.absoluteFilePath( sudoersFilename ) );
 
-cDebug() << QString("CreateUserJob::exec() sudoersFi=%1").arg(sudoersFi.filePath());
-cDebug() << QString("CreateUserJob::exec() isAbsolute=%2").arg(sudoersFi.isAbsolute());
-cDebug() << QString("CreateUserJob::exec() isWritable=%3").arg(sudoersFi.isWritable());
+    cDebug() << QString("[CREATEUSER]: preparing sudoers") ;
+
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() distroName=%1").arg(distroName);
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() sudoersFilename=%1").arg(sudoersFilename);
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() sudoersFi=%1").arg(sudoersFi.filePath());
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() isAbsolute=%2").arg(sudoersFi.isAbsolute());
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() isWritable=%3").arg(sudoersFi.isWritable());
 QString etcdir = gs->value( "rootMountPoint" ).toString() + "/etc" ;
-QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( etcdir ) );
-QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( sudoersFi.filePath() ) );
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -l %1").arg(etcdir) ;
+  QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( etcdir ) );
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -l %1").arg(sudoersFi.filePath()) ;
+  QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( sudoersFi.filePath() ) );
+
 
         if ( !sudoersFi.absoluteDir().exists() )
             return Calamares::JobResult::error( tr( "Sudoers dir is not writable." ) );
@@ -98,6 +117,8 @@ QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( sudoersFi.filePath(
         if ( QProcess::execute( "chmod", { "440", sudoersFi.absoluteFilePath() } ) )
             return Calamares::JobResult::error( tr( "Cannot chmod sudoers file." ) );
     }
+
+    cDebug() << QString("[CREATEUSER]: preparing groups") ;
 
     QFileInfo groupsFi( destDir.absoluteFilePath( "etc/group" ) );
     QFile groupsFile( groupsFi.absoluteFilePath() );
@@ -153,6 +174,8 @@ QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( sudoersFi.filePath(
         }
     }
 
+    cDebug() << QString("[CREATEUSER]: creating user") ;
+
     int ec = CalamaresUtils::System::instance()->
              targetEnvCall( { "useradd",
                               "-m",
@@ -167,6 +190,15 @@ QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( sudoersFi.filePath(
                                                 .arg( m_userName ),
                                             tr( "useradd terminated with error code %1." )
                                                 .arg( ec ) );
+
+
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /etc/skel - source ");
+  QProcess::execute( QString( "/bin/sh -c \"ls -al /etc/skel /etc/skel/.config\"" ) );
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /etc/skel - target");
+  CalamaresUtils::System::instance()->targetEnvCall( { "ls","-a","-l","/etc/skel/","/etc/skel/.config" } );
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - target").arg(m_userName);
+  CalamaresUtils::System::instance()->targetEnvCall( { "ls","-a","-l",QString("/home/%1/").arg(m_userName),QString("/home/%1/.config").arg(m_userName) } );
+
 
     ec = CalamaresUtils::System::instance()->
              targetEnvCall( { "usermod",
@@ -203,28 +235,32 @@ QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( sudoersFi.filePath(
     fi
 */
 
-cDebug() << QString("CreateUserJob::exec() default_desktop=%1").arg(default_desktop);
-
+    CalamaresUtils::System* sys = CalamaresUtils::System::instance() ;
+    QString userCmd = QString("sudo -u %1 ").arg(m_userName) ;
     if (default_desktop == "mate")
     {
+      cDebug() << QString("[CREATEUSER]: configuring mate desktop") ;
 /*
-        QVariantList commands = m_configurationMap.value("gsettings-commands").toList();
+      QVariantList commands = m_configurationMap.value("gsettings-commands").toList();
 
-        for ( const QVariant& command : commands )
-          CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName + command.toString() } );
+      for ( const QVariant& command : commands )
+            CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName + command.toString() } );
+        sys->targetEnvCall( { "sh", "-c", userCmd + gsettingsCmd } );
 */
-        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName + 
-            "gsettings set org.mate.interface gtk-theme 'Radiance-Purple'" } );
-        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName +
-            "gsettings set org.mate.Marco.general theme 'Radiance-Purple'" } );
-        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName +
-            "gsettings set org.mate.interface icon-theme 'RAVE-X-Dark-Purple'" } );
-        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName +
-            "gsettings set org.mate.peripherals-mouse cursor-size '18'" } );
-        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName +
-            "gsettings set org.mate.peripherals-mouse cursor-theme 'mate'" } );
-        CalamaresUtils::System::instance()->targetEnvCall( { "sh", "-c", "sudo -u " + m_userName +
-            "gsettings set org.mate.background picture-filename '/etc/wallpaper.png'" } );
+        QString gsettingsCmd ;
+        gsettingsCmd += QString( "gsettings set org.mate.interface gtk-theme 'Radiance-Purple'" );
+        gsettingsCmd += QString(";");
+        gsettingsCmd += QString( "gsettings set org.mate.Marco.general theme 'Radiance-Purple'" );
+        gsettingsCmd += QString(";");
+        gsettingsCmd += QString( "gsettings set org.mate.interface icon-theme 'RAVE-X-Dark-Purple'" );
+        gsettingsCmd += QString(";");
+        gsettingsCmd += QString( "gsettings set org.mate.peripherals-mouse cursor-size '18'" );
+        gsettingsCmd += QString(";");
+        gsettingsCmd += QString( "gsettings set org.mate.peripherals-mouse cursor-theme 'mate'" );
+        gsettingsCmd += QString(";");
+        gsettingsCmd += QString( "gsettings set org.mate.background picture-filename '/etc/wallpaper.png'" );
+
+        sys->targetEnvCall({ "sh" , "-c" , userCmd + gsettingsCmd }) ;
     }
 
     return Calamares::JobResult::ok();

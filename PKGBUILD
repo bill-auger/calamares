@@ -10,7 +10,7 @@ license=(GPL)
 url="https://github.com/calamares"
 license=('LGPL')
 
-depends=( 'boost-libs' 'dmidecode' 'gptfdisk' 'hwinfo' 'kconfig' 'kcoreaddons' 'ki18n' 
+depends=( 'boost-libs' 'dmidecode' 'gptfdisk' 'hwinfo' 'kconfig' 'kcoreaddons' 'ki18n'
           'kparts' 'kpmcore' 'polkit-qt5' 'python' 'squashfs-tools' 'solid' 'qt5ct'
           'qt5-styleplugins' 'qt5-svg' 'yaml-cpp' )
 makedepends=( 'extra-cmake-modules' 'qt5-tools' 'git' 'boost' )

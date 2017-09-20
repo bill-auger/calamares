@@ -88,12 +88,16 @@ globalStorage->insert( "default-desktop", "mate" ); // TODO: per user option via
     QProcess::execute( mount_cmd );
     QProcess::execute( pacstrap_cmd );
 
-cDebug() << QString( "[DESKTOPCPP]: ls skel" );        QProcess::execute( QString( "/bin/sh -c \"ls -al /etc/skel/\"" ) );
-cDebug() << QString( "[DESKTOPCPP]: ls chroot/skel" ); QProcess::execute( QString( "/bin/sh -c \"ls -al %1/etc/skel/\"" ).arg( mountpoint ) );
-cDebug() << QString( "[DESKTOPCPP]: ls wallpaper" );   QProcess::execute( QString( "/bin/sh -c \"ls -al %1/etc/wallpaper.png\"" ).arg( mountpoint ) );
-cDebug() << QString( "[DESKTOPCPP]: ls sudoers" );     QProcess::execute( QString( "/bin/sh -c \"ls -al %1/etc/sudoers*\"" ).arg( mountpoint ) );
+cDebug() << QString("[DESKTOPCPP]: pwd") ; QProcess::execute(QString("/bin/sh -c \"pwd/\""          )                ) ;
+cDebug() << QString("[DESKTOPCPP]: ls /etc/skel") ;                QProcess::execute(QString("/bin/sh -c \"ls -al /etc/skel/\""          )                ) ;
+cDebug() << QString("[DESKTOPCPP]: ls chroot/etc/skel/") ;         QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/skel/\""        ).arg(mountpoint)) ;
+cDebug() << QString("[DESKTOPCPP]: ls chroot/etc/wallpaper.png") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(mountpoint)) ;
+cDebug() << QString("[DESKTOPCPP]: ls chroot/etc/sudoers*") ;      QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/sudoers*\""     ).arg(mountpoint)) ;
 
     QProcess::execute( wallpaper_cmd );
+
+cDebug() << QString("[DESKTOPCPP]: ls chroot/etc/wallpaper.png") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(mountpoint)) ;
+
     QProcess::execute( umount_cmd );
 
     emit progress( 10 );

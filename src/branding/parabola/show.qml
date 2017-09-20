@@ -29,7 +29,7 @@ Presentation
 
   Timer
   {
-    interval:    2000
+    interval:    20000
     running:     true
     repeat:      true
     onTriggered: presentation.goToNextSlide()
@@ -40,120 +40,9 @@ Presentation
     Image
     {
       id:               background1
-      source:           "Wallpaper_Parabola_Landscape_r800x450px.png"
-//             width:    800; height: 450
-      fillMode:         Image.PreserveAspectCrop
+      source:           "Wallpaper_Parabola_Landscape_r960x540px.png"
+      fillMode:         Image.Stretch
       anchors.centerIn: parent
-    }
-//         Text {
-//             anchors.horizontalCenter: background1.horizontalCenter
-//             anchors.bottom: background1.bottom
-//             text: "slide-1"
-//             wrapMode: Text.WordWrap
-//             width: 800
-//             horizontalAlignment: Text.Center
-//         }
-  }
-
-  Slide
-  {
-    Image
-    {
-      id: background2
-      source: "Wallpaper_Parabola_Landscape_r800x450px.png"
-      width: 800; height: 450
-      fillMode: Image.PreserveAspectCrop
-//             anchors.centerIn: parent
-    }
-//         Text {
-//             anchors.horizontalCenter: background2.horizontalCenter
-//             anchors.top: background2.bottom
-//             text: "slide-2"
-//             wrapMode: Text.WordWrap
-//             width: 800
-//             horizontalAlignment: Text.Center
-//         }
-  }
-
-  Slide
-  {
-    Image
-    {
-      id: background3
-      source: "Wallpaper_Parabola_Landscape_r800x450px.png"
-//             width: 800; height: 450
-      fillMode: Image.PreserveAspectFit
-      anchors.centerIn: parent
-    }
-//         Text {
-//             anchors.horizontalCenter: background3.horizontalCenter
-//             anchors.top: background3.bottom
-//             text: "slide-3"
-//             wrapMode: Text.WordWrap
-//             width: 800
-//             horizontalAlignment: Text.Center
-//         }
-  }
-
-  Slide
-  {
-    Image
-    {
-      id: background4
-      source: "Wallpaper_Parabola_Landscape_r800x450px.png"
-      width: 800; height: 450
-      fillMode: Image.PreserveAspectFit
-//             anchors.centerIn: parent
-    }
-//         Text {
-//             anchors.horizontalCenter: background4.horizontalCenter
-//             anchors.top: background4.bottom
-//             text: "slide-4"
-//             wrapMode: Text.WordWrap
-//             width: 800
-//             horizontalAlignment: Text.Center
-//         }
-  }
-
-  Slide
-  {
-    Image
-    {
-      id: background5
-      source: "Wallpaper_Parabola_Landscape_r800x450px.png"
-//             width: 800; height: 450
-      fillMode: Image.Stretch
-      anchors.centerIn: parent
-    }
-//         Text {
-//             anchors.horizontalCenter: background5.horizontalCenter
-//             anchors.top: background5.bottom
-//             text: "slide-5"
-//             wrapMode: Text.WordWrap
-//             width: 800
-//             horizontalAlignment: Text.Center
-//         }
-  }
-
-  Slide
-  {
-    Image
-    {
-      id: background6
-      source: "Wallpaper_Parabola_Landscape_r960x540px.png"
-      fillMode: Image.Stretch
-      anchors.centerIn: parent
-    }
-  }
-  Slide
-  {
-    Image
-    {
-      id: background7
-      source: "Wallpaper_Parabola_Landscape_r1024x576px.png"
-      fillMode: Image.Stretch
-      anchors.top: parent.top
-      anchors.left: parent.left
     }
   }
 }

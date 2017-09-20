@@ -8,6 +8,9 @@ strings:
   shortVersion:        2017-06
   versionedName:       Parabola GNU/Linux-Libre
   shortVersionedName:  Parabola
+  productUrl:          http://www.parabola.nu/
+  supportUrl:          http://webchat.freenode.net?channels=parabola
+  knownIssuesUrl:      http://labs.parabola.nu/
 
 images:
   productLogo:    "parabolaicon.png"
