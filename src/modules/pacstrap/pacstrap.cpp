@@ -77,12 +77,16 @@ PacstrapCppJob::exec()
         return Calamares::JobResult::error("Target device for root filesystem is unspecified.");
 
 
-    QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring && \
-                                        pacman-key --populate parabola          && \
-                                        pacman-key --refresh-keys                  \"";
+//     QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring && \
+//                                         pacman-key --populate parabola          && \
+//                                         pacman-key --refresh-keys                  \"";
+    QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring\"";
     QString mkdir_cmd = QString( "/bin/sh -c \"mkdir %1 2> /dev/null\"" ).arg( mountpoint );
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
-    QString pacstrap_cmd = QString( "/bin/sh -c \"pacstrap -c %1 %2\"" ).arg( mountpoint, packages );
+// mkdir -p "$newroot/var/lib/pacman/sync/"
+// cp -r /var/lib/pacman/sync/* "$newroot/var/lib/pacman/sync/"
+// sed   if ! pacman -r "$newroot" -S "${pacman_args[@]}"; then
+    QString pacstrap_cmd = QString( "/bin/sh -c \"calamares-pacstrap -c -o %1 %2\"" ).arg( mountpoint, packages );
     QString grub_theme_cmd = QString( "/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"" ).arg( mountpoint );
 QString grub_theme_kludge_cmd = QString( "/bin/sh -c \"echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub\"" ).arg( mountpoint );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
