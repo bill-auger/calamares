@@ -80,7 +80,9 @@ globalStorage->insert( "default-desktop", "mate" ); // TODO: per user option via
     QString packages = packageListToString(package_list) ;
 
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
-    QString pacstrap_cmd = QString( "/bin/sh -c \"pacstrap -c %1 %2\"" ).arg( mountpoint, packages );
+bool is_offline = true ;
+    QString pacstrap_cmd = (is_offline) ? QString("/bin/sh -c \"calamares-pacstrap -c -o %1 %2\"").arg(mountpoint , packages) :
+                                          QString("/bin/sh -c \"pacstrap           -c    %1 %2\"").arg(mountpoint , packages) ;
     QString wallpaper_cmd = QString( "/bin/sh -c \"cp /etc/wallpaper.png %1/etc/\"" ).arg( mountpoint );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
 

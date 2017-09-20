@@ -83,14 +83,21 @@ PacstrapCppJob::exec()
     QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring\"";
     QString mkdir_cmd = QString( "/bin/sh -c \"mkdir %1 2> /dev/null\"" ).arg( mountpoint );
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
-// mkdir -p "$newroot/var/lib/pacman/sync/"
-// cp -r /var/lib/pacman/sync/* "$newroot/var/lib/pacman/sync/"
-// sed   if ! pacman -r "$newroot" -S "${pacman_args[@]}"; then
-    QString pacstrap_cmd = QString( "/bin/sh -c \"calamares-pacstrap -c -o %1 %2\"" ).arg( mountpoint, packages );
+bool is_offline = true ;
+    QString pacstrap_cmd = (is_offline) ? QString("/bin/sh -c \"calamares-pacstrap -c -o %1 %2\"").arg(mountpoint , packages) :
+                                          QString("/bin/sh -c \"pacstrap           -c    %1 %2\"").arg(mountpoint , packages) ;
     QString grub_theme_cmd = QString( "/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"" ).arg( mountpoint );
 QString grub_theme_kludge_cmd = QString( "/bin/sh -c \"echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub\"" ).arg( mountpoint );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
-
+/*
+    if (is_offline) // TODO: install custom calamares-pacstrap
+    {
+      QProcess::execute("/bin/sh -c \"mkdir -p %1/var/lib/pacman\"").arg(mountpoint) ;
+      QProcess::execute("/bin/sh -c \"cp -r /var/lib/pacman/sync %1/var/lib/pacman/\"").arg(mountpoint) ;
+      QProcess::execute("/bin/sh -c \"sed 's/pacman -r \"$newroot\" -Sy /pacman -r \"$newroot\" -S /' /usr/bin/pacstrap > /tmp/calamares-pacstrap\"") ;
+      pacstrap_cmd = QString( "/bin/sh -c \"/tmp/calamares-pacstrap -c %1 %2\"" ).arg( mountpoint, packages );
+    }
+*/
 cDebug() << QString("[PACSTRAPCPP]: pacstrap_cmd=%1").arg(pacstrap_cmd);
 cDebug() << QString("[PACSTRAPCPP]: grub_theme_cmd=%1").arg(grub_theme_cmd);
 // QProcess::execute( "/bin/sh -c \"ls /tmp/\"" );
