@@ -1,12 +1,15 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Calamares
+Name=Install Parabola
+Name[es_ES]=Instalador de Parabola
+Name[gl_ES]=Instalador de Parabola
+Name[pt_BR]=Instalador do Parabola
 GenericName=System Installer
 Keywords=calamares;system;installer
 TryExec=calamares
 Exec=pkexec /usr/bin/calamares
-Comment=Calamares — System Installer
+Comment=Install the Parabola GNU/Linux-Libre operating system
 Icon=calamares
 Terminal=false
 StartupNotify=true

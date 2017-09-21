@@ -4,8 +4,8 @@ componentName: parabola
 strings:
   productName:         Parabola GNU/Linux-Libre
   shortProductName:    Parabola
-  version:             2017-06
-  shortVersion:        2017-06
+  version:             2017-09
+  shortVersion:        2017-09
   versionedName:       Parabola GNU/Linux-Libre
   shortVersionedName:  Parabola
   productUrl:          http://www.parabola.nu/

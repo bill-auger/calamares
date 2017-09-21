@@ -32,7 +32,7 @@ cmake -DCMAKE_BUILD_TYPE=Debug                                               \
                       interactiveterminal license luksbootkeyfile            \
                       luksopenswaphookcfg plymouthcfg removeuser webview" ..
 [ -f Makefile  ] && make ; (($?)) && cd .. && exit
-#sudo make uninstall
+sudo make uninstall
 sudo make install
 cd ..
 

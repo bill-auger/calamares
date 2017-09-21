@@ -45,7 +45,7 @@ if( POLICY CMP0071 )
     cmake_policy( SET CMP0071 NEW )
 endif()
 if(NOT CMAKE_VERSION VERSION_LESS "3.10.0")
-    list(APPEND CMAKE_AUTOMOC_MACRO_NAMES 
+    list(APPEND CMAKE_AUTOMOC_MACRO_NAMES
         "K_PLUGIN_FACTORY_WITH_JSON"
         "K_EXPORT_PLASMA_DATAENGINE_WITH_JSON"
         "K_EXPORT_PLASMA_RUNNER"
@@ -371,6 +371,13 @@ install(
         man/calamares.8
     DESTINATION
         ${CMAKE_INSTALL_MANDIR}/man8/
+)
+
+install(
+  DIRECTORY
+      ${CMAKE_SOURCE_DIR}/data/skel/
+  DESTINATION
+      ${CMAKE_INSTALL_DATADIR}/calamares/
 )
 
 # uninstall target

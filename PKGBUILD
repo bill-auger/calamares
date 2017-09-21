@@ -3,32 +3,26 @@
 
 pkgname=calamares
 pkgver=3.1.0
-pkgrel=1
-pkgdesc='Distribution-independent installer framework'
+pkgrel=2
+pkgdesc='Distribution-independent installer framework - Parabola edition'
 arch=('i686' 'x86_64')
-license=(GPL)
-url="https://github.com/calamares"
-license=('LGPL')
+license=('GPL')
+url="https://calamares.io/"
 
-depends=( 'boost-libs' 'dmidecode' 'gptfdisk' 'hwinfo' 'kconfig' 'kcoreaddons' 'ki18n'
-          'kparts' 'kpmcore' 'polkit-qt5' 'python' 'squashfs-tools' 'solid' 'qt5ct'
-          'qt5-styleplugins' 'qt5-svg' 'yaml-cpp' )
-makedepends=( 'extra-cmake-modules' 'qt5-tools' 'git' 'boost' )
-backup=( 'usr/share/calamares/modules/bootloader.conf'
-         'usr/share/calamares/modules/displaymanager.conf'
-         'usr/share/calamares/modules/initcpio.conf'
-         'usr/share/calamares/modules/unpackfs.conf' )
+depends=('boost-libs' 'dmidecode' 'gptfdisk' 'hwinfo' 'kconfig' 'kcoreaddons' 'ki18n'
+         'kparts' 'kpmcore' 'polkit-qt5' 'python' 'squashfs-tools' 'solid' 'qt5ct'
+         'qt5-styleplugins' 'qt5-svg' 'yaml-cpp')
+makedepends=('boost' 'extra-cmake-modules' 'git' 'qt5-tools')
 
-_git_tag="${pkgver}-parabola-alpha1"
+_git_tag="${pkgver}-parabola-alpha${pkgrel}"
 source=("https://notabug.org/bill-auger/calamares/archive/v${_git_tag}.tar.gz")
-sha256sums=('6ae55f567d5eafdb781dc84988dec184637fa7cf8bd55d7a2157b2d920880d52')
+# sha256sums=('6ae55f567d5eafdb781dc84988dec184637fa7cf8bd55d7a2157b2d920880d52') # alpha1
+sha256sums=('f914857c5f5bbafca0f48f123e34c667b2010b7115b38b2fcee45122e3e41d27') # alpha2
 
 
 build() {
-  cd ${srcdir}/calamares
-
-  mkdir -p build
-  cd build
+  mkdir -p ${srcdir}/calamares/build
+  cd ${srcdir}/calamares/build
   cmake -DCMAKE_BUILD_TYPE=Debug                                               \
         -DCMAKE_INSTALL_PREFIX=/usr                                            \
         -DCMAKE_INSTALL_LIBDIR=lib                                             \
@@ -42,7 +36,4 @@ build() {
 package() {
   cd ${srcdir}/calamares/build
   make DESTDIR="$pkgdir" install
-
-#  install -Dm644 "branding/parabola/squid.png" "$pkgdir/usr/share/icons/hicolor/scalable/apps/calamares.svg"
-#  install -Dm644 "../data/calamares.desktop"   "$pkgdir/usr/share/applications/calamares.desktop"
 }
