@@ -71,24 +71,25 @@ cDebug() << QString("[DESKTOPCPP]: DesktopCppJob::exec() default_desktop=%1").ar
 globalStorage->insert( "default-desktop", "mate" ); // TODO: per user option via globalStorage
 
     QString default_desktop = globalStorage->value("default-desktop").toString();
-    QVariantList package_list = m_configurationMap.value("xserver").toList() +
-                                m_configurationMap.value("applications").toList() +
-                                m_configurationMap.value("utilities").toList() +
-                                m_configurationMap.value("multimedia").toList() +
-                                m_configurationMap.value("network").toList() +
-                                m_configurationMap.value(default_desktop).toList();
+    QVariantList package_list = m_configurationMap.value("applications" ).toList() +
+                                m_configurationMap.value("multimedia"   ).toList() +
+                                m_configurationMap.value("network"      ).toList() +
+                                m_configurationMap.value("themes"       ).toList() +
+                                m_configurationMap.value("utilities"    ).toList() +
+                                m_configurationMap.value("xserver"      ).toList() +
+                                m_configurationMap.value(default_desktop).toList() ;
     QString packages = packageListToString(package_list) ;
 
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
 bool is_offline = true ;
-    QString pacstrap_cmd = (is_offline) ? QString("/bin/sh -c \"calamares-pacstrap -c -o %1 %2\"").arg(mountpoint , packages) :
-                                          QString("/bin/sh -c \"pacstrap           -c    %1 %2\"").arg(mountpoint , packages) ;
+    QString pacstrap_cmd = (is_offline) ? QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) :
+                                          QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) ;
     QString wallpaper_cmd = QString( "/bin/sh -c \"cp /etc/wallpaper.png %1/etc/\"" ).arg( mountpoint );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
 
     // boot-strap install graphical desktop
     QProcess::execute( mount_cmd );
-    QProcess::execute( pacstrap_cmd );
+    if (QProcess::execute(pacstrap_cmd)) return Calamares::JobResult::error("PACSTRAP_FAIL") ;
 
 cDebug() << QString("[DESKTOPCPP]: pwd") ; QProcess::execute(QString("/bin/sh -c \"pwd\"")) ;
 cDebug() << QString("[DESKTOPCPP]: ls /etc/skel") ;                QProcess::execute(QString("/bin/sh -c \"ls -al /etc/skel/\""          )                ) ;
