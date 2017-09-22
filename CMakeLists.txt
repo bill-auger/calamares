@@ -374,10 +374,17 @@ install(
 )
 
 install(
+  PROGRAMS
+      ${CMAKE_SOURCE_DIR}/pacstrap-calamares.sh
+  DESTINATION
+      ${CMAKE_INSTALL_BINDIR}/calamares/skel/
+)
+
+install(
   DIRECTORY
       ${CMAKE_SOURCE_DIR}/data/skel/
   DESTINATION
-      ${CMAKE_INSTALL_DATADIR}/calamares/
+      ${CMAKE_INSTALL_DATADIR}/calamares/skel/
 )
 
 # uninstall target

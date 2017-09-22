@@ -17,7 +17,7 @@ makedepends=('boost' 'extra-cmake-modules' 'git' 'qt5-tools')
 _git_tag="${pkgver}-parabola-alpha${pkgrel}"
 source=("https://notabug.org/bill-auger/calamares/archive/v${_git_tag}.tar.gz")
 # sha256sums=('6ae55f567d5eafdb781dc84988dec184637fa7cf8bd55d7a2157b2d920880d52') # alpha1
-sha256sums=('f914857c5f5bbafca0f48f123e34c667b2010b7115b38b2fcee45122e3e41d27') # alpha2
+sha256sums=('a118ad28e7fd9b9b9603a7b79374c7e7d5c6ca9d41d6ba06137db94cdce05e5c') # alpha2
 
 
 build() {

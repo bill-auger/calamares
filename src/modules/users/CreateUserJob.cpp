@@ -263,8 +263,8 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - targ
         sys->targetEnvCall({ "sh" , "-c" , userCmd + gsettingsCmd }) ;
 */
 
-// const QString SKELS_DIR = "/usr/lib/calamares/modules/desktop/skel" ;
-const QString SKELS_DIR = "/home/bill/calamares/git/data/skel" ;
+const QString SKELS_DIR = "/usr/share/calamares/skel" ;
+// const QString SKELS_DIR = "/home/bill/calamares/git/data/skel" ;
 //     QString dotfiles_cmd = QString("cp -r /home/parabola/.* %1/home/%2/").arg(destDir.absolutePath() , m_userName) ;
     QString dotfiles_cmd = QString("cp -a %1/%2/.??* %3/home/%4/").arg(SKELS_DIR              ,
                                                                        default_desktop        ,

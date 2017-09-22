@@ -83,14 +83,14 @@ PacstrapCppJob::exec()
     QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring\"";
     QString mkdir_cmd = QString( "/bin/sh -c \"mkdir %1 2> /dev/null\"" ).arg( mountpoint );
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
-bool is_offline = true ;
-    QString pacstrap_cmd = (is_offline) ? QString("/bin/sh -c \"calamares-pacstrap -c -o %1 %2\"").arg(mountpoint , packages) :
-                                          QString("/bin/sh -c \"pacstrap           -c    %1 %2\"").arg(mountpoint , packages) ;
+bool is_offline = true ; // TODO: determin programatically
+    QString pacstrap_cmd = (is_offline) ? QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) :
+                                          QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) ;
     QString grub_theme_cmd = QString( "/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"" ).arg( mountpoint );
 QString grub_theme_kludge_cmd = QString( "/bin/sh -c \"echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub\"" ).arg( mountpoint );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
 /*
-    if (is_offline) // TODO: install custom calamares-pacstrap
+    if (is_offline) // TODO: install custom pacstrap-calamares
     {
       QProcess::execute("/bin/sh -c \"mkdir -p %1/var/lib/pacman\"").arg(mountpoint) ;
       QProcess::execute("/bin/sh -c \"cp -r /var/lib/pacman/sync %1/var/lib/pacman/\"").arg(mountpoint) ;

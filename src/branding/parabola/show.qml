@@ -18,10 +18,12 @@
 
 /*
 * Slides images dimensions are 800x440px.
+* "Proposed window size: 1080 648" => 846x544
 */
 
-import QtQuick 2.0;
-import calamares.slideshow 1.0;
+import QtQuick 2.0 ;
+import calamares.slideshow 1.0 ;
+
 
 Presentation
 {
@@ -39,10 +41,12 @@ Presentation
   {
     Image
     {
-      id:               background1
-      source:           "Wallpaper_Parabola_Landscape_r960x540px.png"
-      fillMode:         Image.Stretch
-      anchors.centerIn: parent
+      id:     'background1'
+      source: 'Wallpaper_Parabola_Landscape_846x544.png'
+      x:      -42
+      y:      -109
+      width:  846
+      height: 544
     }
   }
 }
