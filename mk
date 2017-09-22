@@ -1,14 +1,15 @@
 #!/bin/bash
 
 
+echo "\n--- running pacman ---\n"
 # PKGS="$(pacman -Qg base-devel | cut -d ' ' -f 2)"
 # pacman -Qi $PKGS > /dev/null || sudo pacman -S $PKGS
 PKGS="git extra-cmake-modules qt5-tools yaml-cpp polkit-qt5 \
       kpmcore boost"
 #      kpmcore boost os-prober"
-pacman -Qi $PKGS > /dev/null || sudo pacman -S $PKGS
+pacman -Qi $PKGS > /dev/null || sudo pacman -S --needed $PKGS
 PKGS="squashfs-tools arch-install-scripts"
-pacman -Qi $PKGS > /dev/null || sudo pacman -S $PKGS
+pacman -Qi $PKGS > /dev/null || sudo pacman -S --needed $PKGS
 
 
 if [ ! -d build ]
@@ -22,6 +23,7 @@ fi
 # fi
 
 
+echo "\n--- running cmake ---\n"
 cd build
 cmake -DCMAKE_BUILD_TYPE=Debug                                               \
       -DCMAKE_INSTALL_PREFIX=/usr                                            \
@@ -31,13 +33,20 @@ cmake -DCMAKE_BUILD_TYPE=Debug                                               \
                       dummypythonqt grubcfg initramfs initramfscfg           \
                       interactiveterminal license luksbootkeyfile            \
                       luksopenswaphookcfg plymouthcfg removeuser webview" ..
+
+echo "\n--- running make ---\n"
 [ -f Makefile  ] && make ; (($?)) && cd .. && exit
+
+echo "\n--- running make uninstall ---\n"
 sudo make uninstall
+sudo rm -rf /usr/share/calamares/
+
+echo "\n--- running make install ---\n"
 sudo make install
 cd ..
 
 
-[ "`lsmod | grep squashfs`" ] || sudo modprobe squashfs
+# [ "`lsmod | grep squashfs`" ] || sudo modprobe squashfs
 [ -f /usr/bin/calamares     ] && sudo calamares
 # [ -f build/calamares        ] && sudo build/calamares
 

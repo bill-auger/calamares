@@ -375,9 +375,9 @@ install(
 
 install(
   PROGRAMS
-      ${CMAKE_SOURCE_DIR}/pacstrap-calamares.sh
+      ${CMAKE_SOURCE_DIR}/src/modules/pacstrap/pacstrap-calamares
   DESTINATION
-      ${CMAKE_INSTALL_BINDIR}/calamares/skel/
+      ${CMAKE_INSTALL_BINDIR}/
 )
 
 install(
