@@ -225,21 +225,21 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - targ
                                                 .arg( ec ) );
 
 
-    /* parabola-specific configuration */
+  /* parabola-specific configuration */
 
 //    Calamares::GlobalStorage* globalStorage = Calamares::JobQueue::instance()->globalStorage();
-    QString default_desktop = gs->value("default-desktop").toString();
+  QString default_desktop = gs->value("default-desktop").toString();
 /*
     if [ -x /usr/bin/setxkbmap ]; then
         echo "setxkbmap $(cat /.codecheck | grep XKBMAP= | cut -d '=' -f 2)" >> /home/${user#*=}/.bashrc
     fi
 */
 
-    CalamaresUtils::System* sys = CalamaresUtils::System::instance() ;
+  CalamaresUtils::System* sys = CalamaresUtils::System::instance() ;
 //     QString userCmd = QString("sudo -u %1 ").arg(m_userName) ;
-    if (default_desktop == "mate")
-    {
-      cDebug() << QString("[CREATEUSER]: configuring mate desktop") ;
+  if (default_desktop == "mate")
+  {
+    cDebug() << QString("[CREATEUSER]: configuring mate desktop") ;
 /*
       QVariantList commands = m_configurationMap.value("gsettings-commands").toList();
 
@@ -264,16 +264,21 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - targ
 */
 
 const QString SKELS_DIR = "/usr/share/calamares/skel" ;
-// const QString SKELS_DIR = "/home/bill/calamares/git/data/skel" ;
-//     QString dotfiles_cmd = QString("cp -r /home/parabola/.* %1/home/%2/").arg(destDir.absolutePath() , m_userName) ;
-    QString dotfiles_cmd = QString("cp -a %1/%2/.??* %3/home/%4/").arg(SKELS_DIR              ,
-                                                                       default_desktop        ,
-                                                                       destDir.absolutePath() ,
-                                                                       m_userName             ) ;
-    QString chown_cmd    = QString("chown -R %1:users /home/%1/.*").arg(m_userName) ;
 
-    QProcess::execute(QString("/bin/sh -c \"%1\"" ).arg(dotfiles_cmd)) ;
-    sys->targetEnvCall({ "sh" , "-c" , chown_cmd }) ;
+    QString skel_dir        = QString("%1/%2"     ).arg(SKELS_DIR , default_desktop) ;
+    QString chroot_home_dir = QString("%1/home/%2").arg(destDir.absolutePath() , m_userName) ;
+    QString skel_cmd        = QString("cp -rT %1/ %2/").arg(skel_dir , chroot_home_dir) ;
+    QString chown_root_cmd  = QString("chown root:root /home/") ;
+    QString chown_user_cmd  = QString("chown -R %1:%1 /home/%1/").arg(m_userName) ;
+
+sys->targetEnvCall({ "sh" , "-c" , QString("echo '[CREATEUSER]: sys->targetEnvCall'") }) ;
+cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/   IN") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
+    QProcess::execute(QString("/bin/sh -c \"%1\"").arg(skel_cmd)) ;
+cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  MID1") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
+    sys->targetEnvCall({ "sh" , "-c" , chown_root_cmd }) ;
+cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  MID2") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
+    sys->targetEnvCall({ "sh" , "-c" , chown_user_cmd }) ;
+cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  OUT") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
   }
 
     return Calamares::JobResult::ok();

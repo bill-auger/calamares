@@ -17,7 +17,6 @@
  *   along with Calamares. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pacstrap.h"
 
 #include <QProcess>
 #include <QDateTime>
@@ -27,7 +26,9 @@
 #include "JobQueue.h"
 #include "GlobalStorage.h"
 
-#include "utils/Logger.h"
+#include "pacstrap.h"
+// #include "utils/Logger.h"
+
 
 PacstrapCppJob::PacstrapCppJob( QObject* parent )
     : Calamares::CppJob( parent )
@@ -66,12 +67,12 @@ PacstrapCppJob::exec()
     setTargetDevice();
 
     Calamares::GlobalStorage *globalStorage = Calamares::JobQueue::instance()->globalStorage();
+    bool    is_online     = globalStorage->value("hasInternet"  ).toBool() ;
     QString target_device = globalStorage->value("target-device").toString();
     QString mountpoint = "/tmp/pacstrap";
-    QVariantList package_list = m_configurationMap.value("base").toList() +
-                                m_configurationMap.value("kernel").toList() +
-                                m_configurationMap.value("bootloader").toList();
-    QString packages = packageListToString(package_list) ;
+    QString packages = QListToString(m_configurationMap.value("base"      ).toList() +
+                                     m_configurationMap.value("bootloader").toList() +
+                                     m_configurationMap.value("kernel"    ).toList() ) ;
 
     if (target_device.isEmpty())
         return Calamares::JobResult::error("Target device for root filesystem is unspecified.");
@@ -83,9 +84,9 @@ PacstrapCppJob::exec()
     QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring\"";
     QString mkdir_cmd = QString( "/bin/sh -c \"mkdir %1 2> /dev/null\"" ).arg( mountpoint );
     QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
-bool is_offline = true ; // TODO: determin programatically
-    QString pacstrap_cmd = (is_offline) ? QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) :
-                                          QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) ;
+is_online = false ;
+  QString pacstrap_cmd  = (is_online) ? QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) :
+                                        QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) ;
     QString grub_theme_cmd = QString( "/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"" ).arg( mountpoint );
 QString grub_theme_kludge_cmd = QString( "/bin/sh -c \"echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub\"" ).arg( mountpoint );
     QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
@@ -107,7 +108,7 @@ cDebug() << QString("[PACSTRAPCPP]: grub_theme_cmd=%1").arg(grub_theme_cmd);
 //     QProcess::execute( keyring_cmd );
     QProcess::execute( mkdir_cmd );
     QProcess::execute( mount_cmd );
-    QProcess::execute( pacstrap_cmd );
+    if (QProcess::execute(pacstrap_cmd)) return Calamares::JobResult::error("PACSTRAP_FAIL") ;
 //     m_status = tr( "Installing linux-libre kernel" ); emit progress( 5 );
 
 cDebug() << QString( "[PACSTRAPCPP]: grub_theme_cmd IN" );  QProcess::execute( QString( "/bin/sh -c \"cat %1/etc/default/grub\"" ).arg( mountpoint ) );
@@ -163,7 +164,7 @@ if (mount_point == "/") cDebug() << QString("[PACSTRAPCPP]: target_device=%1").a
 
 
 QString
-PacstrapCppJob::packageListToString( const QVariantList& package_list )
+PacstrapCppJob::QListToString( const QVariantList& package_list )
 {
     QStringList result;
     for ( const QVariant& package : package_list )

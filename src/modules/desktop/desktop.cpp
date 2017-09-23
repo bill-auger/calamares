@@ -17,7 +17,6 @@
  *   along with Calamares. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "desktop.h"
 
 #include <QProcess>
 #include <QDateTime>
@@ -27,104 +26,82 @@
 #include "JobQueue.h"
 #include "GlobalStorage.h"
 
-#include "utils/Logger.h"
+#include "desktop.h"
+// #include "utils/Logger.h"
 
-DesktopCppJob::DesktopCppJob( QObject* parent )
-    : Calamares::CppJob( parent )
+
+DesktopCppJob::DesktopCppJob(QObject* parent) : Calamares::CppJob(parent) {}
+
+DesktopCppJob::~DesktopCppJob() {}
+
+QString DesktopCppJob::prettyName() const { return tr("Desktop C++ Job") ; }
+
+QString DesktopCppJob::prettyStatusMessage() const { return m_status ; }
+
+Calamares::JobResult DesktopCppJob::exec()
 {
-}
+  m_status = tr("Installing graphical desktop environment") ; emit progress(1) ;
 
+  Calamares::GlobalStorage* globalStorage = Calamares::JobQueue::instance()->globalStorage() ;
+  bool    is_online     = globalStorage->value("hasInternet"  ).toBool() ;
+  QString target_device = globalStorage->value("target-device").toString() ;
+  QString mountpoint    = "/tmp/pacstrap";
 
-DesktopCppJob::~DesktopCppJob()
-{
-}
+  if (target_device.isEmpty()) return Calamares::JobResult::error("Target device for root filesystem is unspecified.") ;
 
+cDebug() << QString("[DESKTOPCPP]: DesktopCppJob::exec() default_desktop=%1").arg(globalStorage->value("default-desktop").toString()) ;
 
-QString
-DesktopCppJob::prettyName() const
-{
-    return tr( "Desktop C++ Job" );
-}
+globalStorage->insert("default-desktop", "mate") ; // TODO: per user option via globalStorage
 
+  QString desktop  = globalStorage->value("default-desktop").toString() ;
+  QString packages = QListToString(m_configurationMap.value("applications").toList() +
+                                   m_configurationMap.value("multimedia"  ).toList() +
+                                   m_configurationMap.value("network"     ).toList() +
+                                   m_configurationMap.value("themes"      ).toList() +
+                                   m_configurationMap.value("utilities"   ).toList() +
+                                   m_configurationMap.value("xserver"     ).toList() +
+                                   m_configurationMap.value(desktop       ).toList() ) ;
 
-QString
-DesktopCppJob::prettyStatusMessage() const
-{
-    return m_status;
-}
+  QString mount_cmd     = QString("/bin/sh -c \"mount %1 %2\"").arg(target_device, mountpoint) ;
+is_online = false ;
+  QString pacstrap_cmd  = (is_online) ? QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) :
+                                        QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) ;
+  QString wallpaper_cmd = QString("/bin/sh -c \"cp /etc/wallpaper.png %1/etc/\"").arg(mountpoint) ;
+  QString umount_cmd    = QString("/bin/sh -c \"umount %1\"").arg(target_device) ;
 
+  // boot-strap install graphical desktop
+  QProcess::execute(mount_cmd) ;
+  if (QProcess::execute(pacstrap_cmd)) return Calamares::JobResult::error("PACSTRAP_FAIL") ;
 
-Calamares::JobResult
-DesktopCppJob::exec()
-{
-    m_status = tr( "Installing graphical desktop environment" ); emit progress( 1 );
-
-    Calamares::GlobalStorage *globalStorage = Calamares::JobQueue::instance()->globalStorage();
-    QString target_device = globalStorage->value("target-device").toString();
-    QString mountpoint = "/tmp/pacstrap";
-
-    if (target_device.isEmpty())
-        return Calamares::JobResult::error("Target device for root filesystem is unspecified.");
-
-cDebug() << QString("[DESKTOPCPP]: DesktopCppJob::exec() default_desktop=%1").arg(globalStorage->value("default-desktop").toString());
-
-globalStorage->insert( "default-desktop", "mate" ); // TODO: per user option via globalStorage
-
-    QString default_desktop = globalStorage->value("default-desktop").toString();
-    QVariantList package_list = m_configurationMap.value("applications" ).toList() +
-                                m_configurationMap.value("multimedia"   ).toList() +
-                                m_configurationMap.value("network"      ).toList() +
-                                m_configurationMap.value("themes"       ).toList() +
-                                m_configurationMap.value("utilities"    ).toList() +
-                                m_configurationMap.value("xserver"      ).toList() +
-                                m_configurationMap.value(default_desktop).toList() ;
-    QString packages = packageListToString(package_list) ;
-
-    QString mount_cmd = QString( "/bin/sh -c \"mount %1 %2\"" ).arg( target_device, mountpoint );
-bool is_offline = true ;
-    QString pacstrap_cmd = (is_offline) ? QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) :
-                                          QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) ;
-    QString wallpaper_cmd = QString( "/bin/sh -c \"cp /etc/wallpaper.png %1/etc/\"" ).arg( mountpoint );
-    QString umount_cmd = QString( "/bin/sh -c \"umount %1\"" ).arg( target_device );
-
-    // boot-strap install graphical desktop
-    QProcess::execute( mount_cmd );
-    if (QProcess::execute(pacstrap_cmd)) return Calamares::JobResult::error("PACSTRAP_FAIL") ;
-
-cDebug() << QString("[DESKTOPCPP]: pwd") ; QProcess::execute(QString("/bin/sh -c \"pwd\"")) ;
-cDebug() << QString("[DESKTOPCPP]: ls /etc/skel") ;                QProcess::execute(QString("/bin/sh -c \"ls -al /etc/skel/\""          )                ) ;
-cDebug() << QString("[DESKTOPCPP]: ls chroot/etc/skel/") ;         QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/skel/\""        ).arg(mountpoint)) ;
+cDebug() << QString("[DESKTOPCPP]: ls /etc/skel") ;                QProcess::execute(QString("/bin/sh -c \"ls -al /etc/skel/\""         )               ) ;
+cDebug() << QString("[DESKTOPCPP]: ls chroot/etc/skel/") ;         QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/skel/\""       ).arg(mountpoint)) ;
 cDebug() << QString("[DESKTOPCPP]: ls chroot/etc/wallpaper.png") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(mountpoint)) ;
-cDebug() << QString("[DESKTOPCPP]: ls chroot/etc/sudoers*") ;      QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/sudoers*\""     ).arg(mountpoint)) ;
+cDebug() << QString("[DESKTOPCPP]: ls chroot/etc/sudoers*") ;      QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/sudoers*\""    ).arg(mountpoint)) ;
 
-    QProcess::execute( wallpaper_cmd );
+  QProcess::execute(wallpaper_cmd) ;
 
 cDebug() << QString("[DESKTOPCPP]: ls chroot/etc/wallpaper.png") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(mountpoint)) ;
 
-    QProcess::execute( umount_cmd );
+  QProcess::execute(umount_cmd) ;
+  emit progress(10) ;
 
-    emit progress( 10 );
-
-    return Calamares::JobResult::ok();
+  return Calamares::JobResult::ok() ;
 }
 
 
-void
-DesktopCppJob::setConfigurationMap( const QVariantMap& configurationMap )
+void DesktopCppJob::setConfigurationMap(const QVariantMap& configurationMap)
 {
-  m_configurationMap = configurationMap;
+  m_configurationMap = configurationMap ;
 }
 
 
-QString
-DesktopCppJob::packageListToString( const QVariantList& package_list )
+QString DesktopCppJob::QListToString(const QVariantList& package_list)
 {
-    QStringList result;
-    for ( const QVariant& package : package_list )
-        result.append( package.toString() );
+  QStringList result ;
+  for (const QVariant& package : package_list) result.append(package.toString()) ;
 
-    return result.join(' ');
+  return result.join(' ') ;
 }
 
 
-CALAMARES_PLUGIN_FACTORY_DEFINITION( DesktopCppJobFactory, registerPlugin<DesktopCppJob>(); )
+CALAMARES_PLUGIN_FACTORY_DEFINITION(DesktopCppJobFactory , registerPlugin<DesktopCppJob>() ;)

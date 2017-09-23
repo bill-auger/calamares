@@ -23,35 +23,36 @@
 #include <QVariantMap>
 
 #include <CppJob.h>
-
 #include <utils/PluginFactory.h>
-
 #include <PluginDllMacro.h>
+
 
 class PLUGINDLLEXPORT PacstrapCppJob : public Calamares::CppJob
 {
     Q_OBJECT
 
 public:
-    explicit PacstrapCppJob( QObject* parent = nullptr );
-    virtual ~PacstrapCppJob();
 
-    QString prettyName() const override;
-    QString prettyStatusMessage() const override;
-    Calamares::JobResult exec() override;
+    explicit PacstrapCppJob(QObject* parent = nullptr) ;
+    virtual ~PacstrapCppJob() ;
 
-    void setConfigurationMap( const QVariantMap& configurationMap ) override;
+    QString              prettyName()          const override ;
+    QString              prettyStatusMessage() const override ;
+    Calamares::JobResult exec()                      override ;
+
+    void setConfigurationMap(const QVariantMap& configurationMap) override ;
 
 
 private:
 
-    void setTargetDevice();
-    static QString packageListToString( const QVariantList& package_list );
+    void           setTargetDevice() ;
+    static QString QListToString(const QVariantList& package_list) ;
 
 
-    QVariantMap m_configurationMap;
-    QString m_status;
-};
+    QVariantMap m_configurationMap ;
+    QString     m_status ;
+} ;
+
 
 CALAMARES_PLUGIN_FACTORY_DECLARATION( PacstrapCppJobFactory )
 
