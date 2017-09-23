@@ -84,7 +84,7 @@ CreateUserJob::exec()
 */
     QMap<QString, QVariant> brandingMap = gs->value( "branding" ).toMap();
     QString distroName = brandingMap.value( "shortProductName" ).toString();
-    distroName = distroName.replace(QRegExp("[^A-Za-z0-9]"), "-");
+    distroName = distroName.toLower().replace( QRegExp( "[^a-z0-9]" ), "-" );
     QString sudoersFilename = QString( "etc/sudoers.d/10-%1-installer" ).arg( distroName );
     QFileInfo sudoersFi( destDir.absoluteFilePath( sudoersFilename ) );
 
@@ -268,14 +268,14 @@ const QString SKELS_DIR = "/usr/share/calamares/skel" ;
     QString skel_dir        = QString("%1/%2"     ).arg(SKELS_DIR , default_desktop) ;
     QString chroot_home_dir = QString("%1/home/%2").arg(destDir.absolutePath() , m_userName) ;
     QString skel_cmd        = QString("cp -rT %1/ %2/").arg(skel_dir , chroot_home_dir) ;
-    QString chown_root_cmd  = QString("chown root:root /home/") ;
+//     QString chown_root_cmd  = QString("chown root:root /home/") ;
     QString chown_user_cmd  = QString("chown -R %1:%1 /home/%1/").arg(m_userName) ;
 
 sys->targetEnvCall({ "sh" , "-c" , QString("echo '[CREATEUSER]: sys->targetEnvCall'") }) ;
 cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/   IN") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
     QProcess::execute(QString("/bin/sh -c \"%1\"").arg(skel_cmd)) ;
 cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  MID1") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
-    sys->targetEnvCall({ "sh" , "-c" , chown_root_cmd }) ;
+//     sys->targetEnvCall({ "sh" , "-c" , chown_root_cmd }) ;
 cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  MID2") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
     sys->targetEnvCall({ "sh" , "-c" , chown_user_cmd }) ;
 cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  OUT") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;

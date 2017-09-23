@@ -27,7 +27,7 @@
 #include "GlobalStorage.h"
 
 #include "desktop.h"
-// #include "utils/Logger.h"
+#include "utils/Logger.h"
 
 
 DesktopCppJob::DesktopCppJob(QObject* parent) : Calamares::CppJob(parent) {}
@@ -44,6 +44,7 @@ Calamares::JobResult DesktopCppJob::exec()
 
   Calamares::GlobalStorage* globalStorage = Calamares::JobQueue::instance()->globalStorage() ;
   bool    is_online     = globalStorage->value("hasInternet"  ).toBool() ;
+is_online = false ;
   QString target_device = globalStorage->value("target-device").toString() ;
   QString mountpoint    = "/tmp/pacstrap";
 
@@ -63,7 +64,6 @@ globalStorage->insert("default-desktop", "mate") ; // TODO: per user option via 
                                    m_configurationMap.value(desktop       ).toList() ) ;
 
   QString mount_cmd     = QString("/bin/sh -c \"mount %1 %2\"").arg(target_device, mountpoint) ;
-is_online = false ;
   QString pacstrap_cmd  = (is_online) ? QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) :
                                         QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) ;
   QString wallpaper_cmd = QString("/bin/sh -c \"cp /etc/wallpaper.png %1/etc/\"").arg(mountpoint) ;
