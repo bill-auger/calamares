@@ -13,8 +13,8 @@ strings:
   knownIssuesUrl:      http://labs.parabola.nu/
 
 images:
-  productLogo:    "parabolaicon.png"
-  productIcon:    "Parabola_logo,_GNU_and_Bola.svg.png"
+  productLogo:    "Parabola_logo,_GNU_and_Bola.svg.png"
+  productIcon:    "parabolaicon.png"
   productWelcome: "languages.png"
 
 slideshow: "show.qml"
