@@ -1,11 +1,27 @@
-parabola image sources:
+Parabola branding image sources:
   https://wiki.parabola.nu/File:Parabola_logo,_GNU_and_Bola.svg.png
   https://wiki.parabola.nu/File:Wallpaper_Parabola_Landscape_r800x450px.png
+  https://git.parabola.nu/pac.git/tree/src/img+gpl/symbol-parabolaOfficialLogotype-default_r128px2_noa_nof_nos_svg1d1.svg
+
 
 This is Free work, you can redistribute it and/or modify it under the terms of either:
 
-    The Free Art License as published by Copyleft Attitude; either version 1.3, or (at your option) any later version,
-    or
-    The Creative Commons Attribution-ShareAlike 4.0 International License as published by Creative Commons; either version 4.0, or (at your option) any later version,
-    or
-    The GNU Free Documentation License as published by the Free Software Foundation; either version 1.3, or (at your option) any later version; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts
+a) The Free Art License as published by Copyleft Attitude;
+   either version 1.3, or (at your option) any later version
+   (read "COPYING_FAL_V1_3 or "http://artlibre.org/licence/lal/en/"), or
+
+b) The Creative Commons Attribution-ShareAlike 4.0 International License as published by Creative Commons;
+   either version 4.0, or (at your option) any later version
+   (read "COPYING_CCBYSA_V4_0" or "http://creativecommons.org/licenses/by-sa/4.0/"), or
+
+c) The GNU Free Documentation License as published by the Free Software Foundation;
+   either version 1.3, or (at your option) any later version;
+   with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts
+   (read "COPYING_FDL_V1_3" or "http://gnu.org/licenses/fdl-1.3.html")
+
+
+The file: 'symbol-parabolaOfficialLogotype-default_r128px2_noa_nof_nos_svg1d1.svg' ('calamares.svg' as installed) can also be redistributed and/or modified it under the terms of:
+
+d) The GNU General Public License as published by the Free Software Foundation;
+   either version 2, or (at your option) any later version
+   (read "COPYING_GPL_V2_0" or "http://gnu.org/licenses/gpl-2.0.html")

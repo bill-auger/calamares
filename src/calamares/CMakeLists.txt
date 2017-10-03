@@ -70,7 +70,7 @@ install( TARGETS calamares_bin
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install( FILES ${CMAKE_SOURCE_DIR}/data/images/squid.svg
+install( FILES ${CMAKE_SOURCE_DIR}/src/branding/parabola/symbol-parabolaOfficialLogotype-default_r128px2_noa_nof_nos_svg1d1.svg
     RENAME calamares.svg
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
 )
