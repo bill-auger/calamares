@@ -103,6 +103,21 @@ WelcomePage::WelcomePage( RequirementsChecker* requirementsChecker, QWidget* par
     } );
 
     ui->verticalLayout->insertWidget( 3, m_requirementsChecker->widget() );
+
+    Calamares::Branding::ImageEntry bannerImage = Calamares::Branding::ProductBanner;
+    QString bannerPath = Calamares::Branding::instance()->imagePath( bannerImage );
+    if ( !bannerPath.isEmpty() )
+    {
+        QPixmap bannerPixmap = QPixmap( bannerPath );
+        if ( !bannerPixmap.isNull() )
+        {
+            QLabel* bannerLabel = new QLabel;
+            bannerLabel->setAlignment( Qt::AlignCenter );
+            bannerLabel->setPixmap( bannerPixmap );
+
+            ui->verticalLayout->insertWidget( ui->verticalLayout->count()-1, bannerLabel );
+        }
+    }
 }
 
 

@@ -61,9 +61,10 @@ public:
     {
         ProductLogo,
         ProductIcon,
-        ProductWelcome
+        ProductWelcome,
+        ProductBanner
     };
-    
+
     enum StyleEntry : short
     {
         SidebarBackground,

@@ -65,7 +65,8 @@ const QStringList Branding::s_imageEntryStrings =
 {
     "productLogo",
     "productIcon",
-    "productWelcome"
+    "productWelcome",
+    "productBanner"
 };
 
 const QStringList Branding::s_styleEntryStrings =
@@ -166,7 +167,7 @@ Branding::Branding( const QString& brandingFilePath,
             }
             else
                 bail( "Syntax error in slideshow sequence." );
-            
+
             if ( !doc[ "style" ].IsMap() )
                 bail( "Syntax error in style map." );
 
