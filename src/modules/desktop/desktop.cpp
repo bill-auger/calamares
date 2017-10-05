@@ -43,16 +43,16 @@ Calamares::JobResult DesktopCppJob::exec()
   m_status = tr("Installing graphical desktop environment") ; emit progress(1) ;
 
   Calamares::GlobalStorage* globalStorage = Calamares::JobQueue::instance()->globalStorage() ;
-  bool    is_online     = globalStorage->value("hasInternet"  ).toBool() ;
-is_online = false ;
+  bool    has_internet  = globalStorage->value("hasInternet"  ).toBool() ;
+has_internet = false ;
   QString target_device = globalStorage->value("target-device").toString() ;
+  QString conf_file     = (has_internet) ? "/etc/pacman.conf" : "/etc/pacman-offline.conf" ;
   QString mountpoint    = "/tmp/pacstrap";
 
   if (target_device.isEmpty()) return Calamares::JobResult::error("Target device for root filesystem is unspecified.") ;
 
-cDebug() << QString("[DESKTOPCPP]: DesktopCppJob::exec() default_desktop=%1").arg(globalStorage->value("default-desktop").toString()) ;
-
 globalStorage->insert("default-desktop", "mate") ; // TODO: per user option via globalStorage
+cDebug() << QString("[DESKTOPCPP]: DesktopCppJob::exec() default_desktop=%1").arg(globalStorage->value("default-desktop").toString()) ;
 
   QString desktop  = globalStorage->value("default-desktop").toString() ;
   QString packages = QListToString(m_configurationMap.value("applications").toList() +
@@ -64,8 +64,9 @@ globalStorage->insert("default-desktop", "mate") ; // TODO: per user option via 
                                    m_configurationMap.value(desktop       ).toList() ) ;
 
   QString mount_cmd     = QString("/bin/sh -c \"mount %1 %2\"").arg(target_device, mountpoint) ;
-  QString pacstrap_cmd  = (is_online) ? QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) :
-                                        QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) ;
+//   QString pacstrap_cmd  = (has_internet) ? QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) :
+//                                            QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) ;
+  QString pacstrap_cmd  = QString("/bin/sh -c \"pacstrap -c -C %1 %2 %3\"").arg(conf_file , mountpoint , packages);
   QString wallpaper_cmd = QString("/bin/sh -c \"cp /etc/wallpaper.png %1/etc/\"").arg(mountpoint) ;
   QString umount_cmd    = QString("/bin/sh -c \"umount %1\"").arg(target_device) ;
 

@@ -9,13 +9,6 @@ calamares_add_plugin( pacstrap
 )
 
 install(
-  PROGRAMS
-      ${CMAKE_SOURCE_DIR}/src/modules/pacstrap/pacstrap-calamares
-  DESTINATION
-      ${CMAKE_INSTALL_BINDIR}/
-)
-
-install(
   DIRECTORY
       ${CMAKE_SOURCE_DIR}/data/skel/
   DESTINATION

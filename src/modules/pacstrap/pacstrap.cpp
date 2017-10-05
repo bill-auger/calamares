@@ -49,9 +49,10 @@ Calamares::JobResult PacstrapCppJob::exec()
   setTargetDevice() ;
 
   Calamares::GlobalStorage *globalStorage = Calamares::JobQueue::instance()->globalStorage() ;
-  bool    is_online     = globalStorage->value("hasInternet"  ).toBool() ;
-is_online = false ;
+  bool    has_internet  = globalStorage->value("hasInternet"  ).toBool() ;
+has_internet = false ;
   QString target_device = globalStorage->value("target-device").toString() ;
+  QString conf_file     = (has_internet) ? "/etc/pacman.conf" : "/etc/pacman-offline.conf" ;
   QString mountpoint    = "/tmp/pacstrap";
   QString packages      = QListToString(m_configurationMap.value("base"      ).toList() +
                                         m_configurationMap.value("bootloader").toList() +
@@ -65,21 +66,13 @@ is_online = false ;
 //     QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring\"";
   QString mkdir_cmd      = QString("/bin/sh -c \"mkdir %1 2> /dev/null\"").arg(mountpoint) ;
   QString mount_cmd      = QString("/bin/sh -c \"mount %1 %2\"").arg(target_device , mountpoint) ;
-  QString pacstrap_cmd   = (is_online) ? QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) :
-                                         QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) ;
+//   QString pacstrap_cmd   = (has_internet) ? QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) :
+//                                          QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) ;
+  QString pacstrap_cmd   = QString("/bin/sh -c \"pacstrap -c -C %1 %2 %3\"").arg(conf_file , mountpoint , packages);
   QString grub_theme_cmd = QString("/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"").arg(mountpoint) ;
 QString grub_theme_kludge_cmd = QString("/bin/sh -c \"echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub\"").arg(mountpoint) ;
   QString umount_cmd     = QString("/bin/sh -c \"umount %1\"").arg(target_device) ;
-/*
-    if (is_offline) // TODO: install custom pacstrap-calamares
-    {
-      QProcess::execute("/bin/sh -c \"mkdir -p %1/var/lib/pacman\"").arg(mountpoint) ;
-      QProcess::execute("/bin/sh -c \"cp -r /var/lib/pacman/sync %1/var/lib/pacman/\"").arg(mountpoint) ;
-      QProcess::execute("/bin/sh -c \"sed 's/pacman -r \"$newroot\" -Sy /pacman -r \"$newroot\" -S /' /usr/bin/pacstrap > /tmp/calamares-pacstrap\"") ;
-      pacstrap_cmd = QString( "/bin/sh -c \"/tmp/calamares-pacstrap -c %1 %2\"" ).arg( mountpoint, packages );
-    }
-*/
-cDebug() << QString("[PACSTRAPCPP]: pacstrap_cmd=%1").arg(pacstrap_cmd);
+
 cDebug() << QString("[PACSTRAPCPP]: grub_theme_cmd=%1").arg(grub_theme_cmd);
 // QProcess::execute( "/bin/sh -c \"ls /tmp/\"" );
 

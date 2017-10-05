@@ -80,7 +80,7 @@ CalamaresWindow::CalamaresWindow( QWidget* parent )
     sideBox->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
 
     QHBoxLayout* logoLayout = new QHBoxLayout;
-    sideLayout->addSpacing( 42 );
+//     sideLayout->addSpacing( 42 );
     sideLayout->addLayout( logoLayout );
     logoLayout->addStretch();
     QLabel* logoLabel = new QLabel( sideBox );
