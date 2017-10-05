@@ -80,6 +80,7 @@ CalamaresWindow::CalamaresWindow( QWidget* parent )
     sideBox->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
 
     QHBoxLayout* logoLayout = new QHBoxLayout;
+    sideLayout->addSpacing( 42 );
     sideLayout->addLayout( logoLayout );
     logoLayout->addStretch();
     QLabel* logoLabel = new QLabel( sideBox );
@@ -93,13 +94,14 @@ CalamaresWindow::CalamaresWindow( QWidget* parent )
         sideBox->setPalette( plt );
         logoLabel->setPalette( plt );
     }
-    logoLabel->setAlignment( Qt::AlignCenter );
-    logoLabel->setFixedSize( 80, 80 );
+    logoLayout->setAlignment( Qt::AlignCenter );
+    logoLabel->setFixedSize( 136, 187 );
+    logoLabel->setSizePolicy( QSizePolicy::Fixed , QSizePolicy::Fixed );
     logoLabel->setPixmap( Calamares::Branding::instance()->
                           image( Calamares::Branding::ProductLogo,
                                  logoLabel->size() ) );
     logoLayout->addWidget( logoLabel );
-    logoLayout->addStretch();
+    logoLayout->addSpacing( 1 );
 
     ProgressTreeView* tv = new ProgressTreeView( sideBox );
     sideLayout->addWidget( tv );

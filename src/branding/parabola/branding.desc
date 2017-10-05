@@ -6,7 +6,7 @@ strings:
   shortProductName:    Parabola
   version:             2017-09
   shortVersion:        2017-09
-  versionedName:       Parabola GNU/Linux-Libre
+  versionedName:       Parabola
   shortVersionedName:  Parabola
   productUrl:          http://www.parabola.nu/
   supportUrl:          http://webchat.freenode.net?channels=parabola

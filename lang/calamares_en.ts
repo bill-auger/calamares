@@ -2296,7 +2296,7 @@ The installer will quit and all changes will be lost.</translation>
     <message>
         <location filename="../src/modules/welcome/WelcomePage.cpp" line="60"/>
         <source>&lt;h1&gt;Welcome to the %1 installer.&lt;/h1&gt;</source>
-        <translation>&lt;h1&gt;Welcome to the %1 installer.&lt;/h1&gt;</translation>
+        <translation>&lt;h1&gt;Welcome to the %1 installer&lt;/h1&gt;</translation>
     </message>
     <message>
         <location filename="../src/modules/welcome/WelcomePage.cpp" line="60"/>
