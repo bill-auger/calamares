@@ -43,14 +43,23 @@ public:
     void setConfigurationMap(const QVariantMap& configurationMap) override ;
 
 
+protected:
+
+    void timerEvent(QTimerEvent *event) ; override ;
+    void updateProgress() ;
+
+
 private:
 
     void           setTargetDevice() ;
+    void           setNPackages() ;
     static QString QListToString(const QVariantList& package_list) ;
 
 
-    QVariantMap m_configurationMap ;
-    QString     m_status ;
+    QVariantMap  m_configurationMap ;
+    QString      m_status ;
+    int          guiTimerId = 0 ;
+    unsigned int nPackages = 0 ;
 } ;
 
 

@@ -44,9 +44,8 @@ Calamares::JobResult DesktopCppJob::exec()
 
   Calamares::GlobalStorage* globalStorage = Calamares::JobQueue::instance()->globalStorage() ;
   bool    has_internet  = globalStorage->value("hasInternet"  ).toBool() ;
-has_internet = false ;
   QString target_device = globalStorage->value("target-device").toString() ;
-  QString conf_file     = (has_internet) ? "/etc/pacman.conf" : "/etc/pacman-offline.conf" ;
+  QString conf_file     = (has_internet) ? "/etc/pacman-online.conf" : "/etc/pacman-offline.conf" ;
   QString mountpoint    = "/tmp/pacstrap";
 
   if (target_device.isEmpty()) return Calamares::JobResult::error("Target device for root filesystem is unspecified.") ;
@@ -64,8 +63,6 @@ cDebug() << QString("[DESKTOPCPP]: DesktopCppJob::exec() default_desktop=%1").ar
                                    m_configurationMap.value(desktop       ).toList() ) ;
 
   QString mount_cmd     = QString("/bin/sh -c \"mount %1 %2\"").arg(target_device, mountpoint) ;
-//   QString pacstrap_cmd  = (has_internet) ? QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) :
-//                                            QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) ;
   QString pacstrap_cmd  = QString("/bin/sh -c \"pacstrap -c -C %1 %2 %3\"").arg(conf_file , mountpoint , packages);
   QString wallpaper_cmd = QString("/bin/sh -c \"cp /etc/wallpaper.png %1/etc/\"").arg(mountpoint) ;
   QString umount_cmd    = QString("/bin/sh -c \"umount %1\"").arg(target_device) ;

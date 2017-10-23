@@ -30,9 +30,16 @@
 #include "utils/Logger.h"
 
 
-PacstrapCppJob::PacstrapCppJob(QObject* parent) : Calamares::CppJob(parent) {}
+PacstrapCppJob::PacstrapCppJob(QObject* parent) : Calamares::CppJob(parent) {
+cDebug() << "PacstrapCppJob::PacstrapCppJob()" ;
+}
 
-PacstrapCppJob::~PacstrapCppJob() {}
+PacstrapCppJob::~PacstrapCppJob() {
+cDebug() << "PacstrapCppJob::~PacstrapCppJob()" ;
+}
+
+
+/* PacstrapCppJob public instance methods */
 
 QString PacstrapCppJob::prettyName() const { return tr("Pacstrap C++ Job") ; }
 
@@ -46,13 +53,12 @@ Calamares::JobResult PacstrapCppJob::exec()
 
 // QProcess::execute( "echo SKIPPING parabola-prepare.desc" );
 
-  setTargetDevice() ;
+  setTargetDevice() ; setNPackages() ;
 
   Calamares::GlobalStorage *globalStorage = Calamares::JobQueue::instance()->globalStorage() ;
   bool    has_internet  = globalStorage->value("hasInternet"  ).toBool() ;
-has_internet = false ;
   QString target_device = globalStorage->value("target-device").toString() ;
-  QString conf_file     = (has_internet) ? "/etc/pacman.conf" : "/etc/pacman-offline.conf" ;
+  QString conf_file     = (has_internet) ? "/etc/pacman-online.conf" : "/etc/pacman-offline.conf" ;
   QString mountpoint    = "/tmp/pacstrap";
   QString packages      = QListToString(m_configurationMap.value("base"      ).toList() +
                                         m_configurationMap.value("bootloader").toList() +
@@ -66,8 +72,6 @@ has_internet = false ;
 //     QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring\"";
   QString mkdir_cmd      = QString("/bin/sh -c \"mkdir %1 2> /dev/null\"").arg(mountpoint) ;
   QString mount_cmd      = QString("/bin/sh -c \"mount %1 %2\"").arg(target_device , mountpoint) ;
-//   QString pacstrap_cmd   = (has_internet) ? QString("/bin/sh -c \"pacstrap-calamares -c    %1 %2\"").arg(mountpoint , packages) :
-//                                          QString("/bin/sh -c \"pacstrap-calamares -c -o %1 %2\"").arg(mountpoint , packages) ;
   QString pacstrap_cmd   = QString("/bin/sh -c \"pacstrap -c -C %1 %2 %3\"").arg(conf_file , mountpoint , packages);
   QString grub_theme_cmd = QString("/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"").arg(mountpoint) ;
 QString grub_theme_kludge_cmd = QString("/bin/sh -c \"echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub\"").arg(mountpoint) ;
@@ -77,7 +81,13 @@ cDebug() << QString("[PACSTRAPCPP]: grub_theme_cmd=%1").arg(grub_theme_cmd);
 // QProcess::execute( "/bin/sh -c \"ls /tmp/\"" );
 
     // boot-strap install root filesystem
-  m_status = tr("Installing root filesystem") ; emit progress(1) ;
+  this->guiTimerId = startTimer(1000) ; updateProgress() ;
+
+//   #include <QTimer>
+//   QTimer *timer = new QTimer(this);
+//   connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+//   timer->start(1000);
+
 //     QProcess::execute(keyring_cmd) ;
   QProcess::execute(mkdir_cmd) ;
   QProcess::execute(mount_cmd) ;
@@ -89,11 +99,12 @@ cDebug() << QString( "[PACSTRAPCPP]: grub_theme_cmd IN" );  QProcess::execute( Q
 QProcess::execute(grub_theme_kludge_cmd) ;
 cDebug() << QString( "[PACSTRAPCPP]: grub_theme_cmd OUT" ); QProcess::execute( QString( "/bin/sh -c \"cat %1/etc/default/grub\"" ).arg( mountpoint ) );
 
-    emit progress(5) ;
+//     emit progress(5) ;
 //     QProcess::execute( kernel_cmd );
     QProcess::execute(umount_cmd) ;
 
-    emit progress(1) ;
+//     emit progress(1) ;
+    killTimer() ;
 
     return Calamares::JobResult::ok() ;
 }
@@ -103,6 +114,27 @@ void PacstrapCppJob::setConfigurationMap(const QVariantMap& configurationMap)
   m_configurationMap = configurationMap ;
 }
 
+
+/* PacstrapCppJob protected instance methods */
+
+void PacstrapCppJob::timerEvent(QTimerEvent* event)
+{
+qDebug() << "Timer ID:" << event->timerId() ;
+
+  if (event->timerId() == this->guiTimerId) updateProgress() ;
+}
+
+void PacstrapCppJob::updateProgress()
+{
+qDebug() << "PacstrapCppJob::updateProgress()" ;
+
+  unsigned int progress_val = n_packages / this->nPackages ;
+
+  m_status = tr("Installing root filesystem") ; emit progress(progress_val) ;
+}
+
+
+/* PacstrapCppJob private instance methods */
 
 void PacstrapCppJob::setTargetDevice()
 {
@@ -128,6 +160,17 @@ if (mountpoint == "/") cDebug() << QString("[PACSTRAPCPP]: target_device=%1").ar
     }
 
     globalStorage->insert("target-device" , target_device) ;
+}
+
+void PacstrapCppJob::setNPackages()
+{
+  QString pacstrap_cmd   = QString("/bin/sh -c \"pacstrap -c -C %1 %2 %3\"").arg(conf_file , mountpoint , packages);
+  QProcess pacstrap_proc ;
+  pacstrap_proc.start(pacstrap_cmd) ; pacstrap_proc.waitForFinished(-1) ;
+
+  QString stdout = pacstrap_proc.readAllStandardOutput() ;
+  QString stderr = pacstrap_proc.readAllStandardError() ;
+  this->nPackages = 0 ;
 }
 
 QString PacstrapCppJob::QListToString(const QVariantList& package_list)
