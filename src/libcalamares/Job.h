@@ -62,6 +62,7 @@ public:
     explicit Job( QObject* parent = nullptr );
     virtual ~Job();
 
+    virtual qreal jobWeight() const;
     virtual QString prettyName() const = 0;
     virtual QString prettyDescription() const;
     virtual QString prettyStatusMessage() const;

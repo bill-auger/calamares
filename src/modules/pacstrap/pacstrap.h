@@ -19,10 +19,13 @@
 #ifndef PACSTRAPCPPJOB_H
 #define PACSTRAPCPPJOB_H
 
+#include <QDir>
 #include <QObject>
+#include <QTimerEvent>
 #include <QVariantMap>
 
 #include <CppJob.h>
+#include "GlobalStorage.h"
 #include <utils/PluginFactory.h>
 #include <PluginDllMacro.h>
 
@@ -36,33 +39,47 @@ public:
     explicit PacstrapCppJob(QObject* parent = nullptr) ;
     virtual ~PacstrapCppJob() ;
 
-    QString              prettyName()          const override ;
-    QString              prettyStatusMessage() const override ;
-    Calamares::JobResult exec()                      override ;
+    void                 setConfigurationMap(const QVariantMap& config)       override ;
+    qreal                jobWeight          ()                          const override ;
+    QString              prettyName         ()                          const override ;
+    QString              prettyStatusMessage()                          const override ;
+    Calamares::JobResult exec               ()                                override ;
 
-    void setConfigurationMap(const QVariantMap& configurationMap) override ;
 
 
 protected:
 
-    void timerEvent(QTimerEvent *event) ; override ;
+    void timerEvent    (QTimerEvent* event) override ;
     void updateProgress() ;
 
 
 private:
 
-    void           setTargetDevice() ;
-    void           setNPackages() ;
-    static QString QListToString(const QVariantList& package_list) ;
+    static QString     QListToString (const QVariantList& package_list) ;
+    static QStringList ExecWithOutput(QString command_line) ;
 
+    void   setTargetDevice   () ;
+    qint16 nPackagesInstalled() ;
+    qint16 setNPackages      (QString n_packages_cmd) ;
 
-    QVariantMap  m_configurationMap ;
-    QString      m_status ;
-    int          guiTimerId = 0 ;
-    unsigned int nPackages = 0 ;
+    static const qreal   BASE_PROGRESS_PERCENT = 30.0 ;
+    static const qreal   GUI_PROGRESS_PERCENT  = 50.0 ;
+    static const QString MOUNTPOINT ;
+    static const QDir    PACKAGES_CACHE_DIR ;
+    static const QDir    PACKAGES_METADATA_DIR ;
+
+    Calamares::GlobalStorage* globalStorage ;
+    int                       guiTimerId ;
+//     QDir                      packagesCacheDir ;
+//     QDir                      packagesMetadataDir ;
+//     int                       guiTimerId = 0 ;
+    QString                   statusMsg ;
+    QVariantMap               config ;
+    qreal                     maxProgressPercent ;
+    qint16                    nPackages  = 0 ;
 } ;
 
 
-CALAMARES_PLUGIN_FACTORY_DECLARATION( PacstrapCppJobFactory )
+CALAMARES_PLUGIN_FACTORY_DECLARATION(PacstrapCppJobFactory)
 
 #endif // PACSTRAPCPPJOB_H

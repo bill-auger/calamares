@@ -49,6 +49,21 @@ public:
     void setJobs( const JobList& jobs )
     {
         m_jobs = jobs;
+
+        qreal totalJobsWeight = 0.0;
+        for( auto job : m_jobs )
+        {
+            totalJobsWeight += job->jobWeight();
+
+printf("setJobs() += job->jobWeight()=%f = totalJobsWeight=%f\n" , job->jobWeight() , totalJobsWeight) ;
+        }
+        for( auto job : m_jobs )
+        {
+            qreal jobWeight = qreal( job->jobWeight() / totalJobsWeight );
+            m_jobWeights.append( jobWeight ) ;
+
+printf("setJobs(%d) << jobWeight=%f\n" , m_jobWeights.count() , jobWeight) ;
+        }
     }
 
     void run() override
@@ -56,8 +71,8 @@ public:
         m_jobIndex = 0;
         for( auto job : m_jobs )
         {
-            emitProgress();
             cLog() << "Starting job" << job->prettyName();
+            emitProgress();
             connect( job.data(), &Job::progress, this, &JobThread::emitProgress );
             JobResult result = job->exec();
             if ( !result )
@@ -74,6 +89,7 @@ public:
 
 private:
     JobList m_jobs;
+    QList< qreal > m_jobWeights;
     JobQueue* m_queue;
     int m_jobIndex;
 
@@ -88,7 +104,18 @@ private:
             ? m_jobs.at( m_jobIndex )->prettyStatusMessage()
             : tr( "Done" );
 
-        qreal percent = ( m_jobIndex + jobPercent ) / qreal( jobCount );
+
+        qreal cumulativeProgress = 0.0;
+        for( auto jobWeight : m_jobWeights.mid( 0, m_jobIndex ) )
+        {
+            cumulativeProgress += jobWeight;
+
+printf("emitProgress(%d) += jobWeight=%f => cumulativeProgress=%f\n" , m_jobIndex , jobWeight , cumulativeProgress) ;
+        }
+        qreal percent = ( cumulativeProgress + (m_jobWeights.at(m_jobIndex) * jobPercent) );
+//         qreal percent = ( m_jobIndex + jobPercent ) / qreal( jobCount );
+
+printf("emitProgress(%d) cumulativeProgress=%f jobPercent=%f percent=%f\n" , m_jobIndex , cumulativeProgress , jobPercent , percent) ;
 
         QMetaObject::invokeMethod( m_queue, "progress", Qt::QueuedConnection,
             Q_ARG( qreal, percent ),
