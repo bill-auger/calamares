@@ -29,8 +29,8 @@
 const QString PacstrapCppJob::MOUNTPOINT            = "/tmp/pacstrap" ;
 const QDir    PacstrapCppJob::PACKAGES_CACHE_DIR    = QDir(MOUNTPOINT + "/var/cache/pacman/pkg") ;
 const QDir    PacstrapCppJob::PACKAGES_METADATA_DIR = QDir(MOUNTPOINT + "/var/lib/pacman/local") ;
-const char*   PacstrapCppJob::BASE_JOB_NAME         = "Pacstrap C++ Job" ;
-const char*   PacstrapCppJob::GUI_JOB_NAME          = "Desktop C++ Job" ;
+const char*   PacstrapCppJob::BASE_JOB_NAME         = "Pacstrap Base C++ Job" ;
+const char*   PacstrapCppJob::GUI_JOB_NAME          = "Pacstrap Desktop C++ Job" ;
 const char*   PacstrapCppJob::BASE_STATUS_MSG       = "Installing root filesystem" ;
 const char*   PacstrapCppJob::GUI_STATUS_MSG        = "Installing graphical desktop environment" ;
 
@@ -47,6 +47,8 @@ printf("PacstrapCppJob::PacstrapCppJob() '%s'\n" , jobName.toStdString().c_str()
   this->globalStorage = Calamares::JobQueue::instance()->globalStorage() ;
   this->guiTimerId    = startTimer(1000) ;
   this->confFile      = QString("") ; // deferred to exec()
+  this->packages      = QString("") ; // deferred to loadPackageList()
+  this->nPackages     = 0 ;           // deferred to setNPackages()
 }
 
 PacstrapCppJob::~PacstrapCppJob() {
@@ -71,7 +73,7 @@ Calamares::JobResult PacstrapCppJob::exec()
 
 // QProcess::execute( "echo SKIPPING parabola-prepare.desc" );
 
-  setTargetDevice() ;
+  setTargetDevice() ; loadPackageList() ;
 
   bool    has_internet  = this->globalStorage->value("hasInternet"  ).toBool() ;
   QString target_device = this->globalStorage->value("target-device").toString() ;
@@ -85,19 +87,27 @@ Calamares::JobResult PacstrapCppJob::exec()
 //                                         pacman-key --populate parabola          && \
 //                                         pacman-key --refresh-keys                  \"";
 //     QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring\"";
-  QString mkdir_cmd  = QString("/bin/sh -c \"mkdir %1 2> /dev/null\"").arg(MOUNTPOINT) ;
-  QString mount_cmd  = QString("/bin/sh -c \"mount %1 %2\"").arg(target_device , MOUNTPOINT) ;
-  QString umount_cmd = QString("/bin/sh -c \"umount %1\"").arg(target_device) ;
+  QString mkdir_cmd       = QString("/bin/sh -c \"mkdir %1 2> /dev/null\"").arg(MOUNTPOINT) ;
+  QString mount_cmd       = QString("/bin/sh -c \"mount %1 %2\"").arg(target_device , MOUNTPOINT) ;
+  QString chroot_init_cmd = QString("/bin/sh -c \"mkdir -m 0755 -p {%1,%2}\"").arg(PACKAGES_CACHE_DIR.absolutePath() , PACKAGES_METADATA_DIR.absolutePath()) ;
+  QString pacman_sync_cmd = QString("/bin/sh -c \"pacman --print --config %1 --root %2 -Sy\"").arg(this->confFile , MOUNTPOINT) ;
+  QString n_packages_cmd  = QString("/bin/sh -c \"pacman --print --config %1 --root %2 -S %3\"").arg(this->confFile , MOUNTPOINT , this->packages) ;
+  QString umount_cmd      = QString("/bin/sh -c \"umount %1\"").arg(target_device) ;
 
 //     QProcess::execute(keyring_cmd) ;
   QProcess::execute(mkdir_cmd) ;
   QProcess::execute(mount_cmd) ;
-  QString exec_error_msg = chrootExec() ;
-  if (!exec_error_msg.isEmpty()) return Calamares::JobResult::error(exec_error_msg) ;
-  QProcess::execute(umount_cmd) ;
+  QProcess::execute(chroot_init_cmd) ;
+  QProcess::execute(pacman_sync_cmd) ;
+  if (!this->packages.isEmpty() && setNPackages(n_packages_cmd) > 0)
+  {
+// return Calamares::JobResult::error("just cause") ;
 
-//     emit progress(1) ;
-//   killTimer(this->guiTimerId) ;
+    QString exec_error_msg = chrootExec() ;
+    if (!exec_error_msg.isEmpty()) return Calamares::JobResult::error(exec_error_msg) ;
+  }
+  else emit progress(this->jobWeight) ;
+  QProcess::execute(umount_cmd) ;
 
   return Calamares::JobResult::ok() ;
 }

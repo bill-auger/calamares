@@ -1,5 +1,0 @@
----
-type:      "job"
-name:      "desktop"
-interface: "qtplugin"
-load:      "libcalamares_job_desktop.so"

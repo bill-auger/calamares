@@ -56,8 +56,9 @@ protected:
     virtual QString chrootExec() = 0 ;
 
     void    setTargetDevice   () ;
+    QString loadPackageList   () ;
     qint16  nPackagesInstalled() ;
-    qint16  setNPackages      (QString n_packages_cmd) ;
+    qint16  setNPackages      (QString packages) ;
     void    timerEvent        (QTimerEvent* event) override ;
     void    updateProgress    () ;
 
@@ -74,12 +75,13 @@ protected:
 
     QString                   jobName ;
     QString                   statusMsg ;
-    QVariantMap               config ;
     qreal                     jobWeight ;
     Calamares::GlobalStorage* globalStorage ;
     int                       guiTimerId ;
     QString                   confFile ;
-    qint16                    nPackages  = 0 ;
+    QString                   packages ;
+    qint16                    nPackages ;
+    QVariantMap               config ;
 } ;
 
 

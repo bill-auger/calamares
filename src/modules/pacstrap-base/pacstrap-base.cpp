@@ -19,7 +19,7 @@
 
 #include <QProcess>
 
-#include "pacstrap.h"
+#include "pacstrap-base.h"
 
 
 /* PacstrapBaseJob public instance methods */
@@ -32,21 +32,20 @@ PacstrapBaseJob::PacstrapBaseJob(QObject* parent) : PacStrapCppJob(tr(BASE_JOB_N
 
 /* PacstrapBaseJob protected instance methods */
 
+QString PacstrapBaseJob::loadPackageList()
+{
+  this->packages = QListToString(this->config.value("base"      ).toList() +
+                                 this->config.value("bootloader").toList() +
+                                 this->config.value("kernel"    ).toList() ) ;
+}
+
 QString PacstrapBaseJob::chrootExec()
 {
-  QString packages = QListToString(this->config.value("base"      ).toList() +
-                                   this->config.value("bootloader").toList() +
-                                   this->config.value("kernel"    ).toList() ) ;
-  if (packages.isEmpty()) { emit progress(qreal(this->jobWeight)) ; return QString("") ; }
-
-  QString chroot_init_cmd = QString("/bin/sh -c \"mkdir -m 0755 -p {%1,%2}\"").arg(PACKAGES_CACHE_DIR.absolutePath() , PACKAGES_METADATA_DIR.absolutePath()) ;
-  QString pacman_sync_cmd = QString("/bin/sh -c \"pacman --print --config %1 --root %2 -Sy\"").arg(this->confFile , MOUNTPOINT) ;
-  QString n_packages_cmd  = QString("/bin/sh -c \"pacman --print --config %1 --root %2 -S %3\"").arg(this->confFile , MOUNTPOINT , packages) ;
-  QString pacstrap_cmd    = QString("/bin/sh -c \"pacstrap -C %1 %2 %3\"").arg(this->confFile , MOUNTPOINT , packages) ;
-  QString grub_theme_cmd  = QString("/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"").arg(MOUNTPOINT) ;
+  QString pacstrap_cmd   = QString("/bin/sh -c \"pacstrap -C %1 %2 %3\"").arg(this->confFile , MOUNTPOINT , this->packages) ;
+  QString grub_theme_cmd = QString("/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"").arg(MOUNTPOINT) ;
 
 QString grub_theme_kludge_cmd = QString("/bin/sh -c \"echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub\"").arg(MOUNTPOINT) ;
-printf("[PACSTRAPCPP]: grub_theme_cmd=%s\n" , grub_theme_cmd.toStdString().c_str()) ;
+printf("[PACSTRAP-BASE]: grub_theme_cmd=%s\n" , grub_theme_cmd.toStdString().c_str()) ;
 // QProcess::execute( "/bin/sh -c \"ls /tmp/\"" );
 
     // boot-strap install root filesystem
@@ -57,17 +56,13 @@ printf("[PACSTRAPCPP]: grub_theme_cmd=%s\n" , grub_theme_cmd.toStdString().c_str
 //   connect(timer, SIGNAL(timeout()), this, SLOT(update()));
 //   timer->start(1000);
 
-  QProcess::execute(chroot_init_cmd) ;
-  QProcess::execute(pacman_sync_cmd) ;
-  if (setNPackages(n_packages_cmd) == 0) return "No packages to install." ;
-// return Calamares::JobResult::error("just cause") ;
-  if (QProcess::execute(pacstrap_cmd)  ) return "PACSTRAP_FAIL" ;
+  if (QProcess::execute(pacstrap_cmd)) return "PACSTRAP_FAIL" ;
 //     m_status = tr( "Installing linux-libre kernel" ); emit progress( 5 );
 
-printf("[PACSTRAPCPP]: grub_theme_cmd IN:\n");  QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
+printf("[PACSTRAP-BASE]: grub_theme_cmd IN:\n");  QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
     QProcess::execute(grub_theme_cmd) ;
 QProcess::execute(grub_theme_kludge_cmd) ;
-printf("[PACSTRAPCPP]: grub_theme_cmd OUT:\n"); QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
+printf("[PACSTRAP-BASE]: grub_theme_cmd OUT:\n"); QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
 //     emit progress(5) ;
 //     QProcess::execute( kernel_cmd );
 

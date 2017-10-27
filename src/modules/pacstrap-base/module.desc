@@ -1,0 +1,5 @@
+---
+type:      "job"
+name:      "pacstrap-base"
+interface: "qtplugin"
+load:      "libcalamares_job_pacstrap-base.so"

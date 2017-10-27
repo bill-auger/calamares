@@ -1,8 +1,8 @@
-calamares_add_plugin( desktop
+calamares_add_plugin( pacstrap-gui
   TYPE job
   EXPORT_MACRO PLUGINDLLEXPORT_PRO
   SOURCES
-    desktop.cpp
+    pacstrap-gui.cpp
   LINK_PRIVATE_LIBRARIES
     calamares
   SHARED_LIB
