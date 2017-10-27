@@ -17,6 +17,7 @@ set( libSources
     GlobalStorage.cpp
     Job.cpp
     JobQueue.cpp
+    PacstrapCppJob.cpp
     ProcessJob.cpp
 )
 set( utilsSources
