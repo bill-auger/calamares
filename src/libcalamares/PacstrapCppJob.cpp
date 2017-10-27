@@ -63,7 +63,7 @@ QString PacstrapCppJob::prettyName() const { return this->jobName ; }
 
 QString PacstrapCppJob::prettyStatusMessage() const { return this->statusMsg ; }
 
-void PacstrapCppJob::setConfigurationMap(const QVariantMap& config) { this->config = config ; }
+void PacstrapCppJob::setConfigurationMap(const QVariantMap& config) { this->localStorage = config ; }
 
 Calamares::JobResult PacstrapCppJob::exec()
 {
@@ -79,7 +79,7 @@ Calamares::JobResult PacstrapCppJob::exec()
   QString target_device = this->globalStorage->value("target-device").toString() ;
   this->confFile        = (has_internet) ? "/etc/pacman-online.conf" : "/etc/pacman-offline.conf" ;
 
-  if (this->config.empty()           ) return Calamares::JobResult::error("Invalid configuration map.") ;
+  if (this->localStorage.empty()     ) return Calamares::JobResult::error("Invalid configuration map.") ;
   if (target_device.isEmpty()        ) return Calamares::JobResult::error("Target device for root filesystem is unspecified.") ;
   if (!QFile(this->confFile).exists()) return Calamares::JobResult::error(QString("Pacman configuration not found: '%1'.").arg(this->confFile)) ;
 

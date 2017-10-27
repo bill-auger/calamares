@@ -24,7 +24,7 @@
 
 /* PacstrapGuiJob public instance methods */
 
-PacstrapGuiJob::PacstrapGuiJob(QObject* parent) : PacStrapCppJob(tr(GUI_JOB_NAME)   ,
+PacstrapGuiJob::PacstrapGuiJob(QObject* parent) : PacstrapCppJob(tr(GUI_JOB_NAME)   ,
                                                                  tr(GUI_STATUS_MSG) ,
                                                                  GUI_JOB_WEIGHT     ,
                                                                  parent             ) {}
@@ -32,19 +32,19 @@ PacstrapGuiJob::PacstrapGuiJob(QObject* parent) : PacStrapCppJob(tr(GUI_JOB_NAME
 
 /* PacstrapGuiJob protected instance methods */
 
-QString PacstrapGuiJob::loadPackageList()
+void PacstrapGuiJob::loadPackageList()
 {
 globalStorage->insert("default-desktop", "mate") ; // TODO: per user option via globalStorage
-cDebug() << QString("[PACSTRAP-GUI]: DesktopCppJob::exec() default_desktop=%1").arg(globalStorage->value("default-desktop").toString()) ;
+printf("[PACSTRAP-GUI]: DesktopCppJob::exec() default_desktop=%s" , globalStorage->value("default-desktop").toString().toStdString().c_str()) ;
 
   QString desktop = this->globalStorage->value("default-desktop").toString() ;
-  this->packages  = QListToString(this->config.value("applications").toList() +
-                                  this->config.value("multimedia"  ).toList() +
-                                  this->config.value("network"     ).toList() +
-                                  this->config.value("themes"      ).toList() +
-                                  this->config.value("utilities"   ).toList() +
-                                  this->config.value("xserver"     ).toList() +
-                                  this->config.value(desktop       ).toList() ) ;
+  this->packages  = QListToString(this->localStorage.value("applications").toList() +
+                                  this->localStorage.value("multimedia"  ).toList() +
+                                  this->localStorage.value("network"     ).toList() +
+                                  this->localStorage.value("themes"      ).toList() +
+                                  this->localStorage.value("utilities"   ).toList() +
+                                  this->localStorage.value("xserver"     ).toList() +
+                                  this->localStorage.value(desktop       ).toList() ) ;
 }
 
 QString PacstrapGuiJob::chrootExec()
@@ -54,14 +54,14 @@ QString PacstrapGuiJob::chrootExec()
 
   if (QProcess::execute(pacstrap_cmd)) return "PACSTRAP_FAIL" ;
 
-cDebug() << QString("[PACSTRAP-GUI]: ls /etc/skel") ;                QProcess::execute(QString("/bin/sh -c \"ls -al /etc/skel/\""         )               ) ;
-cDebug() << QString("[PACSTRAP-GUI]: ls chroot/etc/skel/") ;         QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/skel/\""       ).arg(MOUNTPOINT)) ;
-cDebug() << QString("[PACSTRAP-GUI]: ls chroot/etc/wallpaper.png") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(MOUNTPOINT)) ;
-cDebug() << QString("[PACSTRAP-GUI]: ls chroot/etc/sudoers*") ;      QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/sudoers*\""    ).arg(MOUNTPOINT)) ;
+printf("[PACSTRAP-GUI]: ls /etc/skel") ;                QProcess::execute(QString("/bin/sh -c \"ls -al /etc/skel/\""         )               ) ;
+printf("[PACSTRAP-GUI]: ls chroot/etc/skel/") ;         QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/skel/\""       ).arg(MOUNTPOINT)) ;
+printf("[PACSTRAP-GUI]: ls chroot/etc/wallpaper.png") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(MOUNTPOINT)) ;
+printf("[PACSTRAP-GUI]: ls chroot/etc/sudoers*") ;      QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/sudoers*\""    ).arg(MOUNTPOINT)) ;
 
   QProcess::execute(wallpaper_cmd) ;
 
-cDebug() << QString("[PACSTRAP-GUI]: ls chroot/etc/wallpaper.png") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(MOUNTPOINT)) ;
+printf("[PACSTRAP-GUI]: ls chroot/etc/wallpaper.png") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(MOUNTPOINT)) ;
 
   return QString("") ;
 }

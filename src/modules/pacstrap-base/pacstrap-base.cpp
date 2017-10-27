@@ -24,7 +24,7 @@
 
 /* PacstrapBaseJob public instance methods */
 
-PacstrapBaseJob::PacstrapBaseJob(QObject* parent) : PacStrapCppJob(tr(BASE_JOB_NAME)   ,
+PacstrapBaseJob::PacstrapBaseJob(QObject* parent) : PacstrapCppJob(tr(BASE_JOB_NAME)   ,
                                                                    tr(BASE_STATUS_MSG) ,
                                                                    BASE_JOB_WEIGHT     ,
                                                                    parent              ) {}
@@ -32,11 +32,11 @@ PacstrapBaseJob::PacstrapBaseJob(QObject* parent) : PacStrapCppJob(tr(BASE_JOB_N
 
 /* PacstrapBaseJob protected instance methods */
 
-QString PacstrapBaseJob::loadPackageList()
+void PacstrapBaseJob::loadPackageList()
 {
-  this->packages = QListToString(this->config.value("base"      ).toList() +
-                                 this->config.value("bootloader").toList() +
-                                 this->config.value("kernel"    ).toList() ) ;
+  this->packages = QListToString(this->localStorage.value("base"      ).toList() +
+                                 this->localStorage.value("bootloader").toList() +
+                                 this->localStorage.value("kernel"    ).toList() ) ;
 }
 
 QString PacstrapBaseJob::chrootExec()

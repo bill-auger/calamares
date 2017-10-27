@@ -26,17 +26,18 @@
 
 class PLUGINDLLEXPORT PacstrapBaseJob : public PacstrapCppJob
 {
-    Q_OBJECT
+  Q_OBJECT
 
 
 public:
 
-    explicit PacstrapBaseJob(QObject* parent = nullptr) ;
+  explicit PacstrapBaseJob(QObject* parent = nullptr) ;
 
 
 protected:
 
-    QString chrootExec() override ;
+  void    loadPackageList() override ;
+  QString chrootExec     () override ;
 } ;
 
 

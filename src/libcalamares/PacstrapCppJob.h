@@ -30,58 +30,56 @@
 
 class PacstrapCppJob : public Calamares::CppJob
 {
-    Q_OBJECT
+  Q_OBJECT
 
 
 public:
 
-    explicit PacstrapCppJob(QString  job_name             ,
-                            QString  status_msg           ,
-                            qreal    job_weight = 1.0     ,
-                            QObject* parent     = nullptr ) ;
-    virtual ~PacstrapCppJob() ;
+  explicit PacstrapCppJob(QString  job_name         , QString  status_msg           ,
+                          qreal    job_weight = 1.0 , QObject* parent     = nullptr ) ;
+  virtual ~PacstrapCppJob() ;
 
-    void                 setConfigurationMap(const QVariantMap& config)       override ;
-    qreal                getJobWeight       ()                          const override ;
-    QString              prettyName         ()                          const override ;
-    QString              prettyStatusMessage()                          const override ;
-    Calamares::JobResult exec               ()                                override ;
+  void                 setConfigurationMap(const QVariantMap& config)       override ;
+  qreal                getJobWeight       ()                          const override ;
+  QString              prettyName         ()                          const override ;
+  QString              prettyStatusMessage()                          const override ;
+  Calamares::JobResult exec               ()                                override ;
 
 
 protected:
 
-    static QString     QListToString (const QVariantList& package_list) ;
-    static QStringList ExecWithOutput(QString command_line) ;
+  static QString     QListToString (const QVariantList& package_list) ;
+  static QStringList ExecWithOutput(QString command_line) ;
 
-    virtual QString chrootExec() = 0 ;
+  virtual void    loadPackageList() = 0 ;
+  virtual QString chrootExec     () = 0 ;
 
-    void    setTargetDevice   () ;
-    QString loadPackageList   () ;
-    qint16  nPackagesInstalled() ;
-    qint16  setNPackages      (QString packages) ;
-    void    timerEvent        (QTimerEvent* event) override ;
-    void    updateProgress    () ;
+  void    setTargetDevice   () ;
+  qint16  nPackagesInstalled() ;
+  qint16  setNPackages      (QString packages) ;
+  void    timerEvent        (QTimerEvent* event) override ;
+  void    updateProgress    () ;
 
 
-    static const     QString MOUNTPOINT ;
-    static const     QDir    PACKAGES_CACHE_DIR ;
-    static const     QDir    PACKAGES_METADATA_DIR ;
-    static const     char*   BASE_JOB_NAME ;
-    static const     char*   GUI_JOB_NAME ;
-    static const     char*   BASE_STATUS_MSG ;
-    static const     char*   GUI_STATUS_MSG ;
-    static constexpr qreal   BASE_JOB_WEIGHT = 30.0 ;
-    static constexpr qreal   GUI_JOB_WEIGHT  = 50.0 ;
+  static const     QString MOUNTPOINT ;
+  static const     QDir    PACKAGES_CACHE_DIR ;
+  static const     QDir    PACKAGES_METADATA_DIR ;
+  static const     char*   BASE_JOB_NAME ;
+  static const     char*   GUI_JOB_NAME ;
+  static const     char*   BASE_STATUS_MSG ;
+  static const     char*   GUI_STATUS_MSG ;
+  static constexpr qreal   BASE_JOB_WEIGHT = 23.0 ; // progress-bar job weight (1.0 normal)
+  static constexpr qreal   GUI_JOB_WEIGHT  = 69.0 ; // progress-bar job weight (1.0 normal)
 
-    QString                   jobName ;
-    QString                   statusMsg ;
-    qreal                     jobWeight ;
-    Calamares::GlobalStorage* globalStorage ;
-    int                       guiTimerId ;
-    QString                   confFile ;
-    QString                   packages ;
-    qint16                    nPackages ;
-    QVariantMap               config ;
+  QString                   jobName ;
+  QString                   statusMsg ;
+  qreal                     jobWeight ;
+  Calamares::GlobalStorage* globalStorage ;
+  int                       guiTimerId ;
+  QString                   confFile ;
+  QString                   packages ;
+  qint16                    nPackages ;
+  QVariantMap               localStorage ;
 } ;
 
 
