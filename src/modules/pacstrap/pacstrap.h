@@ -30,14 +30,18 @@
 #include <PluginDllMacro.h>
 
 
-class PLUGINDLLEXPORT PacstrapCppJob : public Calamares::CppJob
+class PacStrapCppJob : public Calamares::CppJob
 {
     Q_OBJECT
 
+
 public:
 
-    explicit PacstrapCppJob(QObject* parent = nullptr) ;
-    virtual ~PacstrapCppJob() ;
+    explicit PacStrapCppJob(QString  job_name             ,
+                            QString  status_msg           ,
+                            qreal    job_weight = 1.0     ,
+                            QObject* parent     = nullptr ) ;
+    virtual ~PacStrapCppJob() ;
 
     void                 setConfigurationMap(const QVariantMap& config)       override ;
     qreal                getJobWeight       ()                          const override ;
@@ -46,37 +50,57 @@ public:
     Calamares::JobResult exec               ()                                override ;
 
 
-
 protected:
-
-    void timerEvent    (QTimerEvent* event) override ;
-    void updateProgress() ;
-
-
-private:
 
     static QString     QListToString (const QVariantList& package_list) ;
     static QStringList ExecWithOutput(QString command_line) ;
 
-    void   setTargetDevice   () ;
-    qint16 nPackagesInstalled() ;
-    qint16 setNPackages      (QString n_packages_cmd) ;
+    virtual QString chrootExec() = 0 ;
 
-    static const qreal   BASE_PROGRESS_PERCENT = 30.0 ;
-    static const qreal   GUI_PROGRESS_PERCENT  = 50.0 ;
-    static const QString MOUNTPOINT ;
-    static const QDir    PACKAGES_CACHE_DIR ;
-    static const QDir    PACKAGES_METADATA_DIR ;
+    void    setTargetDevice   () ;
+    qint16  nPackagesInstalled() ;
+    qint16  setNPackages      (QString n_packages_cmd) ;
+    void    timerEvent        (QTimerEvent* event) override ;
+    void    updateProgress    () ;
 
-    Calamares::GlobalStorage* globalStorage ;
-    int                       guiTimerId ;
+
+    static const     QString MOUNTPOINT ;
+    static const     QDir    PACKAGES_CACHE_DIR ;
+    static const     QDir    PACKAGES_METADATA_DIR ;
+    static const     char*   BASE_JOB_NAME ;
+    static const     char*   GUI_JOB_NAME ;
+    static const     char*   BASE_STATUS_MSG ;
+    static const     char*   GUI_STATUS_MSG ;
+    static constexpr qreal   BASE_JOB_WEIGHT = 30.0 ;
+    static constexpr qreal   GUI_JOB_WEIGHT  = 50.0 ;
+
 //     QDir                      packagesCacheDir ;
 //     QDir                      packagesMetadataDir ;
 //     int                       guiTimerId = 0 ;
+    QString                   jobName ;
     QString                   statusMsg ;
     QVariantMap               config ;
     qreal                     jobWeight ;
+    Calamares::GlobalStorage* globalStorage ;
+    int                       guiTimerId ;
+    QString                   confFile ;
     qint16                    nPackages  = 0 ;
+} ;
+
+
+class PLUGINDLLEXPORT PacstrapCppJob : public PacStrapCppJob
+{
+    Q_OBJECT
+
+
+public:
+
+    explicit PacstrapCppJob(QObject* parent = nullptr) ;
+
+
+protected:
+
+    QString chrootExec() override ;
 } ;
 
 
