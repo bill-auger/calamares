@@ -26,8 +26,8 @@
 
 #include <CppJob.h>
 #include "GlobalStorage.h"
-#include <utils/PluginFactory.h>
 #include <PluginDllMacro.h>
+#include <utils/PluginFactory.h>
 
 
 class PacStrapCppJob : public Calamares::CppJob
@@ -74,9 +74,6 @@ protected:
     static constexpr qreal   BASE_JOB_WEIGHT = 30.0 ;
     static constexpr qreal   GUI_JOB_WEIGHT  = 50.0 ;
 
-//     QDir                      packagesCacheDir ;
-//     QDir                      packagesMetadataDir ;
-//     int                       guiTimerId = 0 ;
     QString                   jobName ;
     QString                   statusMsg ;
     QVariantMap               config ;

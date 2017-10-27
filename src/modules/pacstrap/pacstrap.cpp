@@ -19,15 +19,9 @@
 
 
 #include <QProcess>
-#include <QDateTime>
-#include <QThread>
 
-#include "CalamaresVersion.h"
 #include "JobQueue.h"
-// #include "GlobalStorage.h"
-
 #include "pacstrap.h"
-#include "utils/Logger.h"
 
 
 /* PacStrapCppJob private class variables */
@@ -48,7 +42,7 @@ PacStrapCppJob::PacStrapCppJob(QString   job_name    , QString           status_
                                jobName  (job_name  ) , statusMsg        (status_msg) ,
                                jobWeight(job_weight) , Calamares::CppJob(parent    )
 {
-cDebug() << "PacStrapCppJob::PacStrapCppJob() " << jobName ;
+printf("PacStrapCppJob::PacStrapCppJob() '%s'\n" , jobName.toStdString().c_str()) ;
 
   this->globalStorage = Calamares::JobQueue::instance()->globalStorage() ;
   this->guiTimerId    = startTimer(1000) ;
@@ -56,7 +50,7 @@ cDebug() << "PacStrapCppJob::PacStrapCppJob() " << jobName ;
 }
 
 PacStrapCppJob::~PacStrapCppJob() {
-cDebug() << "PacStrapCppJob::~PacStrapCppJob() " << jobName ;
+printf("PacStrapCppJob::~PacStrapCppJob() '%s'\n" , jobName.toStdString().c_str()) ;
 
   killTimer(this->guiTimerId) ;
 }
@@ -123,11 +117,10 @@ void PacStrapCppJob::updateProgress()
   unsigned int progress_percent = (nPackagesInstalled() * 100) / this->nPackages ;
 //   qreal progress_percent = nPackagesInstalled() / this->nPackages ;
 
-cDebug() << QString("") ;
-cDebug() << QString("[PACSTRAPCPP]: n_packages=%1").arg(nPackagesInstalled()) ;
-cDebug() << QString("[PACSTRAPCPP]: this->nPackages=%1").arg(this->nPackages) ;
-cDebug() << QString("[PACSTRAPCPP]: progress_percent=%1").arg(progress_percent) ;
-cDebug() << QString("") ;
+printf("\n[PACSTRAPCPP]: n_packages=%d\n" , (int)nPackagesInstalled()) ;
+printf("[PACSTRAPCPP]: this->nPackages=%d\n" , (int)this->nPackages) ;
+printf("[PACSTRAPCPP]: progress_percent=%d\n" , progress_percent) ;
+
 //   emit progress(0.5) ;
 //   emit progress(progress_percent) ;
 //   progress(qreal(progress_percent)) ;
@@ -170,7 +163,7 @@ void PacStrapCppJob::setTargetDevice()
   foreach (const QVariant& partition , partitions)
   {
 QStringList result; for ( auto it = partition.toMap().constBegin(); it != partition.toMap().constEnd(); ++it ) result.append( it.key() + '=' + it.value().toString() );
-cDebug() << QString("[PACSTRAPCPP]: partition=%1").arg('[' + result.join(',') + ']');
+printf("[PACSTRAPCPP]: partition=[%s]\n" , result.join(',').toStdString().c_str()) ;
 
     QVariantMap partition_map = partition.toMap() ;
     QString     device        = partition_map.value("device").toString();
@@ -180,7 +173,7 @@ cDebug() << QString("[PACSTRAPCPP]: partition=%1").arg('[' + result.join(',') + 
 
     if (mountpoint == "/") target_device = device ;
 
-if (mountpoint == "/") cDebug() << QString("[PACSTRAPCPP]: target_device=%1").arg(device);
+if (mountpoint == "/") printf("[PACSTRAPCPP]: target_device=%s\n" , device.toStdString().c_str()) ;
   }
 
   this->globalStorage->insert("target-device" , target_device) ;
@@ -194,11 +187,11 @@ qint16 PacStrapCppJob::nPackagesInstalled()
 // QString s1 = PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).join(",") ;
 // int     n2 = PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).count() ;
 // QString s2 = PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).join(",") ;
-// cDebug() << QString("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_CACHE_DIR=%1").arg(n1) ;
-// cDebug() << QString("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_CACHE_DIR=%1").arg(s1) ;
-// cDebug() << QString("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_METADATA_DIR=%1").arg(n2) ;
-// cDebug() << QString("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_METADATA_DIR=%1").arg(s2) ;
-// cDebug() << QString("[PACSTRAPCPP]: nPackagesInstalled() ret=%1").arg((n1 + n2) / 2) ;
+// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_CACHE_DIR=%d\n" , n1) ;
+// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_CACHE_DIR=%s\n" , s1) ;
+// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_METADATA_DIR=%d\n" , n2) ;
+// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_METADATA_DIR=%s\n" , s2) ;
+// printf("[PACSTRAPCPP]: nPackagesInstalled() ret=%d\n" , ((n1 + n2) / 2)) ;
 
   return (PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).count() +
           PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).count() ) / 2 ;
@@ -238,7 +231,7 @@ QString PacstrapCppJob::chrootExec()
   QString grub_theme_cmd  = QString("/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"").arg(MOUNTPOINT) ;
 
 QString grub_theme_kludge_cmd = QString("/bin/sh -c \"echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub\"").arg(MOUNTPOINT) ;
-cDebug() << QString("[PACSTRAPCPP]: grub_theme_cmd=%1").arg(grub_theme_cmd);
+printf("[PACSTRAPCPP]: grub_theme_cmd=%s\n" , grub_theme_cmd.toStdString().c_str()) ;
 // QProcess::execute( "/bin/sh -c \"ls /tmp/\"" );
 
     // boot-strap install root filesystem
@@ -256,10 +249,10 @@ cDebug() << QString("[PACSTRAPCPP]: grub_theme_cmd=%1").arg(grub_theme_cmd);
   if (QProcess::execute(pacstrap_cmd)  ) return "PACSTRAP_FAIL" ;
 //     m_status = tr( "Installing linux-libre kernel" ); emit progress( 5 );
 
-cDebug() << QString("[PACSTRAPCPP]: grub_theme_cmd IN");  QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
+printf("[PACSTRAPCPP]: grub_theme_cmd IN:\n");  QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
     QProcess::execute(grub_theme_cmd) ;
 QProcess::execute(grub_theme_kludge_cmd) ;
-cDebug() << QString("[PACSTRAPCPP]: grub_theme_cmd OUT"); QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
+printf("[PACSTRAPCPP]: grub_theme_cmd OUT:\n"); QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
 //     emit progress(5) ;
 //     QProcess::execute( kernel_cmd );
 

@@ -15,6 +15,7 @@ PKGS="arch-install-scripts"
 pacman -Qi $PKGS > /dev/null || sudo pacman -S --needed $PKGS
 
 
+echo "\n--- preparing build environment ---\n"
 if [ ! -d build ]
 then mkdir build
 # else rm -f build/Makefile 2> /dev/null
@@ -38,7 +39,7 @@ cmake -DCMAKE_BUILD_TYPE=Debug                                               \
                       luksopenswaphookcfg plymouthcfg removeuser webview" ..
 
 echo "\n--- running make uninstall ---\n"
-sudo make uninstall
+[ -d /usr/share/calamares/ ] && sudo make uninstall
 sudo rm -rf /usr/share/calamares/
 
 echo "\n--- running make install ---\n"
