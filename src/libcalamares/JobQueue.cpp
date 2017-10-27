@@ -53,16 +53,16 @@ public:
         qreal totalJobsWeight = 0.0;
         for( auto job : m_jobs )
         {
-            totalJobsWeight += job->jobWeight();
+            totalJobsWeight += job->getJobWeight();
 
-printf("setJobs() += job->jobWeight()=%f = totalJobsWeight=%f\n" , job->jobWeight() , totalJobsWeight) ;
+printf("JobThread::setJobs() += job->getJobWeight()=%f = totalJobsWeight=%f\n" , job->getJobWeight() , totalJobsWeight) ;
         }
         for( auto job : m_jobs )
         {
-            qreal jobWeight = qreal( job->jobWeight() / totalJobsWeight );
+            qreal jobWeight = qreal( job->getJobWeight() / totalJobsWeight );
             m_jobWeights.append( jobWeight ) ;
 
-printf("setJobs(%d) << jobWeight=%f\n" , m_jobWeights.count() , jobWeight) ;
+printf("JobThread::setJobs(%d) << jobWeight=%f\n" , m_jobWeights.count() , jobWeight) ;
         }
     }
 
@@ -104,18 +104,19 @@ private:
             ? m_jobs.at( m_jobIndex )->prettyStatusMessage()
             : tr( "Done" );
 
-
         qreal cumulativeProgress = 0.0;
         for( auto jobWeight : m_jobWeights.mid( 0, m_jobIndex ) )
         {
             cumulativeProgress += jobWeight;
 
-printf("emitProgress(%d) += jobWeight=%f => cumulativeProgress=%f\n" , m_jobIndex , jobWeight , cumulativeProgress) ;
+printf("JobThread::emitProgress(%d) += jobWeight=%f => cumulativeProgress=%f\n" , m_jobIndex , jobWeight , cumulativeProgress) ;
         }
-        qreal percent = ( cumulativeProgress + (m_jobWeights.at(m_jobIndex) * jobPercent) );
+        qreal percent = m_jobIndex < jobCount
+            ? cumulativeProgress + (m_jobWeights.at(m_jobIndex) * jobPercent)
+            : 1.0;
 //         qreal percent = ( m_jobIndex + jobPercent ) / qreal( jobCount );
 
-printf("emitProgress(%d) cumulativeProgress=%f jobPercent=%f percent=%f\n" , m_jobIndex , cumulativeProgress , jobPercent , percent) ;
+printf("JobThread::emitProgress(%d) cumulativeProgress=%f jobPercent=%f gui_percent=%f\n" , m_jobIndex , cumulativeProgress , jobPercent , percent) ;
 
         QMetaObject::invokeMethod( m_queue, "progress", Qt::QueuedConnection,
             Q_ARG( qreal, percent ),

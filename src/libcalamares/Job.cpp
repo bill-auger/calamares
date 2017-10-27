@@ -93,7 +93,7 @@ Job::~Job()
 
 
 qreal
-Job::jobWeight() const
+Job::getJobWeight() const
 {
     return qreal( 1.0 );
 }

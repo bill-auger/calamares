@@ -43,10 +43,10 @@ PacstrapCppJob::PacstrapCppJob(QObject* parent) : Calamares::CppJob(parent) {
 // : PacstrapCppJob(parent , status_msg , max_progress_percent)
 cDebug() << "PacstrapCppJob::PacstrapCppJob()" ;
 
-  this->statusMsg           = tr("Installing root filesystem") ;
-  this->maxProgressPercent  = BASE_PROGRESS_PERCENT ;
-  this->globalStorage       = Calamares::JobQueue::instance()->globalStorage() ;
-  this->guiTimerId          = startTimer(1000) ;
+  this->statusMsg     = tr("Installing root filesystem") ;
+  this->jobWeight     = BASE_PROGRESS_PERCENT ;
+  this->globalStorage = Calamares::JobQueue::instance()->globalStorage() ;
+  this->guiTimerId    = startTimer(1000) ;
 }
 
 PacstrapCppJob::~PacstrapCppJob() {
@@ -55,7 +55,7 @@ cDebug() << "PacstrapCppJob::~PacstrapCppJob()" ;
   killTimer(this->guiTimerId) ;
 }
 
-qreal PacstrapCppJob::jobWeight() const { return qreal(this->maxProgressPercent) ; }
+qreal PacstrapCppJob::getJobWeight() const { return this->jobWeight ; }
 
 QString PacstrapCppJob::prettyName() const { return tr("Pacstrap C++ Job") ; }
 
@@ -83,7 +83,7 @@ Calamares::JobResult PacstrapCppJob::exec()
   if (this->config.empty()      ) return Calamares::JobResult::error("Invalid configuration map.") ;
   if (target_device.isEmpty()   ) return Calamares::JobResult::error("Target device for root filesystem is unspecified.") ;
   if (!QFile(conf_file).exists()) return Calamares::JobResult::error(QString("Pacman configuration not found: '%1'.").arg(conf_file)) ;
-  if (packages.isEmpty()        ) { emit progress(this->maxProgressPercent) ; return Calamares::JobResult::ok() ; }
+  if (packages.isEmpty()        ) { emit progress(this->jobWeight) ; return Calamares::JobResult::ok() ; }
 
 //     QString keyring_cmd = "/bin/sh -c \"pacman -Sy --noconfirm parabola-keyring && \
 //                                         pacman-key --populate parabola          && \

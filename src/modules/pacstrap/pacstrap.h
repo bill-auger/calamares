@@ -40,7 +40,7 @@ public:
     virtual ~PacstrapCppJob() ;
 
     void                 setConfigurationMap(const QVariantMap& config)       override ;
-    qreal                jobWeight          ()                          const override ;
+    qreal                getJobWeight       ()                          const override ;
     QString              prettyName         ()                          const override ;
     QString              prettyStatusMessage()                          const override ;
     Calamares::JobResult exec               ()                                override ;
@@ -75,7 +75,7 @@ private:
 //     int                       guiTimerId = 0 ;
     QString                   statusMsg ;
     QVariantMap               config ;
-    qreal                     maxProgressPercent ;
+    qreal                     jobWeight ;
     qint16                    nPackages  = 0 ;
 } ;
 
