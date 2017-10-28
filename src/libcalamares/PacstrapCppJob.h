@@ -35,8 +35,8 @@ class PacstrapCppJob : public Calamares::CppJob
 
 public:
 
-  explicit PacstrapCppJob(QString  job_name         , QString  status_msg           ,
-                          qreal    job_weight = 1.0 , QObject* parent     = nullptr ) ;
+  explicit PacstrapCppJob(QString job_name         , QString  status_msg           ,
+                          qreal   job_weight = 1.0 , QObject* parent     = nullptr ) ;
   virtual ~PacstrapCppJob() ;
 
   void                 setConfigurationMap(const QVariantMap& config)       override ;
@@ -48,28 +48,47 @@ public:
 
 protected:
 
-  static QString     QListToString (const QVariantList& package_list) ;
-  static qint16      NPackagesInstalled() ;
-  static QStringList ExecWithOutput(QString command_line) ;
+  static Calamares::JobResult JobErrorRetval    (QString error_msg) ;
+  static Calamares::JobResult JobSuccessRetval  () ;
+  static QString              QListToString     (const QVariantList& package_list) ;
+  static qint16               NPackagesInstalled() ;
+  static int                  ExecWithStatus    (QString command_line) ;
+  static QStringList          ExecWithOutput    (QString command_line) ;
 
   virtual void    loadPackageList() = 0 ;
   virtual QString chrootExec     () = 0 ;
 
-  void    setTargetDevice   () ;
-  qint16  setNPackages      (QString packages) ;
-  void    timerEvent        (QTimerEvent* event) override ;
-  void    updateProgress    () ;
+  void    setTargetDevice() ;
+  qint16  setNPackages   (QString packages) ;
+  void    timerEvent     (QTimerEvent* event) override ;
+  void    updateProgress () ;
 
 
-  static const     QString MOUNTPOINT ;
-  static const     QDir    PACKAGES_CACHE_DIR ;
-  static const     QDir    PACKAGES_METADATA_DIR ;
-  static const     char*   BASE_JOB_NAME ;
-  static const     char*   GUI_JOB_NAME ;
-  static const     char*   BASE_STATUS_MSG ;
-  static const     char*   GUI_STATUS_MSG ;
-  static constexpr qreal   BASE_JOB_WEIGHT = 23.0 ; // progress-bar job weight (1.0 normal)
-  static constexpr qreal   GUI_JOB_WEIGHT  = 69.0 ; // progress-bar job weight (1.0 normal)
+  static const QString MOUNTPOINT ;
+  static const QDir    PACKAGES_CACHE_DIR ;
+  static const QDir    PACKAGES_METADATA_DIR ;
+  static const char*   BASE_JOB_NAME ;
+  static const char*   GUI_JOB_NAME ;
+  static const char*   BASE_STATUS_MSG ;
+  static const char*   GUI_STATUS_MSG ;
+  static const qreal   BASE_JOB_WEIGHT ;
+  static const qreal   GUI_JOB_WEIGHT ;
+  static const QString ONLINE_CONF_FILENAME ;
+  static const QString OFFLINE_CONF_FILENAME ;
+  static const QString IS_ONLINE_KEY ;
+  static const QString TARGET_DEVICE_KEY ;
+  static const QString SYSTEM_EXEC_FMT ;
+//   static const QString KEYRING_CMD ;
+//   static const QString KEYRING_CMD ;
+  static const QString MKDIR_FMT ;
+  static const QString MOUNT_FMT ;
+  static const QString CHROOT_PREP_FMT ;
+  static const QString PACKAGES_SYNC_FMT ;
+  static const QString LIST_PACKAGES_FMT ;
+  static const QString UMOUNT_FMT ;
+  static const QString CONFIG_ERROR_MSG ;
+  static const QString TARGET_ERROR_MSG ;
+  static const QString CONFFILE_ERROR_MSG ;
 
   QString                   jobName ;
   QString                   statusMsg ;
