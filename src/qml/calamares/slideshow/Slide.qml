@@ -87,10 +87,20 @@ Item {
     property real contentWidth: width
 
     // Define the slide to be the "content area"
-    x: parent.width * 0.05
-    y: parent.height * 0.2
-    width: parent.width * 0.9
-    height: parent.height * 0.7
+    property real fillMarginX: 0.05
+    property real fillMarginY: 0.2
+    x: parent.width * fillMarginX
+    y: parent.height * fillMarginY
+    width: parent.width - (x * 2.0)
+    height: parent.height - (y * 2.0)
+
+    // Define the slide to completely fill the parent area
+    property real fillMarginX: 0.0
+    property real fillMarginY: 0.0
+//     x: 0
+//     y: 0
+//     width: parent.width
+//     height: parent.height
 
     property real masterWidth: parent.width
     property real masterHeight: parent.height
