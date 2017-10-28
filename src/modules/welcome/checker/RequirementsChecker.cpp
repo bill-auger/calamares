@@ -295,6 +295,19 @@ RequirementsChecker::setConfigurationMap( const QVariantMap& configurationMap )
                     "RequirementsChecker configuration map:\n"
                  << configurationMap;
     }
+
+    if (QDir("/isorepo").exists("isorepo.db.tar.gz"))
+    {
+        m_entriesToCheck.removeAll("internet") ;
+        m_entriesToRequire.removeAll("internet") ;
+    }
+    else
+    {
+        m_entriesToCheck.append("internet") ;
+        m_entriesToRequire.append("internet") ;
+    }
+    m_entriesToCheck.removeDuplicates() ;
+    m_entriesToRequire.removeDuplicates() ;
 }
 
 
