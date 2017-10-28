@@ -34,6 +34,14 @@
 #include <QLabel>
 #include <QTreeView>
 
+
+const int CalamaresWindow::WindowMinW = 1010;
+const int CalamaresWindow::WindowMinH = 520;
+const int CalamaresWindow::SidebarW = 190;
+const int CalamaresWindow::LogoLabelW = 136;
+const int CalamaresWindow::LogoLabelH = 187;
+
+
 CalamaresWindow::CalamaresWindow( QWidget* parent )
     : QWidget( parent )
     , m_debugWindow( nullptr )
@@ -52,6 +60,14 @@ CalamaresWindow::CalamaresWindow( QWidget* parent )
     using CalamaresUtils::windowPreferredWidth;
 
     QSize availableSize = qApp->desktop()->availableGeometry( this ).size();
+/*
+    setMinimumSize( WindowMinW, WindowMinH );
+    int requestedW = SidebarW + (CalamaresUtils::defaultFontHeight() * 50);
+    int requestedH = LogoLabelH + (CalamaresUtils::defaultFontHeight() * 32);
+    QSize availableSize = qApp->desktop()->availableGeometry( this ).size();
+    int w = qBound( WindowMinW, requestedW, availableSize.width() );
+    int h = qBound( WindowMinH, requestedH, availableSize.height() );
+*/
 
     cDebug() << "Available size" << availableSize;
 
@@ -76,11 +92,11 @@ CalamaresWindow::CalamaresWindow( QWidget* parent )
 
     QBoxLayout* sideLayout = new QVBoxLayout;
     sideBox->setLayout( sideLayout );
-    sideBox->setFixedWidth( qBound( 100, CalamaresUtils::defaultFontHeight() * 12, w < windowPreferredWidth ? 100 : 190 ) );
+    //sideBox->setFixedWidth( qBound( 100, CalamaresUtils::defaultFontHeight() * 12, w < windowPreferredWidth ? 100 : 190 ) );
+    sideBox->setFixedWidth( SidebarW );
     sideBox->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
 
     QHBoxLayout* logoLayout = new QHBoxLayout;
-//     sideLayout->addSpacing( 42 );
     sideLayout->addLayout( logoLayout );
     logoLayout->addStretch();
     QLabel* logoLabel = new QLabel( sideBox );
@@ -95,7 +111,7 @@ CalamaresWindow::CalamaresWindow( QWidget* parent )
         logoLabel->setPalette( plt );
     }
     logoLayout->setAlignment( Qt::AlignCenter );
-    logoLabel->setFixedSize( 136, 187 );
+    logoLabel->setFixedSize( LogoLabelW, LogoLabelH );
     logoLabel->setSizePolicy( QSizePolicy::Fixed , QSizePolicy::Fixed );
     logoLabel->setPixmap( Calamares::Branding::instance()->
                           image( Calamares::Branding::ProductLogo,

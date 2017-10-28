@@ -47,6 +47,12 @@ public slots:
     void enlarge( QSize enlarge );
 
 private:
+    static const int WindowMinW ;
+    static const int WindowMinH ;
+    static const int SidebarW ;
+    static const int LogoLabelW ;
+    static const int LogoLabelH ;
+
     QPointer< Calamares::DebugWindow > m_debugWindow;
 };
 
