@@ -37,8 +37,8 @@ const char*   PacstrapCppJob::GUI_STATUS_MSG        = "Installing graphical desk
 
 /* PacstrapCppJob public instance methods */
 
-PacstrapCppJob::PacstrapCppJob(QString   job_name    , QString           status_msg ,
-                               qreal     job_weight  , QObject*          parent     ) :
+PacstrapCppJob::PacstrapCppJob(QString job_name   , QString  status_msg ,
+                               qreal   job_weight , QObject* parent     ) :
                                jobName  (job_name  ) , statusMsg        (status_msg) ,
                                jobWeight(job_weight) , Calamares::CppJob(parent    )
 {
@@ -57,13 +57,13 @@ printf("PacstrapCppJob::~PacstrapCppJob() '%s'\n" , jobName.toStdString().c_str(
   killTimer(this->guiTimerId) ;
 }
 
+void PacstrapCppJob::setConfigurationMap(const QVariantMap& config) { this->localStorage = config ; }
+
 qreal PacstrapCppJob::getJobWeight() const { return this->jobWeight ; }
 
 QString PacstrapCppJob::prettyName() const { return this->jobName ; }
 
 QString PacstrapCppJob::prettyStatusMessage() const { return this->statusMsg ; }
-
-void PacstrapCppJob::setConfigurationMap(const QVariantMap& config) { this->localStorage = config ; }
 
 Calamares::JobResult PacstrapCppJob::exec()
 {
@@ -113,32 +113,7 @@ Calamares::JobResult PacstrapCppJob::exec()
 }
 
 
-/* PacstrapCppJob protected instance methods */
-
-void PacstrapCppJob::timerEvent(QTimerEvent* event)
-{
-  if (event->timerId() == this->guiTimerId) updateProgress() ;
-}
-
-void PacstrapCppJob::updateProgress()
-{
-  if (this->nPackages == 0) return ;
-
-  unsigned int progress_percent = (nPackagesInstalled() * 100) / this->nPackages ;
-//   qreal progress_percent = nPackagesInstalled() / this->nPackages ;
-
-printf("\n[PACSTRAPCPP]: n_packages=%d\n" , (int)nPackagesInstalled()) ;
-printf("[PACSTRAPCPP]: this->nPackages=%d\n" , (int)this->nPackages) ;
-printf("[PACSTRAPCPP]: progress_percent=%d\n" , progress_percent) ;
-
-//   emit progress(0.5) ;
-//   emit progress(progress_percent) ;
-//   progress(qreal(progress_percent)) ;
-  progress(qreal(progress_percent) / 100.0) ;
-}
-
-
-/* PacstrapCppJob private class methods */
+/* PacstrapCppJob protected class methods */
 
 QString PacstrapCppJob::QListToString(const QVariantList& package_list)
 {
@@ -147,6 +122,29 @@ QString PacstrapCppJob::QListToString(const QVariantList& package_list)
 
   return result.join(' ') ;
 }
+
+qint16 PacstrapCppJob::NPackagesInstalled()
+{
+// QProcess::execute(QString("/bin/sh -c \"ls %1 | wc\"").arg(PACKAGES_CACHE_DIR   .absolutePath())) ;
+// QProcess::execute(QString("/bin/sh -c \"ls %1 | wc\"").arg(PACKAGES_METADATA_DIR.absolutePath())) ;
+// int     n1 = PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).count() ;
+// QString s1 = PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).join(",") ;
+// int     n2 = PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).count() ;
+// QString s2 = PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).join(",") ;
+// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_CACHE_DIR=%d\n" , n1) ;
+// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_CACHE_DIR=%s\n" , s1) ;
+// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_METADATA_DIR=%d\n" , n2) ;
+// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_METADATA_DIR=%s\n" , s2) ;
+// printf("[PACSTRAPCPP]: nPackagesInstalled() ret=%d\n" , ((n1 + n2) / 2)) ;
+
+  return (PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).count() +
+          PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).count() ) / 2 ;
+}
+
+// QStringList PacstrapCppJob::ExecWithStatus(QString command_line)
+// {
+//   return QProcess::execute(QString("/bin/sh -c \"%1\"").arg(command_line)) ;
+// }
 
 QStringList PacstrapCppJob::ExecWithOutput(QString command_line)
 {
@@ -162,7 +160,7 @@ QStringList PacstrapCppJob::ExecWithOutput(QString command_line)
 }
 
 
-/* PacstrapCppJob private instance methods */
+/* PacstrapCppJob protected instance methods */
 
 void PacstrapCppJob::setTargetDevice()
 {
@@ -189,24 +187,6 @@ if (mountpoint == "/") printf("[PACSTRAPCPP]: target_device=%s\n" , device.toStd
   this->globalStorage->insert("target-device" , target_device) ;
 }
 
-qint16 PacstrapCppJob::nPackagesInstalled()
-{
-// QProcess::execute(QString("/bin/sh -c \"ls %1 | wc\"").arg(PACKAGES_CACHE_DIR   .absolutePath())) ;
-// QProcess::execute(QString("/bin/sh -c \"ls %1 | wc\"").arg(PACKAGES_METADATA_DIR.absolutePath())) ;
-// int     n1 = PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).count() ;
-// QString s1 = PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).join(",") ;
-// int     n2 = PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).count() ;
-// QString s2 = PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).join(",") ;
-// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_CACHE_DIR=%d\n" , n1) ;
-// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_CACHE_DIR=%s\n" , s1) ;
-// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_METADATA_DIR=%d\n" , n2) ;
-// printf("[PACSTRAPCPP]: nPackagesInstalled() PACKAGES_METADATA_DIR=%s\n" , s2) ;
-// printf("[PACSTRAPCPP]: nPackagesInstalled() ret=%d\n" , ((n1 + n2) / 2)) ;
-
-  return (PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).count() +
-          PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).count() ) / 2 ;
-}
-
 qint16 PacstrapCppJob::setNPackages(QString n_packages_cmd)
 {
   QString new_packages   = ExecWithOutput(n_packages_cmd).first() ;
@@ -214,4 +194,26 @@ qint16 PacstrapCppJob::setNPackages(QString n_packages_cmd)
   this->nPackages        = nPackagesInstalled() + n_new_packages ;
 
   return this->nPackages ;
+}
+
+void PacstrapCppJob::timerEvent(QTimerEvent* event)
+{
+  if (event->timerId() == this->guiTimerId) updateProgress() ;
+}
+
+void PacstrapCppJob::updateProgress()
+{
+  if (this->nPackages == 0) return ;
+
+  unsigned int progress_percent = (nPackagesInstalled() * 100) / this->nPackages ;
+//   qreal progress_percent = nPackagesInstalled() / this->nPackages ;
+
+printf("\n[PACSTRAPCPP]: n_packages=%d\n" , (int)nPackagesInstalled()) ;
+printf("[PACSTRAPCPP]: this->nPackages=%d\n" , (int)this->nPackages) ;
+printf("[PACSTRAPCPP]: progress_percent=%d\n" , progress_percent) ;
+
+//   emit progress(0.5) ;
+//   emit progress(progress_percent) ;
+//   progress(qreal(progress_percent)) ;
+  progress(qreal(progress_percent) / 100.0) ;
 }

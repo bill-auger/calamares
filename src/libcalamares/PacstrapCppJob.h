@@ -49,13 +49,13 @@ public:
 protected:
 
   static QString     QListToString (const QVariantList& package_list) ;
+  static qint16      NPackagesInstalled() ;
   static QStringList ExecWithOutput(QString command_line) ;
 
   virtual void    loadPackageList() = 0 ;
   virtual QString chrootExec     () = 0 ;
 
   void    setTargetDevice   () ;
-  qint16  nPackagesInstalled() ;
   qint16  setNPackages      (QString packages) ;
   void    timerEvent        (QTimerEvent* event) override ;
   void    updateProgress    () ;
