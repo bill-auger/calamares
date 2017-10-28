@@ -45,42 +45,75 @@ public:
   QString              prettyStatusMessage()                          const override ;
   Calamares::JobResult exec               ()                                override ;
 
+  static const QString DESKTOP_PACKAGES_KEY ;
+
 
 protected:
 
   static Calamares::JobResult JobErrorRetval    (QString error_msg) ;
   static Calamares::JobResult JobSuccessRetval  () ;
   static QString              QListToString     (const QVariantList& package_list) ;
-  static qint16               NPackagesInstalled() ;
+  static QString              FindTargetDevice  (const QVariantList& partitions) ;
+  static unsigned int         NPackagesInstalled() ;
+  static QStringList          Exec              (QString command_line) ;
   static int                  ExecWithStatus    (QString command_line) ;
-  static QStringList          ExecWithOutput    (QString command_line) ;
+  static QString              ExecWithOutput    (QString command_line) ;
+  static QString              ExecWithError     (QString command_line) ;
 
-  virtual void    loadPackageList() = 0 ;
-  virtual QString chrootExec     () = 0 ;
+  virtual QString getPackageList() = 0 ;
+  virtual QString chrootExec    () = 0 ;
 
-  void    setTargetDevice() ;
-  qint16  setNPackages   (QString packages) ;
-  void    timerEvent     (QTimerEvent* event) override ;
-  void    updateProgress () ;
-
+  void                 timerEvent    (QTimerEvent* event) override ;
+  void                 updateProgress() ;
+  Calamares::JobResult runJob        () ;
 
   static const QString MOUNTPOINT ;
-  static const QDir    PACKAGES_CACHE_DIR ;
-  static const QDir    PACKAGES_METADATA_DIR ;
   static const char*   BASE_JOB_NAME ;
   static const char*   GUI_JOB_NAME ;
   static const char*   BASE_STATUS_MSG ;
   static const char*   GUI_STATUS_MSG ;
   static const qreal   BASE_JOB_WEIGHT ;
   static const qreal   GUI_JOB_WEIGHT ;
+  static const QString BASE_PACKAGES_KEY ;
+  static const QString BOOTLODER_PACKAGES_KEY ;
+  static const QString KERNEL_PACKAGES_KEY ;
+  static const QString APPLICATIONS_PACKAGES_KEY ;
+  static const QString MULTIMEDIA_PACKAGES_KEY ;
+  static const QString NETWORK_PACKAGES_KEY ;
+  static const QString THEMES_PACKAGES_KEY ;
+  static const QString UTILITIES_PACKAGES_KEY ;
+  static const QString XSERVER_PACKAGES_KEY ;
+  static const QString MATE_PACKAGES_KEY ;
+  static const QString LXDE_PACKAGES_KEY ;
+  static const QString PACSTRAP_FMT ;
+  static const QString PACSTRAP_ERROR_MSG ;
+
+  QString                   jobName ;
+  QString                   statusMsg ;
+  qreal                     jobWeight ;
+  Calamares::GlobalStorage* globalStorage ;
+  unsigned int              guiTimerId ;
+  QString                   targetDevice ;
+  QString                   confFile ;
+  QString                   packages ;
+  unsigned int              nPackages ;
+  QVariantMap               localStorage ;
+
+
+private:
+
+  static const QDir    PACKAGES_CACHE_DIR ;
+  static const QDir    PACKAGES_METADATA_DIR ;
   static const QString ONLINE_CONF_FILENAME ;
   static const QString OFFLINE_CONF_FILENAME ;
   static const QString IS_ONLINE_KEY ;
-  static const QString TARGET_DEVICE_KEY ;
+  static const QString PARTITIONS_KEY ;
+  static const QString DEVICE_KEY ;
+  static const QString FS_KEY ;
+  static const QString MOUNTPOINT_KEY ;
+  static const QString UUID_KEY ;
   static const QString SYSTEM_EXEC_FMT ;
 //   static const QString KEYRING_CMD ;
-//   static const QString KEYRING_CMD ;
-  static const QString MKDIR_FMT ;
   static const QString MOUNT_FMT ;
   static const QString CHROOT_PREP_FMT ;
   static const QString PACKAGES_SYNC_FMT ;
@@ -89,16 +122,11 @@ protected:
   static const QString CONFIG_ERROR_MSG ;
   static const QString TARGET_ERROR_MSG ;
   static const QString CONFFILE_ERROR_MSG ;
-
-  QString                   jobName ;
-  QString                   statusMsg ;
-  qreal                     jobWeight ;
-  Calamares::GlobalStorage* globalStorage ;
-  int                       guiTimerId ;
-  QString                   confFile ;
-  QString                   packages ;
-  qint16                    nPackages ;
-  QVariantMap               localStorage ;
+//   static const QString KEYRING_ERROR_MSG ;
+  static const QString MOUNT_ERROR_MSG ;
+  static const QString CHROOT_PREP_ERROR_MSG ;
+  static const QString PACMAN_SYNC_ERROR_MSG ;
+  static const QString UMOUNT_ERROR_MSG ;
 } ;
 
 

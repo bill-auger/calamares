@@ -22,6 +22,12 @@
 #include "pacstrap-base.h"
 
 
+/* PacstrapBaseJob private class constants */
+
+const QString PacstrapBaseJob::GRUB_THEME_FMT       = "sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub" ;
+const QString PacstrapBaseJob::GRUB_THEME_ERROR_MSG = "The grub theme installation command has failed." ;
+
+
 /* PacstrapBaseJob public instance methods */
 
 PacstrapBaseJob::PacstrapBaseJob(QObject* parent) : PacstrapCppJob(tr(BASE_JOB_NAME)   ,
@@ -30,41 +36,34 @@ PacstrapBaseJob::PacstrapBaseJob(QObject* parent) : PacstrapCppJob(tr(BASE_JOB_N
                                                                    parent              ) {}
 
 
-/* PacstrapBaseJob protected instance methods */
+/* PacstrapBaseJob protected getters/setters */
 
-void PacstrapBaseJob::loadPackageList()
+QString PacstrapBaseJob::getPackageList()
 {
-  this->packages = QListToString(this->localStorage.value("base"      ).toList() +
-                                 this->localStorage.value("bootloader").toList() +
-                                 this->localStorage.value("kernel"    ).toList() ) ;
+  return QListToString(this->localStorage.value(BASE_PACKAGES_KEY     ).toList() +
+                       this->localStorage.value(BOOTLODER_PACKAGES_KEY).toList() +
+                       this->localStorage.value(KERNEL_PACKAGES_KEY   ).toList() ) ;
 }
+
+
+/* PacstrapBaseJob protected instance methods */
 
 QString PacstrapBaseJob::chrootExec()
 {
-  QString pacstrap_cmd   = QString("/bin/sh -c \"pacstrap -C %1 %2 %3\"").arg(this->confFile , MOUNTPOINT , this->packages) ;
-  QString grub_theme_cmd = QString("/bin/sh -c \"sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub\"").arg(MOUNTPOINT) ;
+  QString pacstrap_cmd   = PACSTRAP_FMT  .arg(this->confFile , MOUNTPOINT , packages) ;
+  QString grub_theme_cmd = GRUB_THEME_FMT.arg(MOUNTPOINT) ;
 
-QString grub_theme_kludge_cmd = QString("/bin/sh -c \"echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub\"").arg(MOUNTPOINT) ;
+  if (!!ExecWithStatus(pacstrap_cmd)) return PACSTRAP_ERROR_MSG ;
+
+QString grub_theme_kludge_cmd = QString("echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub").
+                                    arg(MOUNTPOINT) ;
 printf("[PACSTRAP-BASE]: grub_theme_cmd=%s\n" , grub_theme_cmd.toStdString().c_str()) ;
-// QProcess::execute( "/bin/sh -c \"ls /tmp/\"" );
-
-    // boot-strap install root filesystem
-//   this->guiTimerId = startTimer(1000) ; updateProgress() ;
-
-//   #include <QTimer>
-//   QTimer *timer = new QTimer(this);
-//   connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-//   timer->start(1000);
-
-  if (QProcess::execute(pacstrap_cmd)) return "PACSTRAP_FAIL" ;
-//     m_status = tr( "Installing linux-libre kernel" ); emit progress( 5 );
-
 printf("[PACSTRAP-BASE]: grub_theme_cmd IN:\n");  QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
-    QProcess::execute(grub_theme_cmd) ;
-QProcess::execute(grub_theme_kludge_cmd) ;
+
+  if (!!ExecWithStatus(grub_theme_cmd)) return GRUB_THEME_ERROR_MSG ;
+
+if (!!ExecWithStatus(grub_theme_kludge_cmd)) return "grub_theme_kludge_cmd failed" ;
 printf("[PACSTRAP-BASE]: grub_theme_cmd OUT:\n"); QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
-//     emit progress(5) ;
-//     QProcess::execute( kernel_cmd );
 
   return QString("") ;
 }

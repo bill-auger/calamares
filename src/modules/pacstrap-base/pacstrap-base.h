@@ -36,8 +36,14 @@ public:
 
 protected:
 
-  void    loadPackageList() override ;
-  QString chrootExec     () override ;
+  QString getPackageList() override ;
+  QString chrootExec    () override ;
+
+
+private:
+
+  static const QString GRUB_THEME_FMT ;
+  static const QString GRUB_THEME_ERROR_MSG ;
 } ;
 
 

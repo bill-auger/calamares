@@ -22,6 +22,12 @@
 #include "pacstrap-gui.h"
 
 
+/* PacstrapGuiJob private class constants */
+
+const QString PacstrapGuiJob::WALLPAPER_FMT       = "cp /etc/wallpaper.png %1/etc/" ;
+const QString PacstrapGuiJob::WALLPAPER_ERROR_MSG = "The wallpaper installation command has failed." ;
+
+
 /* PacstrapGuiJob public instance methods */
 
 PacstrapGuiJob::PacstrapGuiJob(QObject* parent) : PacstrapCppJob(tr(GUI_JOB_NAME)   ,
@@ -30,36 +36,40 @@ PacstrapGuiJob::PacstrapGuiJob(QObject* parent) : PacstrapCppJob(tr(GUI_JOB_NAME
                                                                  parent             ) {}
 
 
-/* PacstrapGuiJob protected instance methods */
+/* PacstrapGuiJob protected getters/setters */
 
-void PacstrapGuiJob::loadPackageList()
+QString PacstrapGuiJob::getPackageList()
 {
-globalStorage->insert("default-desktop", "mate") ; // TODO: per user option via globalStorage
-printf("[PACSTRAP-GUI]: DesktopCppJob::exec() default_desktop=%s" , globalStorage->value("default-desktop").toString().toStdString().c_str()) ;
+globalStorage->insert(DESKTOP_PACKAGES_KEY , MATE_PACKAGES_KEY) ; // TODO: per user option via globalStorage
+printf("[PACSTRAP-GUI]: DesktopCppJob::getPackageList() default_desktop=%s" , globalStorage->value(DESKTOP_PACKAGES_KEY).toString().toStdString().c_str()) ;
 
-  QString desktop = this->globalStorage->value("default-desktop").toString() ;
-  this->packages  = QListToString(this->localStorage.value("applications").toList() +
-                                  this->localStorage.value("multimedia"  ).toList() +
-                                  this->localStorage.value("network"     ).toList() +
-                                  this->localStorage.value("themes"      ).toList() +
-                                  this->localStorage.value("utilities"   ).toList() +
-                                  this->localStorage.value("xserver"     ).toList() +
-                                  this->localStorage.value(desktop       ).toList() ) ;
+  QString desktop = this->globalStorage->value(DESKTOP_PACKAGES_KEY).toString() ;
+
+  return QListToString(this->localStorage.value(APPLICATIONS_PACKAGES_KEY).toList() +
+                       this->localStorage.value(MULTIMEDIA_PACKAGES_KEY  ).toList() +
+                       this->localStorage.value(NETWORK_PACKAGES_KEY     ).toList() +
+                       this->localStorage.value(THEMES_PACKAGES_KEY      ).toList() +
+                       this->localStorage.value(UTILITIES_PACKAGES_KEY   ).toList() +
+                       this->localStorage.value(XSERVER_PACKAGES_KEY     ).toList() +
+                       this->localStorage.value(desktop                  ).toList() ) ;
 }
+
+
+/* PacstrapGuiJob protected instance methods */
 
 QString PacstrapGuiJob::chrootExec()
 {
-  QString pacstrap_cmd  = QString("/bin/sh -c \"pacstrap -c -C %1 %2 %3\"").arg(this->confFile , MOUNTPOINT , packages) ;
-  QString wallpaper_cmd = QString("/bin/sh -c \"cp /etc/wallpaper.png %1/etc/\"").arg(MOUNTPOINT) ;
+  QString pacstrap_cmd  = PACSTRAP_FMT .arg(this->confFile , MOUNTPOINT , packages) ;
+  QString wallpaper_cmd = WALLPAPER_FMT.arg(MOUNTPOINT) ;
 
-  if (QProcess::execute(pacstrap_cmd)) return "PACSTRAP_FAIL" ;
+  if (!!ExecWithStatus(pacstrap_cmd)) return PACSTRAP_ERROR_MSG ;
 
 printf("[PACSTRAP-GUI]: ls /etc/skel") ;                QProcess::execute(QString("/bin/sh -c \"ls -al /etc/skel/\""         )               ) ;
 printf("[PACSTRAP-GUI]: ls chroot/etc/skel/") ;         QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/skel/\""       ).arg(MOUNTPOINT)) ;
 printf("[PACSTRAP-GUI]: ls chroot/etc/wallpaper.png") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(MOUNTPOINT)) ;
 printf("[PACSTRAP-GUI]: ls chroot/etc/sudoers*") ;      QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/sudoers*\""    ).arg(MOUNTPOINT)) ;
 
-  QProcess::execute(wallpaper_cmd) ;
+  if (!!ExecWithStatus(wallpaper_cmd)) return WALLPAPER_ERROR_MSG ;
 
 printf("[PACSTRAP-GUI]: ls chroot/etc/wallpaper.png") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(MOUNTPOINT)) ;
 
