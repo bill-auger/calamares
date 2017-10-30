@@ -166,4 +166,15 @@ GlobalStoragePythonWrapper::value( const std::string& key ) const
 
 } // namespace CalamaresPython
 
+
+const QString GS::HAS_ISOREPO_KEY = "has-isorepo";
+const QString GS::IS_ONLINE_KEY = "hasInternet";
+const QString GS::DESKTOP_PACKAGES_KEY = "default-desktop" ;
+const QString GS::PARTITIONS_KEY = "partitions";
+const QString GS::DEVICE_KEY = "device";
+const QString GS::FS_KEY = "fs";
+const QString GS::MOUNTPOINT_KEY = "mountPoint";
+const QString GS::UUID_KEY = "uuid";
+
+
 #endif // WITH_PYTHON

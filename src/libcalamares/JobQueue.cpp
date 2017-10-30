@@ -54,15 +54,11 @@ public:
         for( auto job : m_jobs )
         {
             totalJobsWeight += job->getJobWeight();
-
-printf("JobThread::setJobs() += job->getJobWeight()=%f = totalJobsWeight=%f\n" , job->getJobWeight() , totalJobsWeight) ;
         }
         for( auto job : m_jobs )
         {
             qreal jobWeight = qreal( job->getJobWeight() / totalJobsWeight );
             m_jobWeights.append( jobWeight ) ;
-
-printf("JobThread::setJobs(%d) << jobWeight=%f\n" , m_jobWeights.count() , jobWeight) ;
         }
     }
 
@@ -108,16 +104,18 @@ private:
         for( auto jobWeight : m_jobWeights.mid( 0, m_jobIndex ) )
         {
             cumulativeProgress += jobWeight;
-
-printf("JobThread::emitProgress(%d) += jobWeight=%f => cumulativeProgress=%f\n" , m_jobIndex , jobWeight , cumulativeProgress) ;
         }
         qreal percent = m_jobIndex < jobCount
-            ? cumulativeProgress + (m_jobWeights.at(m_jobIndex) * jobPercent)
+            ? cumulativeProgress + ( ( m_jobWeights.at( m_jobIndex ) ) * jobPercent )
             : 1.0;
-//         qreal percent = ( m_jobIndex + jobPercent ) / qreal( jobCount );
 
-printf("JobThread::emitProgress(%d) cumulativeProgress=%f jobPercent=%f gui_percent=%f\n" , m_jobIndex , cumulativeProgress , jobPercent , percent) ;
-
+        if (m_jobIndex < jobCount)
+        {
+            cLog() << "Progress for Job[" << m_jobIndex << "]: " << ( jobPercent * 100 ) << "% completed";
+            cLog() << "Progress Overall: " << ( cumulativeProgress * 100 ) << "% (accumulated) + "
+                   << ( ( ( m_jobWeights.at( m_jobIndex ) ) * jobPercent ) * 100 ) << "% (this job) = "
+                   << ( percent * 100 ) << "% (total)";
+        }
         QMetaObject::invokeMethod( m_queue, "progress", Qt::QueuedConnection,
             Q_ARG( qreal, percent ),
             Q_ARG( QString, message )

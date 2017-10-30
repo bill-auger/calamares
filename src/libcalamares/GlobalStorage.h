@@ -100,4 +100,19 @@ private:
 } // namespace CalamaresPython
 #endif
 
+
+class GS
+{
+public:
+  static const QString HAS_ISOREPO_KEY;
+  static const QString IS_ONLINE_KEY;
+  static const QString DESKTOP_PACKAGES_KEY;
+  static const QString PARTITIONS_KEY;
+  static const QString DEVICE_KEY;
+  static const QString FS_KEY;
+  static const QString MOUNTPOINT_KEY;
+  static const QString UUID_KEY;
+} ;
+
+
 #endif // CALAMARES_GLOBALSTORAGE_H

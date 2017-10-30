@@ -50,30 +50,42 @@ public:
 
 protected:
 
-  static Calamares::JobResult JobErrorRetval    (QString error_msg) ;
-  static Calamares::JobResult JobSuccessRetval  () ;
-  static QString              QListToString     (const QVariantList& package_list) ;
-  static QString              FindTargetDevice  (const QVariantList& partitions) ;
-  static unsigned int         NPackagesInstalled() ;
-  static QStringList          Exec              (QString command_line) ;
-  static int                  ExecWithStatus    (QString command_line) ;
-  static QString              ExecWithOutput    (QString command_line) ;
-  static QString              ExecWithError     (QString command_line) ;
+  QStringList execWithProgress(QString command_line , qreal task_proportion = 0.0) ;
+  int         execStatus      (QString command_line , qreal task_proportion = 0.0) ;
+  QString     execOutput      (QString command_line , qreal task_proportion = 0.0) ;
+  QString     execError       (QString command_line , qreal task_proportion = 0.0) ;
 
   virtual QString getPackageList() = 0 ;
   virtual QString chrootExec    () = 0 ;
 
-  void                 timerEvent    (QTimerEvent* event) override ;
-  void                 updateProgress() ;
-  Calamares::JobResult runJob        () ;
+  QString                   jobName ;
+  QString                   statusMsg ;
+  qreal                     jobWeight ;
+  Calamares::GlobalStorage* globalStorage ;
+  QVariantMap               localStorage ;
+  QString                   targetDevice ;
+  QString                   confFile ;
+  QString                   packages ;
+  qint16                    nPreviousPackages ;
+  qint16                    nPendingPackages ;
+  qreal                     progressPercent ;
 
-  static const QString MOUNTPOINT ;
-  static const char*   BASE_JOB_NAME ;
-  static const char*   GUI_JOB_NAME ;
-  static const char*   BASE_STATUS_MSG ;
-  static const char*   GUI_STATUS_MSG ;
-  static const qreal   BASE_JOB_WEIGHT ;
-  static const qreal   GUI_JOB_WEIGHT ;
+
+private:
+
+  static        QString              FindTargetDevice  (const QVariantList& partitions) ;
+  static        qint16               NPackagesInstalled() ;
+  static inline Calamares::JobResult JobError          (QString error_msg) ;
+  static inline Calamares::JobResult JobSuccess        () ;
+
+  qreal emitProgress     (qreal transient_percent) ;
+  qreal getTaskCompletion() ;
+
+
+  /* constants */
+
+public:
+
   static const QString BASE_PACKAGES_KEY ;
   static const QString BOOTLODER_PACKAGES_KEY ;
   static const QString KERNEL_PACKAGES_KEY ;
@@ -85,33 +97,31 @@ protected:
   static const QString XSERVER_PACKAGES_KEY ;
   static const QString MATE_PACKAGES_KEY ;
   static const QString LXDE_PACKAGES_KEY ;
+
+
+protected:
+
+  static const QString MOUNTPOINT ;
+  static const char*   BASE_JOB_NAME ;
+  static const char*   GUI_JOB_NAME ;
+  static const char*   BASE_STATUS_MSG ;
+  static const char*   GUI_STATUS_MSG ;
+  static const qreal   BASE_JOB_WEIGHT ;
+  static const qreal   GUI_JOB_WEIGHT ;
+  static const qreal   PACMAN_SYNC_PROPORTION ;
+  static const qreal   LIST_PACKAGES_PROPORTION ;
+  static const qreal   CHROOT_TASK_PROPORTION ;
   static const QString PACSTRAP_FMT ;
   static const QString PACSTRAP_ERROR_MSG ;
-
-  QString                   jobName ;
-  QString                   statusMsg ;
-  qreal                     jobWeight ;
-  Calamares::GlobalStorage* globalStorage ;
-  unsigned int              guiTimerId ;
-  QString                   targetDevice ;
-  QString                   confFile ;
-  QString                   packages ;
-  unsigned int              nPackages ;
-  QVariantMap               localStorage ;
 
 
 private:
 
   static const QDir    PACKAGES_CACHE_DIR ;
   static const QDir    PACKAGES_METADATA_DIR ;
+  static const QString DEFAULT_CONF_FILENAME ;
   static const QString ONLINE_CONF_FILENAME ;
   static const QString OFFLINE_CONF_FILENAME ;
-  static const QString IS_ONLINE_KEY ;
-  static const QString PARTITIONS_KEY ;
-  static const QString DEVICE_KEY ;
-  static const QString FS_KEY ;
-  static const QString MOUNTPOINT_KEY ;
-  static const QString UUID_KEY ;
   static const QString SYSTEM_EXEC_FMT ;
 //   static const QString KEYRING_CMD ;
   static const QString MOUNT_FMT ;
@@ -128,6 +138,38 @@ private:
   static const QString PACMAN_SYNC_ERROR_MSG ;
   static const QString UMOUNT_ERROR_MSG ;
 } ;
+
+
+/* debug */
+
+
+#define DEBUG_TRACE_EXECWITHPROGRESS                     \
+  cDebug(LOGVERBOSE) << "[PACSTRAP]: status=" , status ; \
+  cDebug(LOGVERBOSE) << "[PACSTRAP]: stdout=" , stdout ; \
+  cDebug(LOGVERBOSE) << "[PACSTRAP]: stderr=" , stderr   ;
+
+#define DEBUG_TRACE_FINDTARGETDEVICE if (!target_device.isEmpty())    \
+  cDebug() << "[PACSTRAP]: mounting target_device: " << target_device ;
+
+#define DEBUG_TRACE_EMITPROGRESS cDebug() << "[PACSTRAP]: " << \
+  "this->progressPercent=" << this->progressPercent         << \
+  " transient_percent="    << transient_percent             << \
+  " emmitting="            << progress_percent               ;
+
+#define DEBUG_TRACE_GETTASKCOMPLETION cDebug() << "[PACSTRAP]: " << \
+  "this->nPreviousPackages=" << this->nPreviousPackages          << \
+  " NPackagesInstalled()="   << NPackagesInstalled()             << \
+  "\nn_new_packages="        << (int)n_new_packages              << \
+  " this->nPendingPackages=" << this->nPendingPackages           << \
+  " completion_percent="     << completion_percent                ;
+
+#ifndef QT_NO_DEBUG
+#  define DEBUG_TRACE_DESKTOPPACKAGES                                                     \
+  printf("[PACSTRAP-GUI]: installing default_desktop: %s\n"                             , \
+         globalStorage->value(GS::DESKTOP_PACKAGES_KEY).toString().toStdString().c_str()) ;
+#else // QT_NO_DEBUG
+#  define DEBUG_TRACE_DESKTOPPACKAGES ;
+#endif // QT_NO_DEBUG
 
 
 #endif // PACSTRAPCPPJOB_H

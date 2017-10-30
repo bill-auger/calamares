@@ -296,7 +296,10 @@ RequirementsChecker::setConfigurationMap( const QVariantMap& configurationMap )
                  << configurationMap;
     }
 
-    if (QDir("/isorepo").exists("isorepo.db.tar.gz"))
+    Calamares::GlobalStorage* globalStorage = Calamares::JobQueue::instance()->globalStorage();
+    bool has_isorepo = QDir("/isorepo").exists("isorepo.db.tar.gz");
+    globalStorage->insert( GS::HAS_ISOREPO_KEY, has_isorepo );
+    if ( has_isorepo )
     {
         m_entriesToCheck.removeAll("internet") ;
         m_entriesToRequire.removeAll("internet") ;

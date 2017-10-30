@@ -22,22 +22,212 @@
 
 #include "JobQueue.h"
 #include <PacstrapCppJob.h>
+#include "utils/Logger.h"
+
+
+/* PacstrapCppJob public constructors/destructors */
+
+PacstrapCppJob::PacstrapCppJob(QString job_name   , QString  status_msg ,
+                               qreal   job_weight , QObject* parent     ) :
+                               jobName  (job_name  ) , statusMsg        (status_msg) ,
+                               jobWeight(job_weight) , Calamares::CppJob(parent    )
+{
+  this->globalStorage     = Calamares::JobQueue::instance()->globalStorage() ;
+  this->localStorage      = QVariantMap() ; // deferred to setConfigurationMap()
+  this->targetDevice      = QString("") ;   // deferred to exec()
+  this->confFile          = QString("") ;   // deferred to exec()
+  this->packages          = QString("") ;   // deferred to exec()
+  this->nPreviousPackages = 0 ;             // deferred to exec()
+  this->nPendingPackages  = 0 ;             // deferred to exec()
+  this->progressPercent   = 0 ;
+}
+
+PacstrapCppJob::~PacstrapCppJob() {}
+
+
+/* PacstrapCppJob public getters/setters */
+
+void PacstrapCppJob::setConfigurationMap(const QVariantMap& config) { this->localStorage = config ; }
+
+qreal PacstrapCppJob::getJobWeight()                          const { return this->jobWeight ; }
+
+QString PacstrapCppJob::prettyName()                          const { return this->jobName ; }
+
+QString PacstrapCppJob::prettyStatusMessage()                 const { return this->statusMsg ; }
+
+
+/* PacstrapCppJob public instance methods */
+
+Calamares::JobResult PacstrapCppJob::exec()
+{
+  QVariantList partitions   = this->globalStorage->value(GS::PARTITIONS_KEY ).toList() ;
+  bool         has_isorepo  = this->globalStorage->value(GS::HAS_ISOREPO_KEY).toBool() ;
+  bool         has_internet = this->globalStorage->value(GS::IS_ONLINE_KEY  ).toBool() ;
+  this->targetDevice        = FindTargetDevice(partitions) ;
+  this->confFile            = (!has_isorepo) ? DEFAULT_CONF_FILENAME :
+                              (has_internet) ? ONLINE_CONF_FILENAME  : OFFLINE_CONF_FILENAME ;
+  this->packages            = getPackageList() ;
+
+  if (this->localStorage.empty()     ) return JobError(CONFIG_ERROR_MSG) ;
+  if (this->targetDevice.isEmpty()   ) return JobError(TARGET_ERROR_MSG) ;
+  if (!QFile(this->confFile).exists()) return JobError(CONFFILE_ERROR_MSG.arg(this->confFile)) ;
+
+//   QString keyring_cmd       = KEYRING_CMD ;
+  QString mount_cmd         = MOUNT_FMT        .arg(this->targetDevice , MOUNTPOINT) ;
+  QString chroot_prep_cmd   = CHROOT_PREP_FMT  .arg(PACKAGES_CACHE_DIR   .absolutePath() ,
+                                                    PACKAGES_METADATA_DIR.absolutePath() ) ;
+  QString pacman_sync_cmd   = PACKAGES_SYNC_FMT.arg(this->confFile , MOUNTPOINT) ;
+  QString list_packages_cmd = LIST_PACKAGES_FMT.arg(this->confFile , MOUNTPOINT , this->packages) ;
+  QString umount_cmd        = UMOUNT_FMT       .arg(this->targetDevice) ;
+
+//   if (!!execStatus(keyring_cmd    )) return JobError(KEYRING_ERROR_MSG) ;
+  if (!!execStatus(mount_cmd                               )) return JobError(MOUNT_ERROR_MSG      ) ;
+  if (!!execStatus(chroot_prep_cmd                         )) return JobError(CHROOT_PREP_ERROR_MSG) ;
+  if (!!execStatus(pacman_sync_cmd , PACMAN_SYNC_PROPORTION)) return JobError(PACMAN_SYNC_ERROR_MSG) ;
+
+  if (!this->packages.isEmpty())
+  {
+    QString new_packages    = execOutput(list_packages_cmd , LIST_PACKAGES_PROPORTION) ;
+    this->nPreviousPackages = NPackagesInstalled() ;
+//     this->nPendingPackages  = (has_isorepo) ? new_packages.count(QChar::LineFeed)     :
+//                                               new_packages.count(QChar::LineFeed) * 2 ;
+    this->nPendingPackages  = new_packages.count(QChar::LineFeed) ;
+
+    if (this->nPendingPackages > 0)
+    {
+      QString exec_error_msg = chrootExec() ;
+
+      if (exec_error_msg.isEmpty()) this->nPendingPackages = 0 ;
+      else                          return JobError(exec_error_msg) ;
+    }
+  }
+
+  if (!execStatus(umount_cmd)) this->progressPercent = emitProgress(1.0) ;
+  else                         return JobError(UMOUNT_ERROR_MSG) ;
+
+  return JobSuccess() ;
+}
+
+
+/* PacstrapCppJob protected instance methods */
+
+QStringList PacstrapCppJob::execWithProgress(QString command_line , qreal task_proportion)
+{
+  QProcess proc ;
+  int      status ;
+  QString  stdout = QString("") ;
+  QString  stderr = QString("") ;
+
+  cDebug() << "[PACSTRAP]: executing shell command: " << command_line ;
+  cDebug() << "=================== [SHELL OUTPUT BEGIN] ===================" ;
+  proc.start(QString(SYSTEM_EXEC_FMT).arg(command_line)) ; proc.waitForStarted(-1) ;
+  while (proc.waitForFinished(250) || proc.state() != QProcess::NotRunning)
+  {
+    QString stdout_flush ; stdout += (stdout_flush = proc.readAllStandardOutput()) ;
+    QString stderr_flush ; stderr += (stderr_flush = proc.readAllStandardOutput()) ; ;
+
+    if (!stdout_flush.isEmpty()) printf("%s" , stdout_flush.toStdString().c_str()) ;
+    if (!stderr_flush.isEmpty()) printf("%s" , stderr_flush.toStdString().c_str()) ;
+
+    emitProgress(task_proportion * getTaskCompletion()) ;
+  }
+
+  this->progressPercent = emitProgress(task_proportion) ;
+  cDebug() << "==================== [SHELL OUTPUT END] ====================" ;
+
+  status = (proc.exitStatus() == QProcess::NormalExit) ? proc.exitCode() : 255 ;
+
+DEBUG_TRACE_EXECWITHPROGRESS
+
+  return (QStringList() << QString(status) << stdout << stderr) ;
+}
+
+int PacstrapCppJob::execStatus(QString command_line , qreal task_proportion)
+{
+  return execWithProgress(command_line , task_proportion).at(0).toInt() ;
+}
+
+QString PacstrapCppJob::execOutput(QString command_line , qreal task_proportion)
+{
+  return execWithProgress(command_line , task_proportion).at(1) ;
+}
+
+QString PacstrapCppJob::execError(QString command_line , qreal task_proportion)
+{
+  return execWithProgress(command_line , task_proportion).at(2) ;
+}
+
+
+/* PacstrapCppJob private class methods */
+
+QString PacstrapCppJob::FindTargetDevice(const QVariantList& partitions)
+{
+  QString target_device = QString("") ;
+
+  // locate target device for root filesystem
+  foreach (const QVariant& partition , partitions)
+  {
+    QVariantMap partition_map = partition.toMap() ;
+    QString     device        = partition_map.value(GS::DEVICE_KEY    ).toString() ;
+    QString     fs            = partition_map.value(GS::FS_KEY        ).toString() ;
+    QString     mountpoint    = partition_map.value(GS::MOUNTPOINT_KEY).toString() ;
+    QString     uuid          = partition_map.value(GS::UUID_KEY      ).toString() ;
+
+    if (mountpoint == "/") target_device = device ;
+  }
+
+DEBUG_TRACE_FINDTARGETDEVICE
+
+  return target_device ;
+}
+
+qint16 PacstrapCppJob::NPackagesInstalled()
+{
+  int n_packages_downloaded = PACKAGES_CACHE_DIR   .entryList(QDir::Files).count() - 2 ;
+  int n_packages_installed  = PACKAGES_METADATA_DIR.entryList(QDir::Dirs ).count() - 2 ;
+
+  return (n_packages_downloaded + n_packages_installed) / 2 ;
+}
+
+Calamares::JobResult PacstrapCppJob::JobError(QString error_msg)
+{
+  return Calamares::JobResult::error(error_msg) ;
+}
+
+Calamares::JobResult PacstrapCppJob::JobSuccess()
+{
+  return Calamares::JobResult::ok() ;
+}
+
+
+/* PacstrapCppJob private instance methods */
+
+qreal PacstrapCppJob::emitProgress(qreal transient_percent)
+{
+  qreal progress_percent = qBound(0.0 , this->progressPercent + transient_percent , 1.0) ;
+
+DEBUG_TRACE_EMITPROGRESS
+
+  emit progress(progress_percent) ;
+
+  return progress_percent ;
+}
+
+qreal PacstrapCppJob::getTaskCompletion()
+{
+  if (this->nPendingPackages == 0) return 0.0 ;
+
+  qreal n_new_packages     = qreal(NPackagesInstalled() - this->nPreviousPackages) ;
+  qreal completion_percent = qreal(n_new_packages       / this->nPendingPackages ) ;
+
+DEBUG_TRACE_GETTASKCOMPLETION
+
+  return completion_percent ;
+}
 
 
 /* PacstrapCppJob public class constants */
 
-const QString PacstrapCppJob::DESKTOP_PACKAGES_KEY = "default-desktop" ;
-
-
-/* PacstrapCppJob protected class constants */
-
-const QString PacstrapCppJob::MOUNTPOINT                = "/tmp/pacstrap" ;
-const char*   PacstrapCppJob::BASE_JOB_NAME             = "Pacstrap Base C++ Job" ;
-const char*   PacstrapCppJob::GUI_JOB_NAME              = "Pacstrap Desktop C++ Job" ;
-const char*   PacstrapCppJob::BASE_STATUS_MSG           = "Installing root filesystem" ;
-const char*   PacstrapCppJob::GUI_STATUS_MSG            = "Installing graphical desktop environment" ;
-const qreal   PacstrapCppJob::BASE_JOB_WEIGHT           = 23.0 ; // progress-bar job weight (1.0 normal)
-const qreal   PacstrapCppJob::GUI_JOB_WEIGHT            = 69.0 ; // progress-bar job weight (1.0 normal)
 const QString PacstrapCppJob::BASE_PACKAGES_KEY         = "base" ;
 const QString PacstrapCppJob::BOOTLODER_PACKAGES_KEY    = "bootloader" ;
 const QString PacstrapCppJob::KERNEL_PACKAGES_KEY       = "kernel" ;
@@ -49,22 +239,31 @@ const QString PacstrapCppJob::UTILITIES_PACKAGES_KEY    = "utilities" ;
 const QString PacstrapCppJob::XSERVER_PACKAGES_KEY      = "x-server" ;
 const QString PacstrapCppJob::MATE_PACKAGES_KEY         = "mate" ;
 const QString PacstrapCppJob::LXDE_PACKAGES_KEY         = "lxde" ;
-const QString PacstrapCppJob::PACSTRAP_FMT              = "pacstrap -c -C %1 %2 %3" ;
-const QString PacstrapCppJob::PACSTRAP_ERROR_MSG        = "Failed to install packages in chroot." ;
+
+
+/* PacstrapCppJob protected class constants */
+
+const QString PacstrapCppJob::MOUNTPOINT               = "/tmp/pacstrap" ;
+const char*   PacstrapCppJob::BASE_JOB_NAME            = "Pacstrap Base C++ Job" ;
+const char*   PacstrapCppJob::GUI_JOB_NAME             = "Pacstrap Desktop C++ Job" ;
+const char*   PacstrapCppJob::BASE_STATUS_MSG          = "Installing root filesystem" ;
+const char*   PacstrapCppJob::GUI_STATUS_MSG           = "Installing graphical desktop environment" ;
+const qreal   PacstrapCppJob::BASE_JOB_WEIGHT          = 20.0 ; // progress-bar job weight (1.0 normal)
+const qreal   PacstrapCppJob::GUI_JOB_WEIGHT           = 57.0 ; // progress-bar job weight (1.0 normal)
+const qreal   PacstrapCppJob::PACMAN_SYNC_PROPORTION   = 0.05 ; // per task progress-bar proportion
+const qreal   PacstrapCppJob::LIST_PACKAGES_PROPORTION = 0.05 ; // per task progress-bar proportion
+const qreal   PacstrapCppJob::CHROOT_TASK_PROPORTION   = 0.9 ;  // per task progress-bar proportion
+const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap -C %1 %2 %3" ;
+const QString PacstrapCppJob::PACSTRAP_ERROR_MSG       = "Failed to install packages in chroot." ;
 
 
 /* PacstrapCppJob private class constants */
 
 const QDir    PacstrapCppJob::PACKAGES_CACHE_DIR    = QDir(MOUNTPOINT + "/var/cache/pacman/pkg") ;
 const QDir    PacstrapCppJob::PACKAGES_METADATA_DIR = QDir(MOUNTPOINT + "/var/lib/pacman/local") ;
+const QString PacstrapCppJob::DEFAULT_CONF_FILENAME = "/etc/pacman.conf" ;
 const QString PacstrapCppJob::ONLINE_CONF_FILENAME  = "/etc/pacman-online.conf" ;
 const QString PacstrapCppJob::OFFLINE_CONF_FILENAME = "/etc/pacman-offline.conf" ;
-const QString PacstrapCppJob::IS_ONLINE_KEY         = "hasInternet" ;
-const QString PacstrapCppJob::PARTITIONS_KEY        = "partitions" ;
-const QString PacstrapCppJob::DEVICE_KEY            = "device" ;
-const QString PacstrapCppJob::FS_KEY                = "fs" ;
-const QString PacstrapCppJob::MOUNTPOINT_KEY        = "mountPoint" ;
-const QString PacstrapCppJob::UUID_KEY              = "uuid" ;
 const QString PacstrapCppJob::SYSTEM_EXEC_FMT       = "/bin/sh -c \"%1\"" ;
 // const QString PacstrapCppJob::KEYRING_CMD           = "pacman -Sy --noconfirm parabola-keyring" ;
 // const QString PacstrapCppJob::KEYRING_CMD           = "pacman -Sy --noconfirm parabola-keyring && \
@@ -83,205 +282,3 @@ const QString PacstrapCppJob::MOUNT_ERROR_MSG       = "Failed to mount the pacst
 const QString PacstrapCppJob::CHROOT_PREP_ERROR_MSG = "Failed to prepare the pacstrap chroot." ;
 const QString PacstrapCppJob::PACMAN_SYNC_ERROR_MSG = "Failed to syncronize packages in the pacstrap chroot." ;
 const QString PacstrapCppJob::UMOUNT_ERROR_MSG      = "Failed to unmount the pacstrap chroot." ;
-
-
-/* PacstrapCppJob public constructors/destructors */
-
-PacstrapCppJob::PacstrapCppJob(QString job_name   , QString  status_msg ,
-                               qreal   job_weight , QObject* parent     ) :
-                               jobName  (job_name  ) , statusMsg        (status_msg) ,
-                               jobWeight(job_weight) , Calamares::CppJob(parent    )
-{
-printf("PacstrapCppJob::PacstrapCppJob() '%s'\n" , jobName.toStdString().c_str()) ;
-
-  this->globalStorage = Calamares::JobQueue::instance()->globalStorage() ;
-  this->guiTimerId    = startTimer(1000) ;
-//   this->guiTimerId    = -1 ;          // deferred to exec()
-  this->targetDevice  = QString("") ; // deferred to exec()->runJob()
-  this->confFile      = QString("") ; // deferred to exec()->runJob()
-  this->packages      = QString("") ; // deferred to exec()->runJob()
-  this->nPackages     = 0 ;           // deferred to exec()->runJob()
-}
-
-PacstrapCppJob::~PacstrapCppJob() { killTimer(this->guiTimerId) ; }
-// PacstrapCppJob::~PacstrapCppJob() {}
-
-
-/* PacstrapCppJob public getters/setters */
-
-void PacstrapCppJob::setConfigurationMap(const QVariantMap& config) { this->localStorage = config ; }
-
-qreal PacstrapCppJob::getJobWeight()                          const { return this->jobWeight ; }
-
-QString PacstrapCppJob::prettyName()                          const { return this->jobName ; }
-
-QString PacstrapCppJob::prettyStatusMessage()                 const { return this->statusMsg ; }
-
-
-/* PacstrapCppJob public instance methods */
-
-Calamares::JobResult PacstrapCppJob::exec()
-{
-// #include <QTimer>
-// QTimer* guiTimer = new QTimer() ;
-// connect(guiTimer , SIGNAL(timeout()) , this , SLOT(updateProgress())) ;
-// guiTimer->start((std::chrono::milliseconds)1000) ;
-
-//   this->guiTimerId            = startTimer(1000) ;
-  Calamares::JobResult retval = runJob() ;
-
-//   killTimer(this->guiTimerId) ;
-//   guiTimer->stop() ;
-
-  return retval ;
-}
-
-
-/* PacstrapCppJob protected class methods */
-
-Calamares::JobResult PacstrapCppJob::JobErrorRetval(QString error_msg)
-{
-  return Calamares::JobResult::error(error_msg) ;
-}
-
-Calamares::JobResult PacstrapCppJob::JobSuccessRetval()
-{
-  return Calamares::JobResult::ok() ;
-}
-
-QString PacstrapCppJob::QListToString(const QVariantList& package_list)
-{
-  QStringList result ;
-  for (const QVariant& package : package_list) result.append(package.toString()) ;
-
-  return result.join(' ') ;
-}
-
-QString PacstrapCppJob::FindTargetDevice(const QVariantList& partitions)
-{
-  QString target_device = QString("") ;
-
-  // locate target device for root filesystem
-  foreach (const QVariant& partition , partitions)
-  {
-QStringList result; for ( auto it = partition.toMap().constBegin(); it != partition.toMap().constEnd(); ++it ) result.append( it.key() + '=' + it.value().toString() );
-printf("[PACSTRAPCPP]: partition=[%s]\n" , result.join(',').toStdString().c_str()) ;
-
-    QVariantMap partition_map = partition.toMap() ;
-    QString     device        = partition_map.value(DEVICE_KEY    ).toString() ;
-    QString     fs            = partition_map.value(FS_KEY        ).toString() ;
-    QString     mountpoint    = partition_map.value(MOUNTPOINT_KEY).toString() ;
-    QString     uuid          = partition_map.value(UUID_KEY      ).toString() ;
-
-    if (mountpoint == "/") target_device = device ;
-
-if (mountpoint == "/") printf("[PACSTRAPCPP]: target_device=%s\n" , device.toStdString().c_str()) ;
-  }
-
-  return target_device ;
-}
-
-unsigned int PacstrapCppJob::NPackagesInstalled()
-{
-  return (PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).count() +
-          PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).count() ) / 2 ;
-}
-
-QStringList PacstrapCppJob::Exec(QString command_line)
-{
-  QProcess proc ;
-
-  proc.start(QString(SYSTEM_EXEC_FMT).arg(command_line)) ; proc.waitForFinished(-1) ;
-
-  int     status = proc.exitStatus() ;
-  QString stdout = proc.readAllStandardOutput() ;
-  QString stderr = proc.readAllStandardError() ;
-
-// printf("[PACSTRAPCPP_DEBUG]: PacstrapCppJob::ExecWithOutput() status=%d\n" , status) ;
-// printf("[PACSTRAPCPP_DEBUG]: PacstrapCppJob::ExecWithOutput() stdout=%s\n" , stdout) ;
-// printf("[PACSTRAPCPP_DEBUG]: PacstrapCppJob::ExecWithOutput() stderr=%s\n" , stderr) ;
-
-  return (QStringList() << QString(status) << stdout << stderr) ;
-}
-
-int PacstrapCppJob::ExecWithStatus(QString command_line)
-{
-printf("PacstrapCppJob::ExecWithStatus() command_line=%s\n" , command_line.toStdString().c_str()) ;
-
-  return QProcess::execute(QString(SYSTEM_EXEC_FMT).arg(command_line)) ;
-}
-
-QString PacstrapCppJob::ExecWithOutput(QString command_line)
-{
-  return Exec(command_line).at(1) ;
-}
-
-QString PacstrapCppJob::ExecWithError(QString command_line)
-{
-  return Exec(command_line).at(2) ;
-}
-
-
-/* PacstrapCppJob protected instance methods */
-
-void PacstrapCppJob::timerEvent(QTimerEvent* event)
-{
-  if (event->timerId() == this->guiTimerId) updateProgress() ;
-}
-
-void PacstrapCppJob::updateProgress()
-{
-  if (this->nPackages == 0) return ;
-
-  qreal progress_percent = qreal(NPackagesInstalled()) / this->nPackages ;
-
-printf("\n[PACSTRAPCPP]: n_packages=%d this->nPackages=%d progress_percent=%f\n" , NPackagesInstalled() , this->nPackages , (float)progress_percent) ;
-
-  emit progress(progress_percent) ;
-}
-
-Calamares::JobResult PacstrapCppJob::runJob()
-{
-  QVariantList partitions   = this->globalStorage->value(PARTITIONS_KEY).toList() ;
-  bool         has_internet = this->globalStorage->value(IS_ONLINE_KEY ).toBool() ;
-  this->targetDevice        = FindTargetDevice(partitions) ;
-  this->confFile            = (has_internet) ? ONLINE_CONF_FILENAME : OFFLINE_CONF_FILENAME ;
-  this->packages            = getPackageList() ;
-
-  if (this->localStorage.empty()     ) return JobErrorRetval(CONFIG_ERROR_MSG) ;
-  if (this->targetDevice.isEmpty()   ) return JobErrorRetval(TARGET_ERROR_MSG) ;
-  if (!QFile(this->confFile).exists()) return JobErrorRetval(CONFFILE_ERROR_MSG.arg(this->confFile)) ;
-
-//   QString keyring_cmd       = KEYRING_CMD ;
-  QString mount_cmd         = MOUNT_FMT        .arg(this->targetDevice , MOUNTPOINT) ;
-  QString chroot_prep_cmd   = CHROOT_PREP_FMT  .arg(PACKAGES_CACHE_DIR   .absolutePath() ,
-                                                    PACKAGES_METADATA_DIR.absolutePath() ) ;
-  QString pacman_sync_cmd   = PACKAGES_SYNC_FMT.arg(this->confFile , MOUNTPOINT) ;
-  QString list_packages_cmd = LIST_PACKAGES_FMT.arg(this->confFile , MOUNTPOINT , this->packages) ;
-  QString umount_cmd        = UMOUNT_FMT       .arg(this->targetDevice) ;
-
-//   if (!!ExecWithStatus(keyring_cmd    )) return JobErrorRetval(KEYRING_ERROR_MSG) ;
-// "mkdir %2 2> /dev/null" "mount %1 %2"
-  if (!!ExecWithStatus(mount_cmd      )) return JobErrorRetval(MOUNT_ERROR_MSG      ) ;
-  if (!!ExecWithStatus(chroot_prep_cmd)) return JobErrorRetval(CHROOT_PREP_ERROR_MSG) ;
-  if (!!ExecWithStatus(pacman_sync_cmd)) return JobErrorRetval(PACMAN_SYNC_ERROR_MSG) ;
-
-  if (!this->packages.isEmpty())
-  {
-    QString new_packages = ExecWithOutput(list_packages_cmd) ;
-    this->nPackages      = NPackagesInstalled() + new_packages.count(QChar::LineFeed) ;
-
-    if (this->nPackages > 0)
-    {
-// return Calamares::JobResult::error("just cause") ;
-
-      QString exec_error_msg = chrootExec() ;
-      if (!exec_error_msg.isEmpty()) return JobErrorRetval(exec_error_msg) ;
-    }
-  }
-  else emit progress(this->jobWeight) ;
-
-  if (!!ExecWithStatus(umount_cmd)) return JobErrorRetval(UMOUNT_ERROR_MSG) ;
-
-  return JobSuccessRetval() ;
-}
