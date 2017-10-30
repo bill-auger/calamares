@@ -41,15 +41,10 @@ Presentation
   {
     Image
     {
-      id:               'background1'
-      source:           'Wallpaper_Parabola_Landscape_846x544.png'
-//       x:                -42
-//       y:                -109
-//       width:            8460
-//       height:           5404
-      fillMode:         Image.Stretch
-// n      anchors.centerIn: parent
-          anchors.fill: parent
+      id:           'background1'
+      source:       'Wallpaper_Parabola_Landscape_846x544.png'
+      fillMode:     Image.Stretch
+      anchors.fill: parent
     }
   }
 }
