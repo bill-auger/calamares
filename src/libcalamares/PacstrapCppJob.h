@@ -140,13 +140,21 @@ private:
 } ;
 
 
-/* debug */
+/* DEBUG */
 
+#define DEBUG_TRACE_EXEC cDebug() << "[PACSTRAP]: exec()" \
+  << " job_name="     << this->jobName                    \
+  << " has_isorepo="  << has_isorepo                      \
+  << " is_online="    << is_online                        \
+  << " targetDevice=" << this->targetDevice               \
+  << " confFile="     << this->confFile                   \
+  << " n_packages="   << this->packages.count()           ;
 
-#define DEBUG_TRACE_EXECWITHPROGRESS                     \
-  cDebug(LOGVERBOSE) << "[PACSTRAP]: status=" , status ; \
-  cDebug(LOGVERBOSE) << "[PACSTRAP]: stdout=" , stdout ; \
-  cDebug(LOGVERBOSE) << "[PACSTRAP]: stderr=" , stderr   ;
+#define DEBUG_TRACE_EXECWITHPROGRESS                                          \
+  cDebug()           << "[PACSTRAP]: shell command exited=" << command_line ; \
+  cDebug()           << "[PACSTRAP]: status="               << status ;       \
+  cDebug(LOGVERBOSE) << "[PACSTRAP]: stdout="               << stdout ;       \
+  cDebug(LOGVERBOSE) << "[PACSTRAP]: stderr="               << stderr         ;
 
 #define DEBUG_TRACE_FINDTARGETDEVICE if (!target_device.isEmpty())    \
   cDebug() << "[PACSTRAP]: mounting target_device: " << target_device ;
@@ -159,7 +167,8 @@ private:
 #define DEBUG_TRACE_GETTASKCOMPLETION cDebug() << "[PACSTRAP]: " << \
   "this->nPreviousPackages=" << this->nPreviousPackages          << \
   " NPackagesInstalled()="   << NPackagesInstalled()             << \
-  "\nn_new_packages="        << (int)n_new_packages              << \
+  "\n                          "                                 << \
+  "n_new_packages="          << (int)n_new_packages              << \
   " this->nPendingPackages=" << this->nPendingPackages           << \
   " completion_percent="     << completion_percent                ;
 

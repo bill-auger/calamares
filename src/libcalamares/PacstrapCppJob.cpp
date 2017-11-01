@@ -25,6 +25,64 @@
 #include "utils/Logger.h"
 
 
+/* PacstrapCppJob public class constants */
+
+const QString PacstrapCppJob::BASE_PACKAGES_KEY         = "base" ;
+const QString PacstrapCppJob::BOOTLODER_PACKAGES_KEY    = "bootloader" ;
+const QString PacstrapCppJob::KERNEL_PACKAGES_KEY       = "kernel" ;
+const QString PacstrapCppJob::APPLICATIONS_PACKAGES_KEY = "applications" ;
+const QString PacstrapCppJob::MULTIMEDIA_PACKAGES_KEY   = "multimedia" ;
+const QString PacstrapCppJob::NETWORK_PACKAGES_KEY      = "network" ;
+const QString PacstrapCppJob::THEMES_PACKAGES_KEY       = "themes" ;
+const QString PacstrapCppJob::UTILITIES_PACKAGES_KEY    = "utilities" ;
+const QString PacstrapCppJob::XSERVER_PACKAGES_KEY      = "x-server" ;
+const QString PacstrapCppJob::MATE_PACKAGES_KEY         = "mate" ;
+const QString PacstrapCppJob::LXDE_PACKAGES_KEY         = "lxde" ;
+
+
+/* PacstrapCppJob protected class constants */
+
+const QString PacstrapCppJob::MOUNTPOINT               = "/tmp/pacstrap" ;
+const char*   PacstrapCppJob::BASE_JOB_NAME            = "Pacstrap Base C++ Job" ;
+const char*   PacstrapCppJob::GUI_JOB_NAME             = "Pacstrap Desktop C++ Job" ;
+const char*   PacstrapCppJob::BASE_STATUS_MSG          = "Installing root filesystem" ;
+const char*   PacstrapCppJob::GUI_STATUS_MSG           = "Installing graphical desktop environment" ;
+const qreal   PacstrapCppJob::BASE_JOB_WEIGHT          = 20.0 ; // progress-bar job weight (1.0 normal)
+const qreal   PacstrapCppJob::GUI_JOB_WEIGHT           = 57.0 ; // progress-bar job weight (1.0 normal)
+const qreal   PacstrapCppJob::PACMAN_SYNC_PROPORTION   = 0.05 ; // per task progress-bar proportion
+const qreal   PacstrapCppJob::LIST_PACKAGES_PROPORTION = 0.05 ; // per task progress-bar proportion
+const qreal   PacstrapCppJob::CHROOT_TASK_PROPORTION   = 0.9 ;  // per task progress-bar proportion
+const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap -C %1 %2 %3" ;
+const QString PacstrapCppJob::PACSTRAP_ERROR_MSG       = "Failed to install packages in chroot." ;
+
+
+/* PacstrapCppJob private class constants */
+
+const QDir    PacstrapCppJob::PACKAGES_CACHE_DIR    = QDir(MOUNTPOINT + "/var/cache/pacman/pkg") ;
+const QDir    PacstrapCppJob::PACKAGES_METADATA_DIR = QDir(MOUNTPOINT + "/var/lib/pacman/local") ;
+const QString PacstrapCppJob::DEFAULT_CONF_FILENAME = "/etc/pacman.conf" ;
+const QString PacstrapCppJob::ONLINE_CONF_FILENAME  = "/etc/pacman-online.conf" ;
+const QString PacstrapCppJob::OFFLINE_CONF_FILENAME = "/etc/pacman-offline.conf" ;
+const QString PacstrapCppJob::SYSTEM_EXEC_FMT       = "/bin/sh -c \"%1\"" ;
+// const QString PacstrapCppJob::KEYRING_CMD           = "pacman -Sy --noconfirm parabola-keyring" ;
+// const QString PacstrapCppJob::KEYRING_CMD           = "pacman -Sy --noconfirm parabola-keyring && \
+//                                                        pacman-key --populate parabola          && \
+//                                                        pacman-key --refresh-keys                  " ;
+const QString PacstrapCppJob::MOUNT_FMT             = "mkdir %2 2> /dev/null || true && mount %1 %2" ;
+const QString PacstrapCppJob::CHROOT_PREP_FMT       = "mkdir -m 0755 -p {%1,%2}" ;
+const QString PacstrapCppJob::PACKAGES_SYNC_FMT     = "pacman --print --config %1 --root %2 -Sy" ;
+const QString PacstrapCppJob::LIST_PACKAGES_FMT     = "pacman --print --config %1 --root %2 -S %3" ;
+const QString PacstrapCppJob::UMOUNT_FMT            = "umount %1" ;
+const QString PacstrapCppJob::CONFIG_ERROR_MSG      = "Invalid configuration map." ;
+const QString PacstrapCppJob::TARGET_ERROR_MSG      = "Target device for root filesystem is unspecified." ;
+const QString PacstrapCppJob::CONFFILE_ERROR_MSG    = "Pacman configuration not found: '%1'." ;
+// const QString PacstrapCppJob::KEYRING_ERROR_MSG     = "Failed to update the pacman keyring." ;
+const QString PacstrapCppJob::MOUNT_ERROR_MSG       = "Failed to mount the pacstrap chroot." ;
+const QString PacstrapCppJob::CHROOT_PREP_ERROR_MSG = "Failed to prepare the pacstrap chroot." ;
+const QString PacstrapCppJob::PACMAN_SYNC_ERROR_MSG = "Failed to syncronize packages in the pacstrap chroot." ;
+const QString PacstrapCppJob::UMOUNT_ERROR_MSG      = "Failed to unmount the pacstrap chroot." ;
+
+
 /* PacstrapCppJob public constructors/destructors */
 
 PacstrapCppJob::PacstrapCppJob(QString job_name   , QString  status_msg ,
@@ -60,13 +118,15 @@ QString PacstrapCppJob::prettyStatusMessage()                 const { return thi
 
 Calamares::JobResult PacstrapCppJob::exec()
 {
-  QVariantList partitions   = this->globalStorage->value(GS::PARTITIONS_KEY ).toList() ;
-  bool         has_isorepo  = this->globalStorage->value(GS::HAS_ISOREPO_KEY).toBool() ;
-  bool         has_internet = this->globalStorage->value(GS::IS_ONLINE_KEY  ).toBool() ;
-  this->targetDevice        = FindTargetDevice(partitions) ;
-  this->confFile            = (!has_isorepo) ? DEFAULT_CONF_FILENAME :
-                              (has_internet) ? ONLINE_CONF_FILENAME  : OFFLINE_CONF_FILENAME ;
-  this->packages            = getPackageList() ;
+  QVariantList partitions  = this->globalStorage->value(GS::PARTITIONS_KEY ).toList() ;
+  bool         has_isorepo = this->globalStorage->value(GS::HAS_ISOREPO_KEY).toBool() ;
+  bool         is_online   = this->globalStorage->value(GS::IS_ONLINE_KEY  ).toBool() ;
+  this->targetDevice       = FindTargetDevice(partitions) ;
+  this->confFile           = (!has_isorepo) ? DEFAULT_CONF_FILENAME :
+                             (is_online   ) ? ONLINE_CONF_FILENAME  : OFFLINE_CONF_FILENAME ;
+  this->packages           = getPackageList() ;
+
+DEBUG_TRACE_EXEC
 
   if (this->localStorage.empty()     ) return JobError(CONFIG_ERROR_MSG) ;
   if (this->targetDevice.isEmpty()   ) return JobError(TARGET_ERROR_MSG) ;
@@ -89,8 +149,6 @@ Calamares::JobResult PacstrapCppJob::exec()
   {
     QString new_packages    = execOutput(list_packages_cmd , LIST_PACKAGES_PROPORTION) ;
     this->nPreviousPackages = NPackagesInstalled() ;
-//     this->nPendingPackages  = (has_isorepo) ? new_packages.count(QChar::LineFeed)     :
-//                                               new_packages.count(QChar::LineFeed) * 2 ;
     this->nPendingPackages  = new_packages.count(QChar::LineFeed) ;
 
     if (this->nPendingPackages > 0)
@@ -183,10 +241,10 @@ DEBUG_TRACE_FINDTARGETDEVICE
 
 qint16 PacstrapCppJob::NPackagesInstalled()
 {
-  int n_packages_downloaded = PACKAGES_CACHE_DIR   .entryList(QDir::Files).count() - 2 ;
-  int n_packages_installed  = PACKAGES_METADATA_DIR.entryList(QDir::Dirs ).count() - 2 ;
+  int n_downloaded = PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).count() ;
+  int n_installed  = PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).count() ;
 
-  return (n_packages_downloaded + n_packages_installed) / 2 ;
+  return (n_downloaded + n_installed) / 2 ;
 }
 
 Calamares::JobResult PacstrapCppJob::JobError(QString error_msg)
@@ -224,61 +282,3 @@ DEBUG_TRACE_GETTASKCOMPLETION
 
   return completion_percent ;
 }
-
-
-/* PacstrapCppJob public class constants */
-
-const QString PacstrapCppJob::BASE_PACKAGES_KEY         = "base" ;
-const QString PacstrapCppJob::BOOTLODER_PACKAGES_KEY    = "bootloader" ;
-const QString PacstrapCppJob::KERNEL_PACKAGES_KEY       = "kernel" ;
-const QString PacstrapCppJob::APPLICATIONS_PACKAGES_KEY = "applications" ;
-const QString PacstrapCppJob::MULTIMEDIA_PACKAGES_KEY   = "multimedia" ;
-const QString PacstrapCppJob::NETWORK_PACKAGES_KEY      = "network" ;
-const QString PacstrapCppJob::THEMES_PACKAGES_KEY       = "themes" ;
-const QString PacstrapCppJob::UTILITIES_PACKAGES_KEY    = "utilities" ;
-const QString PacstrapCppJob::XSERVER_PACKAGES_KEY      = "x-server" ;
-const QString PacstrapCppJob::MATE_PACKAGES_KEY         = "mate" ;
-const QString PacstrapCppJob::LXDE_PACKAGES_KEY         = "lxde" ;
-
-
-/* PacstrapCppJob protected class constants */
-
-const QString PacstrapCppJob::MOUNTPOINT               = "/tmp/pacstrap" ;
-const char*   PacstrapCppJob::BASE_JOB_NAME            = "Pacstrap Base C++ Job" ;
-const char*   PacstrapCppJob::GUI_JOB_NAME             = "Pacstrap Desktop C++ Job" ;
-const char*   PacstrapCppJob::BASE_STATUS_MSG          = "Installing root filesystem" ;
-const char*   PacstrapCppJob::GUI_STATUS_MSG           = "Installing graphical desktop environment" ;
-const qreal   PacstrapCppJob::BASE_JOB_WEIGHT          = 20.0 ; // progress-bar job weight (1.0 normal)
-const qreal   PacstrapCppJob::GUI_JOB_WEIGHT           = 57.0 ; // progress-bar job weight (1.0 normal)
-const qreal   PacstrapCppJob::PACMAN_SYNC_PROPORTION   = 0.05 ; // per task progress-bar proportion
-const qreal   PacstrapCppJob::LIST_PACKAGES_PROPORTION = 0.05 ; // per task progress-bar proportion
-const qreal   PacstrapCppJob::CHROOT_TASK_PROPORTION   = 0.9 ;  // per task progress-bar proportion
-const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap -C %1 %2 %3" ;
-const QString PacstrapCppJob::PACSTRAP_ERROR_MSG       = "Failed to install packages in chroot." ;
-
-
-/* PacstrapCppJob private class constants */
-
-const QDir    PacstrapCppJob::PACKAGES_CACHE_DIR    = QDir(MOUNTPOINT + "/var/cache/pacman/pkg") ;
-const QDir    PacstrapCppJob::PACKAGES_METADATA_DIR = QDir(MOUNTPOINT + "/var/lib/pacman/local") ;
-const QString PacstrapCppJob::DEFAULT_CONF_FILENAME = "/etc/pacman.conf" ;
-const QString PacstrapCppJob::ONLINE_CONF_FILENAME  = "/etc/pacman-online.conf" ;
-const QString PacstrapCppJob::OFFLINE_CONF_FILENAME = "/etc/pacman-offline.conf" ;
-const QString PacstrapCppJob::SYSTEM_EXEC_FMT       = "/bin/sh -c \"%1\"" ;
-// const QString PacstrapCppJob::KEYRING_CMD           = "pacman -Sy --noconfirm parabola-keyring" ;
-// const QString PacstrapCppJob::KEYRING_CMD           = "pacman -Sy --noconfirm parabola-keyring && \
-//                                                        pacman-key --populate parabola          && \
-//                                                        pacman-key --refresh-keys                  " ;
-const QString PacstrapCppJob::MOUNT_FMT             = "mkdir %2 2> /dev/null || true && mount %1 %2" ;
-const QString PacstrapCppJob::CHROOT_PREP_FMT       = "mkdir -m 0755 -p {%1,%2}" ;
-const QString PacstrapCppJob::PACKAGES_SYNC_FMT     = "pacman --print --config %1 --root %2 -Sy" ;
-const QString PacstrapCppJob::LIST_PACKAGES_FMT     = "pacman --print --config %1 --root %2 -S %3" ;
-const QString PacstrapCppJob::UMOUNT_FMT            = "umount %1" ;
-const QString PacstrapCppJob::CONFIG_ERROR_MSG      = "Invalid configuration map." ;
-const QString PacstrapCppJob::TARGET_ERROR_MSG      = "Target device for root filesystem is unspecified." ;
-const QString PacstrapCppJob::CONFFILE_ERROR_MSG    = "Pacman configuration not found: '%1'." ;
-// const QString PacstrapCppJob::KEYRING_ERROR_MSG     = "Failed to update the pacman keyring." ;
-const QString PacstrapCppJob::MOUNT_ERROR_MSG       = "Failed to mount the pacstrap chroot." ;
-const QString PacstrapCppJob::CHROOT_PREP_ERROR_MSG = "Failed to prepare the pacstrap chroot." ;
-const QString PacstrapCppJob::PACMAN_SYNC_ERROR_MSG = "Failed to syncronize packages in the pacstrap chroot." ;
-const QString PacstrapCppJob::UMOUNT_ERROR_MSG      = "Failed to unmount the pacstrap chroot." ;

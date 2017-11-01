@@ -111,10 +111,10 @@ private:
 
         if (m_jobIndex < jobCount)
         {
-            cLog() << "Progress for Job[" << m_jobIndex << "]: " << ( jobPercent * 100 ) << "% completed";
-            cLog() << "Progress Overall: " << ( cumulativeProgress * 100 ) << "% (accumulated) + "
-                   << ( ( ( m_jobWeights.at( m_jobIndex ) ) * jobPercent ) * 100 ) << "% (this job) = "
-                   << ( percent * 100 ) << "% (total)";
+            cDebug(LOGINFO) << "[JOBQUEUE]: Progress for Job[" << m_jobIndex << "]: " << ( jobPercent * 100 ) << "% completed";
+            cDebug(LOGINFO) << "[JOBQUEUE]: Progress Overall: " << ( cumulativeProgress * 100 ) << "% (accumulated) + "
+                            << ( ( ( m_jobWeights.at( m_jobIndex ) ) * jobPercent ) * 100 ) << "% (this job) = "
+                            << ( percent * 100 ) << "% (total)";
         }
         QMetaObject::invokeMethod( m_queue, "progress", Qt::QueuedConnection,
             Q_ARG( qreal, percent ),

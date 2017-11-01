@@ -82,25 +82,23 @@ CreateUserJob::exec()
         else
             sudoersFilename += QStringLiteral( "10-parabola-installer" );
 */
-    QMap<QString, QVariant> brandingMap = gs->value( "branding" ).toMap();
-    QString distroName = brandingMap.value( "shortProductName" ).toString();
-    distroName = distroName.toLower().replace( QRegExp( "[^a-z0-9]" ), "-" );
-    QString sudoersFilename = QString( "etc/sudoers.d/10-%1-installer" ).arg( distroName );
-    QFileInfo sudoersFi( destDir.absoluteFilePath( sudoersFilename ) );
+        QMap<QString, QVariant> brandingMap = gs->value( "branding" ).toMap();
+        QString distroName = brandingMap.value( "shortProductName" ).toString();
+        distroName = distroName.toLower().replace( QRegExp( "[^a-z0-9]" ), "-" );
+        QString sudoersFilename = QString( "etc/sudoers.d/10-%1-installer" ).arg( distroName );
+        QFileInfo sudoersFi( destDir.absoluteFilePath( sudoersFilename ) );
 
-    cDebug() << QString("[CREATEUSER]: preparing sudoers") ;
+        cDebug() << QString("[CREATEUSER]: preparing sudoers") ;
 
-cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() distroName=%1").arg(distroName);
-cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() sudoersFilename=%1").arg(sudoersFilename);
-cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() sudoersFi=%1").arg(sudoersFi.filePath());
-cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() isAbsolute=%2").arg(sudoersFi.isAbsolute());
-cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() isWritable=%3").arg(sudoersFi.isWritable());
 QString etcdir = gs->value( "rootMountPoint" ).toString() + "/etc" ;
-cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -l %1").arg(etcdir) ;
-  QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( etcdir ) );
-cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -l %1").arg(sudoersFi.filePath()) ;
-  QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( sudoersFi.filePath() ) );
-
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() distroName=%1"     ).arg(distroName);
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() sudoersFilename=%1").arg(sudoersFilename);
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() sudoersFi=%1"      ).arg(sudoersFi.filePath());
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() isAbsolute=%1"     ).arg(sudoersFi.isAbsolute());
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() exists=%1"         ).arg(sudoersFi.absoluteDir().exists());
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() isWritable=%1"     ).arg(sudoersFi.isWritable());
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -l %1").arg(etcdir) ;               QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( etcdir ) ) ;
+cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -l %1").arg(sudoersFi.filePath()) ; QProcess::execute( QString( "/bin/sh -c \"ls -l %1\"" ).arg( sudoersFi.filePath() ) ) ;
 
         if ( !sudoersFi.absoluteDir().exists() )
             return Calamares::JobResult::error( tr( "Sudoers dir is not writable." ) );
@@ -228,7 +226,7 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - targ
   /* parabola-specific configuration */
 
 //    Calamares::GlobalStorage* globalStorage = Calamares::JobQueue::instance()->globalStorage();
-  QString default_desktop = gs->value("default-desktop").toString();
+  QString default_desktop = gs->value(GS::DESKTOP_PACKAGES_KEY).toString();
 /*
     if [ -x /usr/bin/setxkbmap ]; then
         echo "setxkbmap $(cat /.codecheck | grep XKBMAP= | cut -d '=' -f 2)" >> /home/${user#*=}/.bashrc
