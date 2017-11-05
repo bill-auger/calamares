@@ -111,6 +111,7 @@ protected:
   static const qreal   PACMAN_SYNC_PROPORTION ;
   static const qreal   LIST_PACKAGES_PROPORTION ;
   static const qreal   CHROOT_TASK_PROPORTION ;
+  static const QString PACSTRAP_CLEANUP_CMD ;
   static const QString PACSTRAP_FMT ;
   static const QString PACSTRAP_ERROR_MSG ;
 
@@ -126,7 +127,7 @@ private:
 //   static const QString KEYRING_CMD ;
   static const QString MOUNT_FMT ;
   static const QString CHROOT_PREP_FMT ;
-  static const QString PACKAGES_SYNC_FMT ;
+  static const QString DB_REFRESH_FMT ;
   static const QString LIST_PACKAGES_FMT ;
   static const QString UMOUNT_FMT ;
   static const QString CONFIG_ERROR_MSG ;
@@ -159,18 +160,18 @@ private:
 #define DEBUG_TRACE_FINDTARGETDEVICE if (!target_device.isEmpty())    \
   cDebug() << "[PACSTRAP]: mounting target_device: " << target_device ;
 
-#define DEBUG_TRACE_EMITPROGRESS cDebug() << "[PACSTRAP]: " << \
-  "this->progressPercent=" << this->progressPercent         << \
-  " transient_percent="    << transient_percent             << \
-  " emmitting="            << progress_percent               ;
+#define DEBUG_TRACE_EMITPROGRESS cDebug(LOGVERBOSE) << "[PACSTRAP]: " << \
+  "this->progressPercent=" << this->progressPercent                   << \
+  " transient_percent="    << transient_percent                       << \
+  " emmitting="            << progress_percent                           ;
 
-#define DEBUG_TRACE_GETTASKCOMPLETION cDebug() << "[PACSTRAP]: " << \
-  "this->nPreviousPackages=" << this->nPreviousPackages          << \
-  " NPackagesInstalled()="   << NPackagesInstalled()             << \
-  "\n                          "                                 << \
-  "n_new_packages="          << (int)n_new_packages              << \
-  " this->nPendingPackages=" << this->nPendingPackages           << \
-  " completion_percent="     << completion_percent                ;
+#define DEBUG_TRACE_GETTASKCOMPLETION cDebug(LOGVERBOSE) << "[PACSTRAP]: " << \
+  "this->nPreviousPackages=" << this->nPreviousPackages                    << \
+  " NPackagesInstalled()="   << NPackagesInstalled()                       << \
+  "\n                          "                                           << \
+  "n_new_packages="          << (int)n_new_packages                        << \
+  " this->nPendingPackages=" << this->nPendingPackages                     << \
+  " completion_percent="     << completion_percent                            ;
 
 #ifndef QT_NO_DEBUG
 #  define DEBUG_TRACE_DESKTOPPACKAGES                                                     \

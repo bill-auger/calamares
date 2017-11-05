@@ -52,7 +52,8 @@ const qreal   PacstrapCppJob::GUI_JOB_WEIGHT           = 57.0 ; // progress-bar 
 const qreal   PacstrapCppJob::PACMAN_SYNC_PROPORTION   = 0.05 ; // per task progress-bar proportion
 const qreal   PacstrapCppJob::LIST_PACKAGES_PROPORTION = 0.05 ; // per task progress-bar proportion
 const qreal   PacstrapCppJob::CHROOT_TASK_PROPORTION   = 0.9 ;  // per task progress-bar proportion
-const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap -C %1 %2 %3" ;
+const QString PacstrapCppJob::PACSTRAP_CLEANUP_CMD     = QString("umount %1/dev/pts %1/dev/shm %1/dev %1/proc %1/run %1/sys %1/tmp %1").arg(MOUNTPOINT) ;
+const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap -C %1 %2 %3 --noprogressbar" ;
 const QString PacstrapCppJob::PACSTRAP_ERROR_MSG       = "Failed to install packages in chroot." ;
 
 
@@ -66,12 +67,13 @@ const QString PacstrapCppJob::OFFLINE_CONF_FILENAME = "/etc/pacman-offline.conf"
 const QString PacstrapCppJob::SYSTEM_EXEC_FMT       = "/bin/sh -c \"%1\"" ;
 // const QString PacstrapCppJob::KEYRING_CMD           = "pacman -Sy --noconfirm parabola-keyring" ;
 // const QString PacstrapCppJob::KEYRING_CMD           = "pacman -Sy --noconfirm parabola-keyring && \
+//                                                        pacman-key --init                       && \
 //                                                        pacman-key --populate parabola          && \
-//                                                        pacman-key --refresh-keys                  " ;
+//                                                        pacman-key --refresh-keys                " ;
 const QString PacstrapCppJob::MOUNT_FMT             = "mkdir %2 2> /dev/null || true && mount %1 %2" ;
 const QString PacstrapCppJob::CHROOT_PREP_FMT       = "mkdir -m 0755 -p {%1,%2}" ;
-const QString PacstrapCppJob::PACKAGES_SYNC_FMT     = "pacman --print --config %1 --root %2 -Sy" ;
-const QString PacstrapCppJob::LIST_PACKAGES_FMT     = "pacman --print --config %1 --root %2 -S %3" ;
+const QString PacstrapCppJob::DB_REFRESH_FMT        = "pacman -S --print --config %1 --root %2 --refresh" ;
+const QString PacstrapCppJob::LIST_PACKAGES_FMT     = "pacman -S --print --config %1 --root %2 %3" ;
 const QString PacstrapCppJob::UMOUNT_FMT            = "umount %1" ;
 const QString PacstrapCppJob::CONFIG_ERROR_MSG      = "Invalid configuration map." ;
 const QString PacstrapCppJob::TARGET_ERROR_MSG      = "Target device for root filesystem is unspecified." ;
@@ -118,6 +120,9 @@ QString PacstrapCppJob::prettyStatusMessage()                 const { return thi
 
 Calamares::JobResult PacstrapCppJob::exec()
 {
+  // cleanup from possibly aborted previous runs
+  QProcess::execute(SYSTEM_EXEC_FMT.arg(PACSTRAP_CLEANUP_CMD)) ;
+
   QVariantList partitions  = this->globalStorage->value(GS::PARTITIONS_KEY ).toList() ;
   bool         has_isorepo = this->globalStorage->value(GS::HAS_ISOREPO_KEY).toBool() ;
   bool         is_online   = this->globalStorage->value(GS::IS_ONLINE_KEY  ).toBool() ;
@@ -136,7 +141,7 @@ DEBUG_TRACE_EXEC
   QString mount_cmd         = MOUNT_FMT        .arg(this->targetDevice , MOUNTPOINT) ;
   QString chroot_prep_cmd   = CHROOT_PREP_FMT  .arg(PACKAGES_CACHE_DIR   .absolutePath() ,
                                                     PACKAGES_METADATA_DIR.absolutePath() ) ;
-  QString pacman_sync_cmd   = PACKAGES_SYNC_FMT.arg(this->confFile , MOUNTPOINT) ;
+  QString pacman_sync_cmd   = DB_REFRESH_FMT   .arg(this->confFile , MOUNTPOINT) ;
   QString list_packages_cmd = LIST_PACKAGES_FMT.arg(this->confFile , MOUNTPOINT , this->packages) ;
   QString umount_cmd        = UMOUNT_FMT       .arg(this->targetDevice) ;
 
@@ -182,7 +187,7 @@ QStringList PacstrapCppJob::execWithProgress(QString command_line , qreal task_p
   while (proc.waitForFinished(250) || proc.state() != QProcess::NotRunning)
   {
     QString stdout_flush ; stdout += (stdout_flush = proc.readAllStandardOutput()) ;
-    QString stderr_flush ; stderr += (stderr_flush = proc.readAllStandardOutput()) ; ;
+    QString stderr_flush ; stderr += (stderr_flush = proc.readAllStandardError()) ; ;
 
     if (!stdout_flush.isEmpty()) printf("%s" , stdout_flush.toStdString().c_str()) ;
     if (!stderr_flush.isEmpty()) printf("%s" , stderr_flush.toStdString().c_str()) ;
