@@ -83,6 +83,9 @@ const QString PacstrapCppJob::MOUNT_ERROR_MSG       = "Failed to mount the pacst
 const QString PacstrapCppJob::CHROOT_PREP_ERROR_MSG = "Failed to prepare the pacstrap chroot." ;
 const QString PacstrapCppJob::PACMAN_SYNC_ERROR_MSG = "Failed to syncronize packages in the pacstrap chroot." ;
 const QString PacstrapCppJob::UMOUNT_ERROR_MSG      = "Failed to unmount the pacstrap chroot." ;
+const QString PacstrapCppJob::STATUS_KEY            = QString("status") ;
+const QString PacstrapCppJob::STDOUT_KEY            = QString("stdout") ;
+const QString PacstrapCppJob::STDERR_KEY            = QString("stderr") ;
 
 
 /* PacstrapCppJob public constructors/destructors */
@@ -174,15 +177,16 @@ DEBUG_TRACE_EXEC
 
 /* PacstrapCppJob protected instance methods */
 
-QStringList PacstrapCppJob::execWithProgress(QString command_line , qreal task_proportion)
+QVariantMap PacstrapCppJob::execWithProgress(QString command_line , qreal task_proportion)
 {
-  QProcess proc ;
-  int      status ;
-  QString  stdout = QString("") ;
-  QString  stderr = QString("") ;
+  QProcess    proc ;
+  int         status ;
+  QString     stdout = QString("") ;
+  QString     stderr = QString("") ;
+  QVariantMap retval ;
 
-  cDebug() << "[PACSTRAP]: executing shell command: " << command_line ;
-  cDebug() << "=================== [SHELL OUTPUT BEGIN] ===================" ;
+  cLog() << "[PACSTRAP]: executing shell command: " << command_line ;
+  cLog() << "=================== [SHELL OUTPUT BEGIN] ===================" ;
   proc.start(QString(SYSTEM_EXEC_FMT).arg(command_line)) ; proc.waitForStarted(-1) ;
   while (proc.waitForFinished(250) || proc.state() != QProcess::NotRunning)
   {
@@ -196,28 +200,41 @@ QStringList PacstrapCppJob::execWithProgress(QString command_line , qreal task_p
   }
 
   this->progressPercent = emitProgress(task_proportion) ;
-  cDebug() << "==================== [SHELL OUTPUT END] ====================" ;
+  cLog() << "==================== [SHELL OUTPUT END] ====================" ;
 
   status = (proc.exitStatus() == QProcess::NormalExit) ? proc.exitCode() : 255 ;
 
 DEBUG_TRACE_EXECWITHPROGRESS
 
-  return (QStringList() << QString(status) << stdout << stderr) ;
-}
+    retval.insert(STATUS_KEY , QVariant(status)) ;
+    retval.insert(STDOUT_KEY , QVariant(stdout)) ;
+    retval.insert(STDERR_KEY , QVariant(stderr)) ;
+
+    return retval ;
+} ;
 
 int PacstrapCppJob::execStatus(QString command_line , qreal task_proportion)
 {
-  return execWithProgress(command_line , task_proportion).at(0).toInt() ;
+    QVariantMap result = execWithProgress(command_line , task_proportion) ;
+    int         status = result.value(STATUS_KEY).toInt() ;
+
+    return status ;
 }
 
 QString PacstrapCppJob::execOutput(QString command_line , qreal task_proportion)
 {
-  return execWithProgress(command_line , task_proportion).at(1) ;
+    QVariantMap result = execWithProgress(command_line , task_proportion) ;
+    QString     stdout = result.value(STDOUT_KEY).toString() ;
+
+    return stdout ;
 }
 
 QString PacstrapCppJob::execError(QString command_line , qreal task_proportion)
 {
-  return execWithProgress(command_line , task_proportion).at(2) ;
+    QVariantMap result = execWithProgress(command_line , task_proportion) ;
+    QString     stderr = result.value(STDERR_KEY).toString() ;
+
+    return stderr ;
 }
 
 

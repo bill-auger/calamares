@@ -49,8 +49,7 @@ QString PacstrapBaseJob::chrootExec()
 
   if (!!execStatus(pacstrap_cmd , CHROOT_TASK_PROPORTION)) return PACSTRAP_ERROR_MSG ;
 
-QString grub_theme_kludge_cmd = QString("echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub").
-                                    arg(MOUNTPOINT) ;
+QString grub_theme_kludge_cmd = QString("echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub").arg(MOUNTPOINT) ;
 printf("[PACSTRAP-BASE]: grub_theme_cmd=%s\n" , grub_theme_cmd.toStdString().c_str()) ;
 printf("[PACSTRAP-BASE]: grub_theme_cmd IN:\n");  QProcess::execute(QString("/bin/sh -c \"cat %1/etc/default/grub\"").arg(MOUNTPOINT));
 

@@ -5,6 +5,8 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+setxkbmap us
+
 alias ls='ls --color=auto'
 
 if   [[ "$XDG_VTNR" == "7"  ]]

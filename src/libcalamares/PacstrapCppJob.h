@@ -50,7 +50,7 @@ public:
 
 protected:
 
-  QStringList execWithProgress(QString command_line , qreal task_proportion = 0.0) ;
+  QVariantMap execWithProgress(QString command_line , qreal task_proportion = 0.0) ;
   int         execStatus      (QString command_line , qreal task_proportion = 0.0) ;
   QString     execOutput      (QString command_line , qreal task_proportion = 0.0) ;
   QString     execError       (QString command_line , qreal task_proportion = 0.0) ;
@@ -138,6 +138,9 @@ private:
   static const QString CHROOT_PREP_ERROR_MSG ;
   static const QString PACMAN_SYNC_ERROR_MSG ;
   static const QString UMOUNT_ERROR_MSG ;
+  static const QString STATUS_KEY ;
+  static const QString STDOUT_KEY ;
+  static const QString STDERR_KEY ;
 } ;
 
 
