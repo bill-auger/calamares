@@ -24,6 +24,8 @@ import libcalamares
 
 
 def run():
+    setServices()
+
     """
     Setup systemd services
     """
@@ -99,3 +101,15 @@ def run():
                     )
 
     return None
+
+
+def setServices():
+    #init_key           = libcalamares.globalstorage.value(GS::INITSYSTEM_KEY)
+    #desktop_key        = libcalamares.globalstorage.value(GS::DESKTOP_KEY   )
+    init_key           = libcalamares.globalstorage.value('default-initsystem') # TODO:
+    desktop_key        = libcalamares.globalstorage.value('default-desktop'   ) # TODO:
+    config             = libcalamares.job.configuration
+    config['services'] = config[init_key    + '-services'] + \
+                         config[desktop_key + '-services']
+    config['targets' ] = config[init_key    + '-targets' ]
+    config['disable' ] = config[init_key    + '-disable' ]

@@ -30,31 +30,46 @@
 const QString PacstrapCppJob::BASE_PACKAGES_KEY         = "base" ;
 const QString PacstrapCppJob::BOOTLODER_PACKAGES_KEY    = "bootloader" ;
 const QString PacstrapCppJob::KERNEL_PACKAGES_KEY       = "kernel" ;
+const QString PacstrapCppJob::OPENRC_PACKAGES_KEY       = "openrc" ;
+const QString PacstrapCppJob::SYSTEMD_PACKAGES_KEY      = "systemd" ;
 const QString PacstrapCppJob::APPLICATIONS_PACKAGES_KEY = "applications" ;
 const QString PacstrapCppJob::MULTIMEDIA_PACKAGES_KEY   = "multimedia" ;
 const QString PacstrapCppJob::NETWORK_PACKAGES_KEY      = "network" ;
 const QString PacstrapCppJob::THEMES_PACKAGES_KEY       = "themes" ;
 const QString PacstrapCppJob::UTILITIES_PACKAGES_KEY    = "utilities" ;
 const QString PacstrapCppJob::XSERVER_PACKAGES_KEY      = "x-server" ;
-const QString PacstrapCppJob::MATE_PACKAGES_KEY         = "mate" ;
 const QString PacstrapCppJob::LXDE_PACKAGES_KEY         = "lxde" ;
+const QString PacstrapCppJob::MATE_PACKAGES_KEY         = "mate" ;
 
 
 /* PacstrapCppJob protected class constants */
 
-const QString PacstrapCppJob::MOUNTPOINT               = "/tmp/pacstrap" ;
-const char*   PacstrapCppJob::BASE_JOB_NAME            = "Pacstrap Base C++ Job" ;
-const char*   PacstrapCppJob::GUI_JOB_NAME             = "Pacstrap Desktop C++ Job" ;
-const char*   PacstrapCppJob::BASE_STATUS_MSG          = "Installing root filesystem" ;
-const char*   PacstrapCppJob::GUI_STATUS_MSG           = "Installing graphical desktop environment" ;
-const qreal   PacstrapCppJob::BASE_JOB_WEIGHT          = 20.0 ; // progress-bar job weight (1.0 normal)
-const qreal   PacstrapCppJob::GUI_JOB_WEIGHT           = 57.0 ; // progress-bar job weight (1.0 normal)
-const qreal   PacstrapCppJob::PACMAN_SYNC_PROPORTION   = 0.05 ; // per task progress-bar proportion
-const qreal   PacstrapCppJob::LIST_PACKAGES_PROPORTION = 0.05 ; // per task progress-bar proportion
-const qreal   PacstrapCppJob::CHROOT_TASK_PROPORTION   = 0.9 ;  // per task progress-bar proportion
-const QString PacstrapCppJob::PACSTRAP_CLEANUP_CMD     = QString("umount %1/dev/pts %1/dev/shm %1/dev %1/proc %1/run %1/sys %1/tmp %1").arg(MOUNTPOINT) ;
-const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap -C %1 %2 %3 --noprogressbar" ;
-const QString PacstrapCppJob::PACSTRAP_ERROR_MSG       = "Failed to install packages in chroot." ;
+const QString    PacstrapCppJob::MOUNTPOINT               = "/tmp/pacstrap" ;
+const char*      PacstrapCppJob::BASE_JOB_NAME            = "Pacstrap Base C++ Job" ;
+const char*      PacstrapCppJob::GUI_JOB_NAME             = "Pacstrap Desktop C++ Job" ;
+const char*      PacstrapCppJob::BASE_STATUS_MSG          = "Installing root filesystem" ;
+const char*      PacstrapCppJob::GUI_STATUS_MSG           = "Installing graphical desktop environment" ;
+const qreal      PacstrapCppJob::BASE_JOB_WEIGHT          = 20.0 ; // progress-bar job weight (1.0 normal)
+const qreal      PacstrapCppJob::GUI_JOB_WEIGHT           = 57.0 ; // progress-bar job weight (1.0 normal)
+const qreal      PacstrapCppJob::PACMAN_SYNC_PROPORTION   = 0.05 ; // per task progress-bar proportion
+const qreal      PacstrapCppJob::LIST_PACKAGES_PROPORTION = 0.05 ; // per task progress-bar proportion
+const qreal      PacstrapCppJob::CHROOT_TASK_PROPORTION   = 0.9 ;  // per task progress-bar proportion
+const QString    PacstrapCppJob::PACSTRAP_CLEANUP_CMD     = QString("umount %1/dev/pts %1/dev/shm %1/dev %1/proc %1/run %1/sys %1/tmp %1 2> /dev/null").arg(MOUNTPOINT) ;
+const QString    PacstrapCppJob::PACSTRAP_FMT             = "pacstrap -C %1 %2 %3 --noprogressbar" ;
+const QString    PacstrapCppJob::PACSTRAP_ERROR_MSG       = "Failed to install packages in chroot." ;
+const QSTRINGMAP PacstrapCppJob::LANGUAGE_PACKS           = { {"eo"          , "iceweasel-l10n-eo"    } ,
+                                                              {"es_ES.UTF-8" , "icedove-l10n-es-es"   } ,
+                                                              {"es_ES.UTF-8" , "iceweasel-l10n-es-es" } ,
+                                                              {"fr_FR.UTF-8" , "icedove-l10n-fr"      } ,
+                                                              {"fr_FR.UTF-8" , "iceweasel-l10n-fr"    } ,
+                                                              {"gl_ES.UTF-8" , "icedove-l10n-gl"      } ,
+                                                              {"gl_ES.UTF-8" , "iceweasel-l10n-gl"    } ,
+                                                              {"it_IT.UTF-8" , "icedove-l10n-it"      } ,
+                                                              {"it_IT.UTF-8" , "iceweasel-l10n-it"    } ,
+                                                              {"pt_BR.UTF-8" , "icedove-l10n-pt-br"   } ,
+                                                              {"pt_BR.UTF-8" , "iceweasel-l10n-pt-br" } ,
+                                                              {"pl_PL.UTF-8" , "icedove-l10n-pl"      } ,
+                                                              {"pl_PL.UTF-8" , "iceweasel-l10n-pl"    } } ;
 
 
 /* PacstrapCppJob private class constants */
@@ -123,8 +138,12 @@ QString PacstrapCppJob::prettyStatusMessage()                 const { return thi
 
 Calamares::JobResult PacstrapCppJob::exec()
 {
+globalStorage->insert(GS::INITSYSTEM_KEY , SYSTEMD_PACKAGES_KEY) ; // TODO: per user option via globalStorage
+globalStorage->insert(GS::DESKTOP_KEY    , LXDE_PACKAGES_KEY   ) ; // TODO: per user option via globalStorage
+// globalStorage->insert(GS::DESKTOP_KEY    , MATE_PACKAGES_KEY   ) ; // TODO: per user option via globalStorage
+
   // cleanup from possibly aborted previous runs
-  QProcess::execute(SYSTEM_EXEC_FMT.arg(PACSTRAP_CLEANUP_CMD)) ;
+  Teardown() ;
 
   QVariantList partitions  = this->globalStorage->value(GS::PARTITIONS_KEY ).toList() ;
   bool         has_isorepo = this->globalStorage->value(GS::HAS_ISOREPO_KEY).toBool() ;
@@ -155,9 +174,14 @@ DEBUG_TRACE_EXEC
 
   if (!this->packages.isEmpty())
   {
-    QString new_packages    = execOutput(list_packages_cmd , LIST_PACKAGES_PROPORTION) ;
-    this->nPreviousPackages = NPackagesInstalled() ;
-    this->nPendingPackages  = new_packages.count(QChar::LineFeed) ;
+    QVariantMap result       = execWithProgress(list_packages_cmd , LIST_PACKAGES_PROPORTION) ;
+    int         status       = result.value(STATUS_KEY).toInt() ;
+    QString     new_packages = result.value(STDOUT_KEY).toString() ;
+    QString     stderr       = result.value(STDERR_KEY).toString() ;
+    this->nPreviousPackages  = NPackagesInstalled() ;
+    this->nPendingPackages   = new_packages.count(QChar::LineFeed) ;
+
+    if (!!status) return JobError(stderr) ;
 
     if (this->nPendingPackages > 0)
     {
@@ -240,6 +264,8 @@ QString PacstrapCppJob::execError(QString command_line , qreal task_proportion)
 
 /* PacstrapCppJob private class methods */
 
+void PacstrapCppJob::Teardown() { QProcess::execute(SYSTEM_EXEC_FMT.arg(PACSTRAP_CLEANUP_CMD)) ; }
+
 QString PacstrapCppJob::FindTargetDevice(const QVariantList& partitions)
 {
   QString target_device = QString("") ;
@@ -271,6 +297,8 @@ qint16 PacstrapCppJob::NPackagesInstalled()
 
 Calamares::JobResult PacstrapCppJob::JobError(QString error_msg)
 {
+  Teardown() ;
+
   return Calamares::JobResult::error(error_msg) ;
 }
 

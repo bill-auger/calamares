@@ -7,10 +7,3 @@ calamares_add_plugin( pacstrap-base
     calamares
   SHARED_LIB
 )
-
-install(
-  DIRECTORY
-      ${CMAKE_SOURCE_DIR}/data/skel/
-  DESTINATION
-      ${CMAKE_INSTALL_DATADIR}/calamares/skel/
-)

@@ -34,9 +34,12 @@ PacstrapBaseJob::PacstrapBaseJob(QObject* parent) : PacstrapCppJob(tr(BASE_JOB_N
 
 QString PacstrapBaseJob::getPackageList()
 {
+  QString init_key = this->globalStorage->value(GS::INITSYSTEM_KEY).toString() ;
+
   return (this->localStorage.value(BASE_PACKAGES_KEY     ).toStringList() +
           this->localStorage.value(BOOTLODER_PACKAGES_KEY).toStringList() +
-          this->localStorage.value(KERNEL_PACKAGES_KEY   ).toStringList() ).join(' ') ;
+          this->localStorage.value(KERNEL_PACKAGES_KEY   ).toStringList() +
+          this->localStorage.value(init_key              ).toStringList() ).join(' ') ;
 }
 
 

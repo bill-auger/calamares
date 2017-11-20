@@ -106,7 +106,10 @@ class GS
 public:
   static const QString HAS_ISOREPO_KEY;
   static const QString IS_ONLINE_KEY;
-  static const QString DESKTOP_PACKAGES_KEY;
+  static const QString INITSYSTEM_KEY;
+  static const QString DESKTOP_KEY;
+  static const QString LOCALE_KEY;
+  static const QString LANG_KEY;
   static const QString PARTITIONS_KEY;
   static const QString DEVICE_KEY;
   static const QString FS_KEY;

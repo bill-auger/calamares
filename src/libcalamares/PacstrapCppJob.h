@@ -19,6 +19,8 @@
 #ifndef PACSTRAPCPPJOB_H
 #define PACSTRAPCPPJOB_H
 
+#define QSTRINGMAP QMultiMap<QString , QString>
+
 #include <QDir>
 #include <QObject>
 #include <QTimerEvent>
@@ -73,6 +75,7 @@ protected:
 
 private:
 
+  static inline void                 Teardown          () ;
   static        QString              FindTargetDevice  (const QVariantList& partitions) ;
   static        qint16               NPackagesInstalled() ;
   static inline Calamares::JobResult JobError          (QString error_msg) ;
@@ -89,31 +92,34 @@ public:
   static const QString BASE_PACKAGES_KEY ;
   static const QString BOOTLODER_PACKAGES_KEY ;
   static const QString KERNEL_PACKAGES_KEY ;
+  static const QString OPENRC_PACKAGES_KEY ;
+  static const QString SYSTEMD_PACKAGES_KEY ;
   static const QString APPLICATIONS_PACKAGES_KEY ;
   static const QString MULTIMEDIA_PACKAGES_KEY ;
   static const QString NETWORK_PACKAGES_KEY ;
   static const QString THEMES_PACKAGES_KEY ;
   static const QString UTILITIES_PACKAGES_KEY ;
   static const QString XSERVER_PACKAGES_KEY ;
-  static const QString MATE_PACKAGES_KEY ;
   static const QString LXDE_PACKAGES_KEY ;
+  static const QString MATE_PACKAGES_KEY ;
 
 
 protected:
 
-  static const QString MOUNTPOINT ;
-  static const char*   BASE_JOB_NAME ;
-  static const char*   GUI_JOB_NAME ;
-  static const char*   BASE_STATUS_MSG ;
-  static const char*   GUI_STATUS_MSG ;
-  static const qreal   BASE_JOB_WEIGHT ;
-  static const qreal   GUI_JOB_WEIGHT ;
-  static const qreal   PACMAN_SYNC_PROPORTION ;
-  static const qreal   LIST_PACKAGES_PROPORTION ;
-  static const qreal   CHROOT_TASK_PROPORTION ;
-  static const QString PACSTRAP_CLEANUP_CMD ;
-  static const QString PACSTRAP_FMT ;
-  static const QString PACSTRAP_ERROR_MSG ;
+  static const QString    MOUNTPOINT ;
+  static const char*      BASE_JOB_NAME ;
+  static const char*      GUI_JOB_NAME ;
+  static const char*      BASE_STATUS_MSG ;
+  static const char*      GUI_STATUS_MSG ;
+  static const qreal      BASE_JOB_WEIGHT ;
+  static const qreal      GUI_JOB_WEIGHT ;
+  static const qreal      PACMAN_SYNC_PROPORTION ;
+  static const qreal      LIST_PACKAGES_PROPORTION ;
+  static const qreal      CHROOT_TASK_PROPORTION ;
+  static const QString    PACSTRAP_CLEANUP_CMD ;
+  static const QString    PACSTRAP_FMT ;
+  static const QString    PACSTRAP_ERROR_MSG ;
+  static const QSTRINGMAP LANGUAGE_PACKS ;
 
 
 private:
@@ -177,10 +183,18 @@ private:
   " completion_percent="     << completion_percent                            ;
 
 #ifndef QT_NO_DEBUG
-#  define DEBUG_TRACE_DESKTOPPACKAGES                                                     \
-  printf("[PACSTRAP-GUI]: installing default_desktop: %s\n"                             , \
-         globalStorage->value(GS::DESKTOP_PACKAGES_KEY).toString().toStdString().c_str()) ;
+#  define DEBUG_TRACE_BASEPACKAGES                       \
+  printf("[PACSTRAP-GUI]: installing initsystem: %s\n" , \
+         init_key.toStdString().c_str() )                ;
+#  define DEBUG_TRACE_DESKTOPPACKAGES                                      \
+  printf("[PACSTRAP-GUI]: installing initsystem: %s default_desktop: %s" , \
+         init_key   .toStdString().c_str() ,                               \
+         desktop_key.toStdString().c_str() ) ;                             \
+  printf("language_packs: %s for locale: %s\n"          ,                  \
+         language_packs.join(' ').toStdString().c_str() ,                  \
+         locale                  .toStdString().c_str() )                  ;
 #else // QT_NO_DEBUG
+#  define DEBUG_TRACE_BASEPACKAGES ;
 #  define DEBUG_TRACE_DESKTOPPACKAGES ;
 #endif // QT_NO_DEBUG
 

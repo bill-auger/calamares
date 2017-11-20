@@ -193,9 +193,15 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -l %1").arg(sudoersF
 cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /etc/skel - source ");
   QProcess::execute( QString( "/bin/sh -c \"ls -al /etc/skel /etc/skel/.config\"" ) );
 cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /etc/skel - target");
-  CalamaresUtils::System::instance()->targetEnvCall( { "ls","-a","-l","/etc/skel/","/etc/skel/.config" } );
+  CalamaresUtils::System::instance()->targetEnvCall( { "ls","-a","-l","/etc/skel/"        } );
+// Finished. Exit code: 2
+  CalamaresUtils::System::instance()->targetEnvCall( { "ls","-a","-l","/etc/skel/.config" } );
+// Finished. Exit code: 2
 cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - target").arg(m_userName);
-  CalamaresUtils::System::instance()->targetEnvCall( { "ls","-a","-l",QString("/home/%1/").arg(m_userName),QString("/home/%1/.config").arg(m_userName) } );
+  CalamaresUtils::System::instance()->targetEnvCall( { "ls","-a","-l",QString("/home/%1/"       ).arg(m_userName) } );
+// Finished. Exit code: 2
+  CalamaresUtils::System::instance()->targetEnvCall( { "ls","-a","-l",QString("/home/%1/.config").arg(m_userName) } );
+// Finished. Exit code: 2
 
 
     ec = CalamaresUtils::System::instance()->
@@ -226,7 +232,8 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - targ
   /* parabola-specific configuration */
 
 //    Calamares::GlobalStorage* globalStorage = Calamares::JobQueue::instance()->globalStorage();
-  QString default_desktop = gs->value(GS::DESKTOP_PACKAGES_KEY).toString();
+  QString default_desktop = gs->value(GS::DESKTOP_KEY).toString() ;
+  QString locale          = gs->value(GS::LOCALE_KEY).toMap().value(GS::LANG_KEY).toString() ;
 /*
     if [ -x /usr/bin/setxkbmap ]; then
         echo "setxkbmap $(cat /.codecheck | grep XKBMAP= | cut -d '=' -f 2)" >> /home/${user#*=}/.bashrc
@@ -260,24 +267,30 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - targ
         gsettingsCmd += QString( "gsettings set org.mate.background picture-filename '/etc/wallpaper.png'" );
         sys->targetEnvCall({ "sh" , "-c" , userCmd + gsettingsCmd }) ;
 */
-
-const QString SKELS_DIR = "/usr/share/calamares/skel" ;
-
-    QString skel_dir        = QString("%1/%2"     ).arg(SKELS_DIR , default_desktop) ;
-    QString chroot_home_dir = QString("%1/home/%2").arg(destDir.absolutePath() , m_userName) ;
-    QString skel_cmd        = QString("cp -rT %1/ %2/").arg(skel_dir , chroot_home_dir) ;
-//     QString chown_root_cmd  = QString("chown root:root /home/") ;
-    QString chown_user_cmd  = QString("chown -R %1:%1 /home/%1/").arg(m_userName) ;
-
-sys->targetEnvCall({ "sh" , "-c" , QString("echo '[CREATEUSER]: sys->targetEnvCall'") }) ;
-cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/   IN") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
-    QProcess::execute(QString("/bin/sh -c \"%1\"").arg(skel_cmd)) ;
-cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  MID1") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
-//     sys->targetEnvCall({ "sh" , "-c" , chown_root_cmd }) ;
-cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  MID2") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
-    sys->targetEnvCall({ "sh" , "-c" , chown_user_cmd }) ;
-cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  OUT") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al %1").arg(chroot_home_dir) }) ;
   }
+
+const QString SKEL_DIR = "/usr/share/calamares/skel" ;
+
+  QString chroot_home_dir = QString("%1/home/%2").arg(destDir.absolutePath() , m_userName) ;
+  QString skel_cmd        = QString("cp -rT %1/ %2/").arg(SKEL_DIR , chroot_home_dir) ;
+  QString set_lang_cmd    = QString("echo \"export LANG=%1\" >> /home/%2/.bashrc").arg(locale , m_userName) ;
+//   QString chown_root_cmd  = QString("chown root:root /home/") ;
+  QString chown_user_cmd  = QString("chown -R %1:%1 /home/%1/").arg(m_userName) ;
+
+cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/   IN") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al /home/%1/").arg(m_userName) }) ;
+// Finished. Exit code: 2
+  QProcess::execute(QString("/bin/sh -c \"%1\"").arg(skel_cmd)) ;
+cDebug() << QString("[CREATEUSER]: locale=%1").arg(locale) ;
+  sys->targetEnvCall({ "sh" , "-c" , set_lang_cmd }) ;
+cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  MID1") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al /home/%1/").arg(m_userName) }) ;
+// Finished. Exit code: 2
+//   sys->targetEnvCall({ "sh" , "-c" , chown_root_cmd }) ;
+cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  MID2") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al /home/%1/").arg(m_userName) }) ;
+// Finished. Exit code: 2
+  sys->targetEnvCall({ "sh" , "-c" , chown_user_cmd }) ;
+cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  OUT") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al /home/%1/").arg(m_userName) }) ;
+// Finished. Exit code: 2
+
 
     return Calamares::JobResult::ok();
 }

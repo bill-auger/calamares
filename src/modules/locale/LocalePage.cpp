@@ -450,13 +450,16 @@ LocaleConfiguration
 LocalePage::guessLocaleConfiguration() const
 {
     QLocale myLocale;   // User-selected language
-
+cLog() << "LocalePage::guessLocaleConfiguration() m_localeGenLines.isEmpty()=" << m_localeGenLines.isEmpty() ;
     // If we cannot say anything about available locales
     if ( m_localeGenLines.isEmpty() )
     {
         cDebug() << "WARNING: guessLocaleConfiguration can't guess from an empty list.";
         return LocaleConfiguration::createDefault();
     }
+cLog() << "LocalePage::guessLocaleConfiguration() myLocale.name()=" << myLocale.name() ;
+if ( myLocale.name().isEmpty() ) cLog() << "LocalePage::guessLocaleConfiguration() returing default" ;
+else cLog() << "LocalePage::guessLocaleConfiguration() returing fromLanguageAndLocation()" ;
 
     QString myLanguageLocale = myLocale.name();
     if ( myLanguageLocale.isEmpty() )
