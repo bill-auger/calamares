@@ -31,7 +31,7 @@ cmake -DCMAKE_BUILD_TYPE=Debug                                               \
       -DSKIP_MODULES="dracut dracutlukscfg dummycpp dummyprocess dummypython \
                       dummypythonqt grubcfg initramfs initramfscfg           \
                       interactiveterminal license luksbootkeyfile            \
-                      luksopenswaphookcfg plymouthcfg removeuser webview" ..
+                      luksopenswaphookcfg plymouthcfg removeuser webview"    ..
 
 
 echo "\n--- running make uninstall ---\n"
