@@ -62,6 +62,8 @@ def run():
         # we want unique values, so locale_values should have 1 or 2 items
         locale_values = set(locale_conf.values())
 
+        print("locale_values=" + locale_values)
+
         with open("{!s}/etc/locale.gen".format(install_path), "w") as gen:
             for line in text:
                 # always enable en_US
