@@ -248,7 +248,7 @@ int PacstrapCppJob::execStatus(QString command_line , qreal task_proportion)
 QString PacstrapCppJob::execOutput(QString command_line , qreal task_proportion)
 {
     QVariantMap result = execWithProgress(command_line , task_proportion) ;
-    QString     stdout = result.value(STDOUT_KEY).toString() ;
+    QString     stdout = result.value(STDOUT_KEY).toString().trimmed() ;
 
     return stdout ;
 }
@@ -256,7 +256,7 @@ QString PacstrapCppJob::execOutput(QString command_line , qreal task_proportion)
 QString PacstrapCppJob::execError(QString command_line , qreal task_proportion)
 {
     QVariantMap result = execWithProgress(command_line , task_proportion) ;
-    QString     stderr = result.value(STDERR_KEY).toString() ;
+    QString     stderr = result.value(STDERR_KEY).toString().trimmed() ;
 
     return stderr ;
 }
