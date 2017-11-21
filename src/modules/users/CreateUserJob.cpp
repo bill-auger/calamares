@@ -269,17 +269,25 @@ cDebug() << QString("[CREATEUSER]: CreateUserJob::exec() ls -al /home/%1/ - targ
 */
   }
 
-const QString SKEL_DIR = "/usr/share/calamares/skel" ;
+const QString SKEL_DIR        = "/usr/share/calamares/skel" ;
+const QString SYSTEM_EXEC_FMT = "/bin/sh -c \"%1\"" ;
+const QString SKEL_FMT        = "cp -rT %1/ %2/" ;
+const QString DM_DESKTOP_FMT  = "sed -i \"s/^Session=.*/Session=%1/\"   %2/.dmrc" ;
+const QString DM_LANG_FMT     = "sed -i \"s/^Language=.*/Language=%1/\" %2/.dmrc" ;
+const QString SET_LANG_FMT    = "echo \"export LANG=%1\" >> %2/.bashrc" ;
+const QString CHOWN_USER_FMT  = "chown -R %1:%1 %1/" ;
 
-  QString chroot_home_dir = QString("%1/home/%2").arg(destDir.absolutePath() , m_userName) ;
-  QString skel_cmd        = QString("cp -rT %1/ %2/").arg(SKEL_DIR , chroot_home_dir) ;
-  QString set_lang_cmd    = QString("echo \"export LANG=%1\" >> /home/%2/.bashrc").arg(locale , m_userName) ;
-//   QString chown_root_cmd  = QString("chown root:root /home/") ;
-  QString chown_user_cmd  = QString("chown -R %1:%1 /home/%1/").arg(m_userName) ;
+  QString home_dir        = QString("/home/%1"    ).arg(m_userName                       ) ;
+  QString chroot_home_dir = QString("%1%2"        ).arg(destDir         , home_dir       ) ;
+  QString skel_cmd        = QString(SKEL_FMT      ).arg(SKEL_DIR        , chroot_home_dir) ;
+  QString dm_desktop_cmd  = QString(DM_DESKTOP_FMT).arg(default_desktop , home_dir       ) ;
+  QString dm_lang_cmd     = QString(DM_LANG_FMT   ).arg(locale          , home_dir       ) ;
+  QString set_lang_cmd    = QString(SET_LANG_FMT  ).arg(locale          , home_dir       ) ;
+  QString chown_user_cmd  = QString(CHOWN_USER_FMT).arg(home_dir                         ) ;
 
 cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/   IN") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al /home/%1/").arg(m_userName) }) ;
 // Finished. Exit code: 2
-  QProcess::execute(QString("/bin/sh -c \"%1\"").arg(skel_cmd)) ;
+  QProcess::execute(QString(SYSTEM_EXEC_FMT).arg(skel_cmd)) ;
 cDebug() << QString("[CREATEUSER]: locale=%1").arg(locale) ;
   sys->targetEnvCall({ "sh" , "-c" , set_lang_cmd }) ;
 cDebug() << QString("[CREATEUSER]: ls -al chroot/home/user/  MID1") ; sys->targetEnvCall({ "sh" , "-c" , QString("ls -al /home/%1/").arg(m_userName) }) ;
