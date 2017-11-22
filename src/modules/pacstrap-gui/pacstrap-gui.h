@@ -44,6 +44,14 @@ private:
 
   static const QString WALLPAPER_FMT ;
   static const QString WALLPAPER_ERROR_MSG ;
+  static const QString GET_XKBMAP_CMD ;
+  static const QString SKEL_DIR ;
+  static const QString CHROOT_SKEL_DIR ;
+  static const QString SKEL_FMT ;
+  static const QString SET_LANG_FMT ;
+  static const QString SET_XKBMAP_FMT ;
+  static const QString DM_DESKTOP_FMT ;
+  static const QString DM_LANG_FMT ;
 } ;
 
 

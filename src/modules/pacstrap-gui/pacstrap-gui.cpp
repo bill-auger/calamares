@@ -22,7 +22,18 @@
 #include "pacstrap-gui.h"
 
 
-#include "utils/Logger.h"
+/* PacstrapGuiJob private class constants */
+
+const QString PacstrapGuiJob::WALLPAPER_FMT       = "cp /etc/wallpaper.png %1/etc/" ;
+const QString PacstrapGuiJob::WALLPAPER_ERROR_MSG = "The wallpaper installation command has failed." ;
+const QString PacstrapGuiJob::GET_XKBMAP_CMD  = "grep XKBMAP= ~/.codecheck 2> /dev/null | cut -d '=' -f 2" ;
+const QString PacstrapGuiJob::SKEL_DIR        = "/usr/share/calamares/skel" ;
+const QString PacstrapGuiJob::CHROOT_SKEL_DIR = QString("%1/etc/skel" ).arg(MOUNTPOINT) ;
+const QString PacstrapGuiJob::SKEL_FMT        = "cp -rT %1/ %2/" ;
+const QString PacstrapGuiJob::SET_LANG_FMT    = "sed -i 's/^export LANG=.*/export LANG=%1/' %2/.bashrc" ;
+const QString PacstrapGuiJob::SET_XKBMAP_FMT  = "sed -i 's/^setxkbmap.*/setxkbmap %1/'      %2/.bashrc" ;
+const QString PacstrapGuiJob::DM_DESKTOP_FMT  = "sed -i 's/^Session=.*/Session=%1/'         %2/.dmrc" ;
+const QString PacstrapGuiJob::DM_LANG_FMT     = "sed -i 's/^Language=.*/Language=%1/'       %2/.dmrc" ;
 
 
 /* PacstrapGuiJob public instance methods */
@@ -40,7 +51,7 @@ QString PacstrapGuiJob::getPackageList()
   QString     init_key       = this->globalStorage->value(GS::INITSYSTEM_KEY).toString() ;
   QString     desktop_key    = this->globalStorage->value(GS::DESKTOP_KEY   ).toString() ;
   QString     locale         = this->globalStorage->value(GS::LOCALE_KEY    ).toMap()
-                                               .value(GS::LANG_KEY      ).toString() ;
+                                                   .value(GS::LANG_KEY      ).toString() ;
   QStringList language_packs = LANGUAGE_PACKS.values(locale) ;
 
 DEBUG_TRACE_DESKTOPPACKAGES
@@ -61,8 +72,16 @@ DEBUG_TRACE_DESKTOPPACKAGES
 
 QString PacstrapGuiJob::chrootExec()
 {
-  QString pacstrap_cmd  = PACSTRAP_FMT .arg(this->confFile , MOUNTPOINT , packages) ;
-  QString wallpaper_cmd = WALLPAPER_FMT.arg(MOUNTPOINT) ;
+  QString pacstrap_cmd    = PACSTRAP_FMT .arg(this->confFile , MOUNTPOINT , packages) ;
+  QString wallpaper_cmd   = WALLPAPER_FMT.arg(MOUNTPOINT) ;
+  QString default_desktop = this->globalStorage->value(GS::DESKTOP_KEY).toString() ;
+  QString locale          = this->globalStorage->value(GS::LOCALE_KEY).toMap().value(GS::LANG_KEY).toString() ;
+  QString xkbmap          = execOutput(GET_XKBMAP_CMD) ; if (xkbmap.isEmpty()) xkbmap = "us" ;
+  QString skel_cmd        = QString(SKEL_FMT      ).arg(SKEL_DIR        , CHROOT_SKEL_DIR) ;
+  QString set_lang_cmd    = QString(SET_LANG_FMT  ).arg(locale          , CHROOT_SKEL_DIR) ;
+  QString set_xkbmap_cmd  = QString(SET_XKBMAP_FMT).arg(xkbmap          , CHROOT_SKEL_DIR) ;
+  QString dm_desktop_cmd  = QString(DM_DESKTOP_FMT).arg(default_desktop , CHROOT_SKEL_DIR) ;
+  QString dm_lang_cmd     = QString(DM_LANG_FMT   ).arg(locale          , CHROOT_SKEL_DIR) ;
 
   if (!!execStatus(pacstrap_cmd , CHROOT_TASK_PROPORTION)) return PACSTRAP_ERROR_MSG ;
 
@@ -75,46 +94,20 @@ printf("[PACSTRAP-GUI]: ls chroot/etc/sudoers*\n") ;      QProcess::execute(QStr
 
 printf("[PACSTRAP-GUI]: ls chroot/etc/wallpaper.png\n") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(MOUNTPOINT)) ;
 
+printf("[PACSTRAP-GUI]: default_desktop=%s\n" , default_desktop) ;
+printf("[PACSTRAP-GUI]: locale=%s\n" , locale) ;
+printf("[PACSTRAP-GUI]: CHROOT_SKEL_DIR=%s\n" , CHROOT_SKEL_DIR) ;
+printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/  IN\n%s\n" , execOutput("ls -al /tmp/pacstrap/etc/skel")) ;
 
-const QString CHROOT_SKEL_DIR = QString("%1/etc/skel" ).arg(MOUNTPOINT) ;
-const QString SKEL_DIR        = "/usr/share/calamares/skel" ;
-const QString SKEL_FMT        = "cp -rT %1/ %2/" ;
-const QString GET_XKBMAP_CMD  = "grep XKBMAP= ~/.codecheck 2> /dev/null | cut -d '=' -f 2" ;
-const QString DM_DESKTOP_FMT  = "sed -i 's/^Session=.*/Session=%1/'         %2/.dmrc" ;
-const QString DM_LANG_FMT     = "sed -i 's/^Language=.*/Language=%1/'       %2/.dmrc" ;
-const QString SET_LANG_FMT    = "sed -i 's/^export LANG=.*/export LANG=%1/' %2/.bashrc" ;
-const QString SET_XKBMAP_FMT  = "sed -i 's/^setxkbmap.*/setxkbmap %1/'      %2/.bashrc" ;
-
-  QString default_desktop = this->globalStorage->value(GS::DESKTOP_KEY).toString() ;
-  QString locale          = this->globalStorage->value(GS::LOCALE_KEY).toMap().value(GS::LANG_KEY).toString() ;
-  QString xkbmap          = execOutput(GET_XKBMAP_CMD) ; if (xkbmap.isEmpty()) xkbmap = "us" ;
-  QString skel_cmd        = QString(SKEL_FMT      ).arg(SKEL_DIR        , CHROOT_SKEL_DIR) ;
-  QString dm_desktop_cmd  = QString(DM_DESKTOP_FMT).arg(default_desktop , CHROOT_SKEL_DIR) ;
-  QString dm_lang_cmd     = QString(DM_LANG_FMT   ).arg(locale          , CHROOT_SKEL_DIR) ;
-  QString set_lang_cmd    = QString(SET_LANG_FMT  ).arg(locale          , CHROOT_SKEL_DIR) ;
-  QString set_xkbmap_cmd  = QString(SET_XKBMAP_FMT).arg(xkbmap          , CHROOT_SKEL_DIR) ;
-
-cDebug() << "[CREATEUSER]: default_desktop=" << default_desktop ;
-cDebug() << "[CREATEUSER]: locale=" << locale ;
-cDebug() << "[CREATEUSER]: CHROOT_SKEL_DIR=" << CHROOT_SKEL_DIR ;
-cDebug() << "[CREATEUSER]: ls -al chroot/etc/skel/  IN" << execOutput("ls -al /tmp/pacstrap/etc/skel") ;
-
-  if (!!execStatus(skel_cmd)) return "SKEL_FMT ERROR_MSG" ;
-cDebug() << "[CREATEUSER]: ls -al chroot/etc/skel/ OUT" << execOutput("ls -al /tmp/pacstrap/etc/skel") ;
-  if (!!execStatus(dm_desktop_cmd)) return "DM_DESKTOP_FMT ERROR_MSG" ;
-  if (!!execStatus(dm_lang_cmd)) return "DM_LANG_FMT ERROR_MSG" ;
-  if (!!execStatus(set_lang_cmd)) return "SET_LANG_FMT ERROR_MSG" ;
-  if (!!execStatus(set_xkbmap_cmd)) return "SET_XKBMAP_FMT ERROR_MSG" ;
-
+  if (!!execStatus(skel_cmd                             )) return "SKEL_FMT ERROR_MSG" ;
+printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput("ls -al /tmp/pacstrap/etc/skel")) ;
+  if (!!execStatus(dm_desktop_cmd                       )) return "DM_DESKTOP_FMT ERROR_MSG" ;
+  if (!!execStatus(dm_lang_cmd                          )) return "DM_LANG_FMT ERROR_MSG" ;
+  if (!!execStatus(set_lang_cmd                         )) return "SET_LANG_FMT ERROR_MSG" ;
+  if (!!execStatus(set_xkbmap_cmd                       )) return "SET_XKBMAP_FMT ERROR_MSG" ;
 
   return QString("") ;
 }
-
-
-/* PacstrapGuiJob private class constants */
-
-const QString PacstrapGuiJob::WALLPAPER_FMT       = "cp /etc/wallpaper.png %1/etc/" ;
-const QString PacstrapGuiJob::WALLPAPER_ERROR_MSG = "The wallpaper installation command has failed." ;
 
 
 CALAMARES_PLUGIN_FACTORY_DEFINITION(PacstrapGuiJobFactory , registerPlugin<PacstrapGuiJob>() ;)

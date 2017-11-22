@@ -22,6 +22,12 @@
 #include "pacstrap-base.h"
 
 
+/* PacstrapBaseJob private class constants */
+
+const QString PacstrapBaseJob::GRUB_THEME_FMT       = "sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub" ;
+const QString PacstrapBaseJob::GRUB_THEME_ERROR_MSG = "The grub theme installation command has failed." ;
+
+
 /* PacstrapBaseJob public instance methods */
 
 PacstrapBaseJob::PacstrapBaseJob(QObject* parent) : PacstrapCppJob(tr(BASE_JOB_NAME)   ,
@@ -63,12 +69,6 @@ printf("[PACSTRAP-BASE]: grub_theme_cmd OUT:\n"); QProcess::execute(QString("/bi
 
   return QString("") ;
 }
-
-
-/* PacstrapBaseJob private class constants */
-
-const QString PacstrapBaseJob::GRUB_THEME_FMT       = "sed -i 's|[#]GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub" ;
-const QString PacstrapBaseJob::GRUB_THEME_ERROR_MSG = "The grub theme installation command has failed." ;
 
 
 CALAMARES_PLUGIN_FACTORY_DEFINITION(PacstrapBaseJobFactory , registerPlugin<PacstrapBaseJob>() ;)
