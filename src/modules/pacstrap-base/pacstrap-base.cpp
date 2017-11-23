@@ -30,10 +30,10 @@ const QString PacstrapBaseJob::GRUB_THEME_ERROR_MSG = "The grub theme installati
 
 /* PacstrapBaseJob public instance methods */
 
-PacstrapBaseJob::PacstrapBaseJob(QObject* parent) : PacstrapCppJob(tr(BASE_JOB_NAME)   ,
-                                                                   tr(BASE_STATUS_MSG) ,
-                                                                   BASE_JOB_WEIGHT     ,
-                                                                   parent              ) {}
+PacstrapBaseJob::PacstrapBaseJob(QObject* parent) : PacstrapCppJob(BASE_JOB_NAME   ,
+                                                                   BASE_STATUS_MSG ,
+                                                                   BASE_JOB_WEIGHT ,
+                                                                   parent          ) {}
 
 
 /* PacstrapBaseJob protected getters/setters */
@@ -42,8 +42,7 @@ QString PacstrapBaseJob::getPackageList()
 {
   QString init_key = this->globalStorage->value(GS::INITSYSTEM_KEY).toString() ;
 
-  return (this->localStorage.value(BASE_PACKAGES_KEY     ).toStringList() +
-          this->localStorage.value(BOOTLODER_PACKAGES_KEY).toStringList() +
+  return (this->localStorage.value(BOOTLODER_PACKAGES_KEY).toStringList() +
           this->localStorage.value(KERNEL_PACKAGES_KEY   ).toStringList() +
           this->localStorage.value(init_key              ).toStringList() ).join(' ') ;
 }
@@ -53,10 +52,7 @@ QString PacstrapBaseJob::getPackageList()
 
 QString PacstrapBaseJob::chrootExec()
 {
-  QString pacstrap_cmd   = PACSTRAP_FMT  .arg(this->confFile , MOUNTPOINT , packages) ;
   QString grub_theme_cmd = GRUB_THEME_FMT.arg(MOUNTPOINT) ;
-
-  if (!!execStatus(pacstrap_cmd , CHROOT_TASK_PROPORTION)) return PACSTRAP_ERROR_MSG ;
 
 QString grub_theme_kludge_cmd = QString("echo GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt >> %1/etc/default/grub").arg(MOUNTPOINT) ;
 printf("[PACSTRAP-BASE]: grub_theme_cmd=%s\n" , grub_theme_cmd.toStdString().c_str()) ;

@@ -373,13 +373,6 @@ install(
         ${CMAKE_INSTALL_MANDIR}/man8/
 )
 
-install(
-  DIRECTORY
-      ${CMAKE_SOURCE_DIR}/data/skel/
-  DESTINATION
-      ${CMAKE_INSTALL_DATADIR}/calamares/skel/
-)
-
 # uninstall target
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"

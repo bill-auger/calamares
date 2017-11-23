@@ -115,11 +115,3 @@ install( FILES ${CMAKE_CURRENT_BINARY_DIR}/CalamaresConfig.h DESTINATION include
 install( FILES ${rootHeaders}                       DESTINATION include/libcalamares )
 install( FILES ${kdsingleapplicationguardHeaders}   DESTINATION include/libcalamares/kdsingleapplicationguard )
 install( FILES ${utilsHeaders}                      DESTINATION include/libcalamares/utils )
-
-# PacstrapCppJob
-install(
-  DIRECTORY
-      ${CMAKE_SOURCE_DIR}/data/skel/
-  DESTINATION
-      ${CMAKE_INSTALL_DATADIR}/calamares/skel/
-)

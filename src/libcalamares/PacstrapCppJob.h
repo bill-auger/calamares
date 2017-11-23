@@ -37,8 +37,8 @@ class PacstrapCppJob : public Calamares::CppJob
 
 public:
 
-  explicit PacstrapCppJob(QString job_name         , QString  status_msg           ,
-                          qreal   job_weight = 1.0 , QObject* parent     = nullptr ) ;
+  explicit PacstrapCppJob(const char* job_name         , const char* status_msg           ,
+                          qreal       job_weight = 1.0 , QObject*    parent     = nullptr ) ;
   virtual ~PacstrapCppJob() ;
 
   void                 setConfigurationMap(const QVariantMap& config)       override ;
@@ -89,7 +89,6 @@ private:
 
 public:
 
-  static const QString BASE_PACKAGES_KEY ;
   static const QString BOOTLODER_PACKAGES_KEY ;
   static const QString KERNEL_PACKAGES_KEY ;
   static const QString OPENRC_PACKAGES_KEY ;
@@ -113,12 +112,6 @@ protected:
   static const char*      GUI_STATUS_MSG ;
   static const qreal      BASE_JOB_WEIGHT ;
   static const qreal      GUI_JOB_WEIGHT ;
-  static const qreal      PACMAN_SYNC_PROPORTION ;
-  static const qreal      LIST_PACKAGES_PROPORTION ;
-  static const qreal      CHROOT_TASK_PROPORTION ;
-  static const QString    PACSTRAP_CLEANUP_CMD ;
-  static const QString    PACSTRAP_FMT ;
-  static const QString    PACSTRAP_ERROR_MSG ;
   static const QSTRINGMAP LANGUAGE_PACKS ;
 
 
@@ -129,20 +122,26 @@ private:
   static const QString DEFAULT_CONF_FILENAME ;
   static const QString ONLINE_CONF_FILENAME ;
   static const QString OFFLINE_CONF_FILENAME ;
+  static const qreal   PACMAN_SYNC_PROPORTION ;
+  static const qreal   LIST_PACKAGES_PROPORTION ;
+  static const qreal   CHROOT_TASK_PROPORTION ;
   static const QString SYSTEM_EXEC_FMT ;
-//   static const QString KEYRING_CMD ;
+  static const QString PACSTRAP_CLEANUP_CMD ;
+  static const QString KEYRING_CMD ;
   static const QString MOUNT_FMT ;
   static const QString CHROOT_PREP_FMT ;
   static const QString DB_REFRESH_FMT ;
   static const QString LIST_PACKAGES_FMT ;
+  static const QString PACSTRAP_FMT ;
   static const QString UMOUNT_FMT ;
   static const QString CONFIG_ERROR_MSG ;
   static const QString TARGET_ERROR_MSG ;
   static const QString CONFFILE_ERROR_MSG ;
-//   static const QString KEYRING_ERROR_MSG ;
+  static const QString KEYRING_ERROR_MSG ;
   static const QString MOUNT_ERROR_MSG ;
   static const QString CHROOT_PREP_ERROR_MSG ;
   static const QString PACMAN_SYNC_ERROR_MSG ;
+  static const QString PACSTRAP_ERROR_MSG ;
   static const QString UMOUNT_ERROR_MSG ;
   static const QString STATUS_KEY ;
   static const QString STDOUT_KEY ;
@@ -160,11 +159,11 @@ private:
   << " confFile="     << this->confFile                   \
   << " n_packages="   << this->packages.count()           ;
 
-#define DEBUG_TRACE_EXECWITHPROGRESS                                          \
-  cDebug()           << "[PACSTRAP]: shell command exited=" << command_line ; \
-  cDebug()           << "[PACSTRAP]: status="               << status ;       \
-  cDebug(LOGVERBOSE) << "[PACSTRAP]: stdout="               << stdout ;       \
-  cDebug(LOGVERBOSE) << "[PACSTRAP]: stderr="               << stderr         ;
+#define DEBUG_TRACE_EXECWITHPROGRESS                                           \
+  cDebug()           << "[PACSTRAP]: shell command exited=" << command_line ;  \
+  cDebug()           << "[PACSTRAP]: status="               << status ;        \
+  cDebug(LOGVERBOSE) << "[PACSTRAP]: stdout='"              << stdout << "'" ; \
+  cDebug(LOGVERBOSE) << "[PACSTRAP]: stderr='"              << stderr << "'"   ;
 
 #define DEBUG_TRACE_FINDTARGETDEVICE if (!target_device.isEmpty())    \
   cDebug() << "[PACSTRAP]: mounting target_device: " << target_device ;
