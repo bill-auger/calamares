@@ -24,14 +24,12 @@ fi
 
 echo "\n--- running cmake ---\n"
 cd build
-cmake -DCMAKE_BUILD_TYPE=Debug                                               \
-      -DCMAKE_INSTALL_PREFIX=/usr                                            \
-      -DCMAKE_INSTALL_LIBDIR=lib                                             \
-      -DWITH_CRASHREPORTER=OFF                                               \
-      -DSKIP_MODULES="dracut dracutlukscfg dummycpp dummyprocess dummypython \
-                      dummypythonqt grubcfg initramfs initramfscfg           \
-                      interactiveterminal license luksbootkeyfile            \
-                      luksopenswaphookcfg plymouthcfg removeuser webview"    ..
+cmake -DCMAKE_BUILD_TYPE=Debug                                                       \
+      -DCMAKE_INSTALL_PREFIX=/usr                                                    \
+      -DCMAKE_INSTALL_LIBDIR=lib                                                     \
+      -DSKIP_MODULES="dracut dracutlukscfg dummycpp dummyprocess dummypython         \
+                      dummypythonqt grubcfg initramfs initramfscfg tracking          \
+                      interactiveterminal license plymouthcfg removeuser webview" ..
 
 
 echo "\n--- running make uninstall ---\n"
