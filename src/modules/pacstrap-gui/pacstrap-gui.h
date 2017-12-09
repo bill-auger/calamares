@@ -46,7 +46,7 @@ private:
 //   static const QString WALLPAPER_ERROR_MSG ;
   static const QString GET_XKBMAP_CMD ;
   static const QString SKEL_DIR ;
-  static const QString CHROOT_SKEL_DIR ;
+//   static const QString CHROOT_SKEL_DIR ;
 //   static const QString SKEL_FMT ;
 //   static const QString SET_PROMPT_FMT ;
   static const QString SET_EDITOR_FMT ;

@@ -65,9 +65,12 @@ protected:
   qreal                     jobWeight ;
   Calamares::GlobalStorage* globalStorage ;
   QVariantMap               localStorage ;
+  QString                   mountPoint ;
   QString                   targetDevice ;
   QString                   confFile ;
   QString                   packages ;
+  QDir                      cacheDir ;
+  QDir                      metedataDir ;
   qint16                    nPreviousPackages ;
   qint16                    nPendingPackages ;
   qreal                     progressPercent ;
@@ -75,14 +78,13 @@ protected:
 
 private:
 
-  static inline void                 Teardown          () ;
   static        QString              FindTargetDevice  (const QVariantList& partitions) ;
-  static        qint16               NPackagesInstalled() ;
   static inline Calamares::JobResult JobError          (QString error_msg) ;
   static inline Calamares::JobResult JobSuccess        () ;
 
-  qreal emitProgress     (qreal transient_percent) ;
-  qreal getTaskCompletion() ;
+  qint16 nPackagesInstalled() ;
+  qreal  emitProgress      (qreal transient_percent) ;
+  qreal  getTaskCompletion () ;
 
 
   /* constants */
@@ -96,7 +98,7 @@ public:
   static const QString APPLICATIONS_PACKAGES_KEY ;
   static const QString MULTIMEDIA_PACKAGES_KEY ;
   static const QString NETWORK_PACKAGES_KEY ;
-  static const QString THEMES_PACKAGES_KEY ;
+  static const QString LOOKANDFEEL_PACKAGES_KEY ;
   static const QString UTILITIES_PACKAGES_KEY ;
   static const QString XSERVER_PACKAGES_KEY ;
   static const QString LXDE_PACKAGES_KEY ;
@@ -105,7 +107,7 @@ public:
 
 protected:
 
-  static const QString    MOUNTPOINT ;
+//   static const QString    MOUNTPOINT ;
   static const char*      BASE_JOB_NAME ;
   static const char*      GUI_JOB_NAME ;
   static const char*      BASE_STATUS_MSG ;
@@ -117,8 +119,8 @@ protected:
 
 private:
 
-  static const QDir    PACKAGES_CACHE_DIR ;
-  static const QDir    PACKAGES_METADATA_DIR ;
+  static const QString PACKAGES_CACHE_DIR_FMT ;
+  static const QString PACKAGES_METADATA_DIR_FMT ;
   static const QString DEFAULT_CONF_FILENAME ;
   static const QString ONLINE_CONF_FILENAME ;
   static const QString OFFLINE_CONF_FILENAME ;
@@ -155,6 +157,7 @@ private:
   << " job_name="     << this->jobName                    \
   << " has_isorepo="  << has_isorepo                      \
   << " is_online="    << is_online                        \
+  << " mountPoint="   << this->mountPoint                 \
   << " targetDevice=" << this->targetDevice               \
   << " confFile="     << this->confFile                   \
   << " n_packages="   << this->packages.count()           ;
@@ -175,7 +178,7 @@ private:
 
 #define DEBUG_TRACE_GETTASKCOMPLETION cDebug(LOGVERBOSE) << "[PACSTRAP]: " << \
   "this->nPreviousPackages=" << this->nPreviousPackages                    << \
-  " NPackagesInstalled()="   << NPackagesInstalled()                       << \
+  " nPackagesInstalled()="   << nPackagesInstalled()                       << \
   "\n                          "                                           << \
   "n_new_packages="          << (int)n_new_packages                        << \
   " this->nPendingPackages=" << this->nPendingPackages                     << \

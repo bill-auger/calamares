@@ -34,7 +34,7 @@ const QString PacstrapCppJob::SYSTEMD_PACKAGES_KEY      = "systemd" ;
 const QString PacstrapCppJob::APPLICATIONS_PACKAGES_KEY = "applications" ;
 const QString PacstrapCppJob::MULTIMEDIA_PACKAGES_KEY   = "multimedia" ;
 const QString PacstrapCppJob::NETWORK_PACKAGES_KEY      = "network" ;
-const QString PacstrapCppJob::THEMES_PACKAGES_KEY       = "themes" ;
+const QString PacstrapCppJob::LOOKANDFEEL_PACKAGES_KEY  = "look-and-feel" ;
 const QString PacstrapCppJob::UTILITIES_PACKAGES_KEY    = "utilities" ;
 const QString PacstrapCppJob::XSERVER_PACKAGES_KEY      = "x-server" ;
 const QString PacstrapCppJob::LXDE_PACKAGES_KEY         = "lxde" ;
@@ -43,7 +43,7 @@ const QString PacstrapCppJob::MATE_PACKAGES_KEY         = "mate" ;
 
 /* PacstrapCppJob protected class constants */
 
-const QString    PacstrapCppJob::MOUNTPOINT      = "/tmp/pacstrap" ;
+// const QString    PacstrapCppJob::MOUNTPOINT      = "/tmp/pacstrap" ;
 const char*      PacstrapCppJob::BASE_JOB_NAME   = "Pacstrap Base C++ Job" ;
 const char*      PacstrapCppJob::GUI_JOB_NAME    = "Pacstrap Desktop C++ Job" ;
 const char*      PacstrapCppJob::BASE_STATUS_MSG = "Installing root filesystem" ;
@@ -67,31 +67,35 @@ const QSTRINGMAP PacstrapCppJob::LANGUAGE_PACKS  = { {"eo"          , "iceweasel
 
 /* PacstrapCppJob private class constants */
 
-const QDir    PacstrapCppJob::PACKAGES_CACHE_DIR       = QDir(MOUNTPOINT + "/var/cache/pacman/pkg") ;
-const QDir    PacstrapCppJob::PACKAGES_METADATA_DIR    = QDir(MOUNTPOINT + "/var/lib/pacman/local") ;
-const QString PacstrapCppJob::DEFAULT_CONF_FILENAME    = "/etc/pacman.conf" ;
+// const QDir    PacstrapCppJob::PACKAGES_CACHE_DIR       = QDir(MOUNTPOINT + "/var/cache/pacman/pkg") ;
+// const QDir    PacstrapCppJob::PACKAGES_METADATA_DIR    = QDir(MOUNTPOINT + "/var/lib/pacman/local") ;
+const QString PacstrapCppJob::PACKAGES_CACHE_DIR_FMT    = "%1/var/cache/pacman/pkg" ;
+const QString PacstrapCppJob::PACKAGES_METADATA_DIR_FMT = "%1/var/lib/pacman/local" ;
+const QString PacstrapCppJob::DEFAULT_CONF_FILENAME     = "/etc/pacman.conf" ;
 const QString PacstrapCppJob::ONLINE_CONF_FILENAME     = "/etc/pacman-online.conf" ;
 const QString PacstrapCppJob::OFFLINE_CONF_FILENAME    = "/etc/pacman-offline.conf" ;
 const qreal   PacstrapCppJob::PACMAN_SYNC_PROPORTION   = 0.05 ; // per task progress-bar proportion
 const qreal   PacstrapCppJob::LIST_PACKAGES_PROPORTION = 0.05 ; // per task progress-bar proportion
 const qreal   PacstrapCppJob::CHROOT_TASK_PROPORTION   = 0.9 ;  // per task progress-bar proportion
 const QString PacstrapCppJob::SYSTEM_EXEC_FMT          = "/bin/sh -c \"%1\"" ;
-const QString PacstrapCppJob::PACSTRAP_CLEANUP_CMD     = QString("umount %1/dev/pts %1/dev/shm %1/dev %1/proc %1/run %1/sys %1/tmp %1 2> /dev/null").arg(MOUNTPOINT) ;
-const QString PacstrapCppJob::MOUNT_FMT                = "mkdir %2 2> /dev/null || true && mount %1 %2" ;
+const QString PacstrapCppJob::PACSTRAP_CLEANUP_CMD     = "umount %1/dev/pts %1/dev/shm %1/dev %1/proc %1/run %1/sys %1/tmp %1 2> /dev/null" ;
+// const QString PacstrapCppJob::MOUNT_FMT                = "mkdir %2 2> /dev/null || true && mount %1 %2" ;
 const QString PacstrapCppJob::CHROOT_PREP_FMT          = "mkdir -m 0755 -p {%1,%2}" ;
 const QString PacstrapCppJob::DB_REFRESH_FMT           = "pacman -S --print --config %1 --root %2 --refresh" ;
 const QString PacstrapCppJob::LIST_PACKAGES_FMT        = "pacman -S --print --config %1 --root %2 %3" ;
 const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap -C %1 %2 %3 --noprogressbar" ;
 // const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm parabola-keyring" ;
-const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm parabola-keyring       \
-                                                                                 archlinux-keyring      \
-                                                                                 archlinux32-keyring && \
-                                                          pacman-key --init                          && \
-                                                          pacman-key --populate parabola                \
-                                                                                archlinux               \
-                                                                                archlinux32          && \
-                                                          pacman-key --refresh-keys                     " ;
-const QString PacstrapCppJob::UMOUNT_FMT               = "umount %1" ;
+const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm archlinux-keyring       \
+                                                                                 archlinux32-keyring     \
+                                                                                 archlinuxarm-keyring    \
+                                                                                 parabola-keyring     && \
+                                                          pacman-key --init                           && \
+                                                          pacman-key --populate archlinux                \
+                                                                                archlinux32              \
+                                                                                archlinuxarm             \
+                                                                                parabola              && \
+                                                          pacman-key --refresh-keys                      " ;
+// const QString PacstrapCppJob::UMOUNT_FMT               = "umount %1" ;
 const QString PacstrapCppJob::CONFIG_ERROR_MSG         = "Invalid configuration map." ;
 const QString PacstrapCppJob::TARGET_ERROR_MSG         = "Target device for root filesystem is unspecified." ;
 const QString PacstrapCppJob::CONFFILE_ERROR_MSG       = "Pacman configuration not found: '%1'." ;
@@ -99,8 +103,8 @@ const QString PacstrapCppJob::KEYRING_ERROR_MSG        = "Failed to update the p
 const QString PacstrapCppJob::MOUNT_ERROR_MSG          = "Failed to mount the pacstrap chroot." ;
 const QString PacstrapCppJob::CHROOT_PREP_ERROR_MSG    = "Failed to prepare the pacstrap chroot." ;
 const QString PacstrapCppJob::PACMAN_SYNC_ERROR_MSG    = "Failed to syncronize packages in the pacstrap chroot." ;
-const QString PacstrapCppJob::PACSTRAP_ERROR_MSG       = "Failed to install packages in chroot." ;
-const QString PacstrapCppJob::UMOUNT_ERROR_MSG         = "Failed to unmount the pacstrap chroot." ;
+const QString PacstrapCppJob::PACSTRAP_ERROR_MSG       = "Failed to install packages in chroot. " ;
+// const QString PacstrapCppJob::UMOUNT_ERROR_MSG         = "Failed to unmount the pacstrap chroot." ;
 const QString PacstrapCppJob::STATUS_KEY               = QString("status") ;
 const QString PacstrapCppJob::STDOUT_KEY               = QString("stdout") ;
 const QString PacstrapCppJob::STDERR_KEY               = QString("stderr") ;
@@ -115,9 +119,12 @@ PacstrapCppJob::PacstrapCppJob(const char* job_name   , const char* status_msg ,
 {
   this->globalStorage     = Calamares::JobQueue::instance()->globalStorage() ;
   this->localStorage      = QVariantMap() ; // deferred to setConfigurationMap()
+  this->mountPoint        = QString("") ;   // deferred to exec()
   this->targetDevice      = QString("") ;   // deferred to exec()
   this->confFile          = QString("") ;   // deferred to exec()
   this->packages          = QString("") ;   // deferred to exec()
+  this->cacheDir          = QDir("") ;      // deferred to exec()
+  this->metedataDir       = QDir("") ;      // deferred to exec()
   this->nPreviousPackages = 0 ;             // deferred to exec()
   this->nPendingPackages  = 0 ;             // deferred to exec()
   this->progressPercent   = 0 ;
@@ -147,15 +154,20 @@ globalStorage->insert(GS::DESKTOP_KEY    , LXDE_PACKAGES_KEY   ) ; // TODO: per 
 // globalStorage->insert(GS::DESKTOP_KEY    , MATE_PACKAGES_KEY   ) ; // TODO: per user option via globalStorage
 
   // cleanup from possibly aborted previous runs
-  Teardown() ;
+//   Teardown() ;
 
-  QVariantList partitions  = this->globalStorage->value(GS::PARTITIONS_KEY ).toList() ;
-  bool         has_isorepo = this->globalStorage->value(GS::HAS_ISOREPO_KEY).toBool() ;
-  bool         is_online   = this->globalStorage->value(GS::IS_ONLINE_KEY  ).toBool() ;
+  QVariantList partitions  = this->globalStorage->value(GS::PARTITIONS_KEY     ).toList() ;
+  bool         has_isorepo = this->globalStorage->value(GS::HAS_ISOREPO_KEY    ).toBool() ;
+  bool         is_online   = this->globalStorage->value(GS::IS_ONLINE_KEY      ).toBool() ;
+  this->mountPoint         = this->globalStorage->value(GS::ROOT_MOUNTPOINT_KEY).toString() ;
   this->targetDevice       = FindTargetDevice(partitions) ;
   this->confFile           = (!has_isorepo) ? DEFAULT_CONF_FILENAME :
                              (is_online   ) ? ONLINE_CONF_FILENAME  : OFFLINE_CONF_FILENAME ;
   this->packages           = getPackageList() ;
+  this->cacheDir           = QDir(PACKAGES_CACHE_DIR_FMT   .arg(this->mountPoint)) ;
+  this->metedataDir        = QDir(PACKAGES_METADATA_DIR_FMT.arg(this->mountPoint)) ;
+  QString cache_path       = this->cacheDir   .absolutePath() ;
+  QString metadata_path    = this->metedataDir.absolutePath() ;
 
 DEBUG_TRACE_EXEC
 
@@ -164,15 +176,14 @@ DEBUG_TRACE_EXEC
   if (!QFile(this->confFile).exists()) return JobError(CONFFILE_ERROR_MSG.arg(this->confFile)) ;
 
 //   QString keyring_cmd       = KEYRING_CMD ;
-  QString mount_cmd         = MOUNT_FMT        .arg(this->targetDevice , MOUNTPOINT) ;
-  QString chroot_prep_cmd   = CHROOT_PREP_FMT  .arg(PACKAGES_CACHE_DIR   .absolutePath() ,
-                                                    PACKAGES_METADATA_DIR.absolutePath() ) ;
-  QString pacman_sync_cmd   = DB_REFRESH_FMT   .arg(this->confFile , MOUNTPOINT) ;
-  QString list_packages_cmd = LIST_PACKAGES_FMT.arg(this->confFile , MOUNTPOINT , this->packages) ;
-  QString umount_cmd        = UMOUNT_FMT       .arg(this->targetDevice) ;
+//   QString mount_cmd         = MOUNT_FMT        .arg(this->targetDevice , this->mountPoint) ;
+  QString chroot_prep_cmd   = CHROOT_PREP_FMT  .arg(cache_path , metadata_path) ;
+  QString pacman_sync_cmd   = DB_REFRESH_FMT   .arg(this->confFile , this->mountPoint) ;
+  QString list_packages_cmd = LIST_PACKAGES_FMT.arg(this->confFile , this->mountPoint , this->packages) ;
+//   QString umount_cmd        = UMOUNT_FMT       .arg(this->targetDevice) ;
 
 //   if (!!execStatus(keyring_cmd    )) return JobError(KEYRING_ERROR_MSG) ;
-  if (!!execStatus(mount_cmd                               )) return JobError(MOUNT_ERROR_MSG      ) ;
+//   if (!!execStatus(mount_cmd                               )) return JobError(MOUNT_ERROR_MSG      ) ;
   if (!!execStatus(chroot_prep_cmd                         )) return JobError(CHROOT_PREP_ERROR_MSG) ;
   if (!!execStatus(pacman_sync_cmd , PACMAN_SYNC_PROPORTION)) return JobError(PACMAN_SYNC_ERROR_MSG) ;
 
@@ -182,15 +193,17 @@ DEBUG_TRACE_EXEC
     int         status       = result.value(STATUS_KEY).toInt() ;
     QString     new_packages = result.value(STDOUT_KEY).toString() ;
     QString     stderr       = result.value(STDERR_KEY).toString() ;
-    this->nPreviousPackages  = NPackagesInstalled() ;
+    this->nPreviousPackages  = nPackagesInstalled() ;
     this->nPendingPackages   = new_packages.count(QChar::LineFeed) ;
 
     if (!!status) return JobError(stderr) ;
 
     if (this->nPendingPackages > 0)
     {
-      QString pacstrap_cmd   = PACSTRAP_FMT.arg(this->confFile , MOUNTPOINT , this->packages) ;
-      QString pacstrap_error = execError(pacstrap_cmd , CHROOT_TASK_PROPORTION) ;
+      QString     pacstrap_cmd    = PACSTRAP_FMT.arg(this->confFile , this->mountPoint , this->packages) ;
+      QVariantMap pacstrap_result = execWithProgress(pacstrap_cmd , CHROOT_TASK_PROPORTION) ;
+      int         pacstrap_status = pacstrap_result.value(STATUS_KEY).toInt() ;
+      QString     pacstrap_error  = pacstrap_result.value(STDERR_KEY).toString().trimmed() ;
 
       if (pacstrap_error.contains("signature"))
       {
@@ -199,11 +212,11 @@ DEBUG_TRACE_EXEC
         if (!!execStatus(KEYRING_CMD , CHROOT_TASK_PROPORTION * 0.5))
           return JobError(KEYRING_ERROR_MSG) ;
 
-        pacstrap_error = execError(pacstrap_cmd , CHROOT_TASK_PROPORTION * 0.5) ;
-
-        if (pacstrap_error.contains("signature"))
-          return JobError(PACSTRAP_ERROR_MSG + pacstrap_error) ;
+        pacstrap_result = execWithProgress(pacstrap_cmd , CHROOT_TASK_PROPORTION * 0.5) ;
+        pacstrap_status = pacstrap_result.value(STATUS_KEY).toInt() ;
+        pacstrap_error  = pacstrap_result.value(STDERR_KEY).toString().trimmed() ;
       }
+      if (!!pacstrap_status) return JobError(PACSTRAP_ERROR_MSG + pacstrap_error) ;
 
       QString exec_error_msg = chrootExec() ;
 
@@ -212,8 +225,9 @@ DEBUG_TRACE_EXEC
     }
   }
 
-  if (!execStatus(umount_cmd)) this->progressPercent = emitProgress(1.0) ;
-  else                         return JobError(UMOUNT_ERROR_MSG) ;
+//   if (!execStatus(umount_cmd)) this->progressPercent = emitProgress(1.0) ;
+//   else                         return JobError(UMOUNT_ERROR_MSG) ;
+  this->progressPercent = emitProgress(1.0) ;
 
   return JobSuccess() ;
 }
@@ -255,7 +269,7 @@ DEBUG_TRACE_EXECWITHPROGRESS
   retval.insert(STDERR_KEY , QVariant(stderr)) ;
 
   return retval ;
-} ;
+}
 
 int PacstrapCppJob::execStatus(QString command_line , qreal task_proportion)
 {
@@ -284,8 +298,6 @@ QString PacstrapCppJob::execError(QString command_line , qreal task_proportion)
 
 /* PacstrapCppJob private class methods */
 
-void PacstrapCppJob::Teardown() { QProcess::execute(SYSTEM_EXEC_FMT.arg(PACSTRAP_CLEANUP_CMD)) ; }
-
 QString PacstrapCppJob::FindTargetDevice(const QVariantList& partitions)
 {
   QString target_device = QString("") ;
@@ -307,17 +319,11 @@ DEBUG_TRACE_FINDTARGETDEVICE
   return target_device ;
 }
 
-qint16 PacstrapCppJob::NPackagesInstalled()
-{
-  int n_downloaded = PACKAGES_CACHE_DIR   .entryList(QDir::Files | QDir::NoDotAndDotDot).count() ;
-  int n_installed  = PACKAGES_METADATA_DIR.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).count() ;
-
-  return (n_downloaded + n_installed) / 2 ;
-}
-
 Calamares::JobResult PacstrapCppJob::JobError(QString error_msg)
 {
-  Teardown() ;
+//   Calamares::GlobalStorage* global_storage = Calamares::JobQueue::instance()->globalStorage() ;
+//   QString                   mountpoint     = global_storage.value(GS::ROOT_MOUNTPOINT_KEY).toString() ;
+//   QProcess::execute(SYSTEM_EXEC_FMT.arg(PACSTRAP_CLEANUP_CMD.arg(mountpoint))) ;
 
   return Calamares::JobResult::error(error_msg) ;
 }
@@ -329,6 +335,14 @@ Calamares::JobResult PacstrapCppJob::JobSuccess()
 
 
 /* PacstrapCppJob private instance methods */
+
+qint16 PacstrapCppJob::nPackagesInstalled()
+{
+  int n_downloaded = this->cacheDir   .entryList(QDir::Files | QDir::NoDotAndDotDot).count() ;
+  int n_installed  = this->metedataDir.entryList(QDir::Dirs  | QDir::NoDotAndDotDot).count() ;
+
+  return (n_downloaded + n_installed) / 2 ;
+}
 
 qreal PacstrapCppJob::emitProgress(qreal transient_percent)
 {
@@ -345,7 +359,7 @@ qreal PacstrapCppJob::getTaskCompletion()
 {
   if (this->nPendingPackages == 0) return 0.0 ;
 
-  qreal n_new_packages     = qreal(NPackagesInstalled() - this->nPreviousPackages) ;
+  qreal n_new_packages     = qreal(nPackagesInstalled() - this->nPreviousPackages) ;
   qreal completion_percent = qreal(n_new_packages       / this->nPendingPackages ) ;
 
 DEBUG_TRACE_GETTASKCOMPLETION

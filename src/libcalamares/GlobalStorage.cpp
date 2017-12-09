@@ -173,6 +173,7 @@ const QString GS::INITSYSTEM_KEY = "default-initsystem" ;
 const QString GS::DESKTOP_KEY = "default-desktop" ;
 const QString GS::LOCALE_KEY = "localeConf";
 const QString GS::LANG_KEY = "LANG";
+const QString GS::ROOT_MOUNTPOINT_KEY = "rootMountPoint";
 const QString GS::PARTITIONS_KEY = "partitions";
 const QString GS::DEVICE_KEY = "device";
 const QString GS::FS_KEY = "fs";

@@ -110,6 +110,7 @@ public:
   static const QString DESKTOP_KEY;
   static const QString LOCALE_KEY;
   static const QString LANG_KEY;
+  static const QString ROOT_MOUNTPOINT_KEY;
   static const QString PARTITIONS_KEY;
   static const QString DEVICE_KEY;
   static const QString FS_KEY;
