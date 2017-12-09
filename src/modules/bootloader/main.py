@@ -213,12 +213,16 @@ def install_grub(efi_directory, fw_type):
     :param fw_type:
     """
     import json
+
+
     print("bootloader::install_grub()" + fw_type)
     print("bootloader::install_grub() boot_loader=" + json.dumps(libcalamares.globalstorage.value("bootLoader")))
     if libcalamares.globalstorage.value("bootLoader") != None:
-      print("bootloader::install_grub() boot_loader=" + json.dumps(libcalamares.globalstorage.value("bootLoader")["installPath"]))
+      print("bootloader::install_grub() installPath=" + json.dumps(libcalamares.globalstorage.value("bootLoader")["installPath"]))
     print("bootloader::install_grub() grubMkconfig=" + libcalamares.job.configuration["grubMkconfig"])
     print("bootloader::install_grub() grubCfg=" + libcalamares.job.configuration["grubCfg"])
+
+
     if fw_type == "efi":
         print("Bootloader: grub (efi)")
         install_path = libcalamares.globalstorage.value("rootMountPoint")

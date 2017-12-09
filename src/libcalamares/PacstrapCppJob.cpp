@@ -83,12 +83,13 @@ const QString PacstrapCppJob::PACSTRAP_CLEANUP_CMD     = "umount %1/dev/pts %1/d
 const QString PacstrapCppJob::CHROOT_PREP_FMT          = "mkdir -m 0755 -p {%1,%2}" ;
 const QString PacstrapCppJob::DB_REFRESH_FMT           = "pacman -S --print --config %1 --root %2 --refresh" ;
 const QString PacstrapCppJob::LIST_PACKAGES_FMT        = "pacman -S --print --config %1 --root %2 %3" ;
-const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap-calamares -C %1 %2 %3 --noprogressbar" ;
+const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap-calamares -M -C %1 %2 %3 --noprogressbar" ;
 // const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm parabola-keyring" ;
 const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm archlinux-keyring       \
                                                                                  archlinux32-keyring     \
                                                                                  archlinuxarm-keyring    \
                                                                                  parabola-keyring     && \
+                                                          rm -rf /etc/pacman.d/gnupg/                 && \
                                                           pacman-key --init                           && \
                                                           pacman-key --populate archlinux                \
                                                                                 archlinux32              \
@@ -191,6 +192,8 @@ DEBUG_TRACE_EXEC
 //   if (!!execStatus(mount_cmd                               )) return JobError(MOUNT_ERROR_MSG      ) ;
   if (!!execStatus(chroot_prep_cmd                         )) return JobError(CHROOT_PREP_ERROR_MSG) ;
   if (!!execStatus(pacman_sync_cmd , PACMAN_SYNC_PROPORTION)) return JobError(PACMAN_SYNC_ERROR_MSG) ;
+
+execStatus(QString("touch %1/etc/os-release").arg(this->mountPoint)) ; //FIXME:
 
   if (!this->packages.isEmpty())
   {

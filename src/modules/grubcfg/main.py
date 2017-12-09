@@ -57,6 +57,10 @@ def modify_grub_default(partitions, root_mount_point, distributor):
 
     cryptdevice_params = []
 
+
+    print("modify_grub_default() root_mount_point=" + root_mount_point + " have_dracut=" + str(have_dracut))
+
+
     if have_dracut:
         for partition in partitions:
             has_luks = "luksMapperName" in partition
@@ -76,6 +80,10 @@ def modify_grub_default(partitions, root_mount_point, distributor):
             has_luks = "luksMapperName" in partition
             if partition["fs"] == "linuxswap" and not has_luks:
                 swap_uuid = partition["uuid"]
+
+
+            print("modify_grub_default() partition[device]=" + partition["device"] + " partition[mountPoint]=" + partition["mountPoint"] + " has_luks=" + str(has_luks))
+
 
             if (partition["mountPoint"] == "/" and has_luks):
                 cryptdevice_params = [
@@ -119,6 +127,10 @@ def modify_grub_default(partitions, root_mount_point, distributor):
         overwrite = libcalamares.job.configuration["overwrite"]
     else:
         overwrite = False
+
+
+    print("modify_grub_default() cryptdevice_params=" + str(cryptdevice_params) + " default_grub=" + default_grub + " os.path.exists(default_grub)=" + str(os.path.exists(default_grub)) + " overwrite=" + str(overwrite))
+
 
     if os.path.exists(default_grub) and not overwrite:
         with open(default_grub, 'r') as grub_file:
@@ -201,6 +213,10 @@ def run():
     """
 
     fw_type = libcalamares.globalstorage.value("firmwareType")
+
+
+    print("grub run() bootLoader(is None)=" + str(libcalamares.globalstorage.value("bootLoader") is None) + " fw_type=" + fw_type + " efiSystemPartition=" + libcalamares.globalstorage.value("efiSystemPartition"))
+
 
     if (libcalamares.globalstorage.value("bootLoader") is None
             and fw_type != "efi"):

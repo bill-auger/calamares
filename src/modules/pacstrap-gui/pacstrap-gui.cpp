@@ -38,7 +38,7 @@ const QString PacstrapGuiJob::SET_LANG_FMT      = "echo 'export LANG=%1'        
 const QString PacstrapGuiJob::SET_XKBMAP_FMT    = "echo 'setxkbmap %1'               >> %2/etc/skel/.bashrc" ;
 const QString PacstrapGuiJob::DM_DESKTOP_FMT    = "sed -i 's|^Session=.*|Session=%1|'   %2/etc/skel/.dmrc" ;
 const QString PacstrapGuiJob::DM_LANG_FMT       = "sed -i 's|^Language=.*|Language=%1|' %2/etc/skel/.dmrc" ;
-const QString PacstrapGuiJob::WELCOME_TITLE_FMT = "sed -i 's|_EDITION_TITLE_|${WELCOME_TITLE}|' %1/etc/skel/.config/autostart/autostart.sh" ;
+const QString PacstrapGuiJob::WELCOME_TITLE_FMT = "sed -i 's|_EDITION_TITLE_|Parabola Welcome|' %1/etc/skel/.config/autostart/autostart.sh" ;
 const QString PacstrapGuiJob::OCTOPI_FMT        = "rm -f %1/etc/xdg/autostart/octopi-notifier.desktop" ;
 
 
