@@ -1,18 +1,35 @@
 #!/bin/bash
 
-
-sudo echo "\n--- running pacman ---\n"
-BASE_PKGS="$(pacman -Qg base-devel | cut -d ' ' -f 2)"
-CALAMARES_PKGS="boost extra-cmake-modules git kpmcore qt5-tools polkit-qt5 yaml-cpp" # squashfs-tools os-prober
-PARABOLA_PKGS="arch-install-scripts"
-PKGS="$BASE_PKGS $CALAMARES_PKGS $PARABOLA_PKGS"
-pacman -Qi calamares > /dev/null 2>&1 && sudo pacman -R calamares
-pacman -Qi $PKGS > /dev/null || sudo pacman -S --needed $PKGS
+readonly NO_UPGRADE=1
+readonly RUN_INSTALLED=1
+# [ "`lsmod | grep squashfs`" ] || sudo modprobe squashfs
 
 
-echo "\n--- preparing build environment ---\n"
-if [ ! -d build ]
-then mkdir build
+function print() { printf "\033[01;34m%s\033[00m\n" "$(echo -e $*)" ; }
+
+
+sudo echo
+if pacman --version 2> /dev/null | grep libalpm > /dev/null
+then print "\n--- running pacman ---\n"
+     BASE_PKGS="$(pacman -Qg base-devel | cut -d ' ' -f 2)"
+     CALAMARES_PKGS="boost extra-cmake-modules git kconfig kpmcore kservice kwindowsystem \
+                     plasma-framework qt5-tools polkit-qt5 yaml-cpp" # squashfs-tools os-prober
+#      PARABOLA_PKGS="arch-install-scripts"
+     PKGS="$BASE_PKGS $CALAMARES_PKGS $PARABOLA_PKGS"
+     pacman -Qi calamares > /dev/null 2>&1 && sudo pacman -R calamares
+     pacman -Qi $PKGS > /dev/null && (($NO_UPGRADE)) || sudo pacman -Sy --needed $PKGS || exit 1
+elif which apt-get &> /dev/null
+then print "\n--- running apt ---\n"
+     apt-get install extra-cmake-modules libatasmart-dev libboost-python-dev \
+                     libkf5coreaddons-dev libkf5kio-dev libkf5plasma-dev     \
+                     libkf5service-dev libkpmcore4-dev libparted-dev         \
+                     libpolkit-qt5-1-dev qtdeclarative5-dev                    || exit 1
+fi
+
+
+if [ ! -d ./build ]
+then print "\n--- preparing build environment ---\n"
+     mkdir ./build
 # else rm -f build/Makefile 2> /dev/null
 fi
 # if [ ! -d /etc/calamares/ ]
@@ -22,27 +39,46 @@ fi
 # fi
 
 
-echo "\n--- running cmake ---\n"
-cd build
-cmake -DCMAKE_BUILD_TYPE=Debug                                                    \
-      -DCMAKE_INSTALL_PREFIX=/usr                                                 \
-      -DCMAKE_INSTALL_LIBDIR=lib                                                  \
-      -DSKIP_MODULES="dracut dracutlukscfg dummycpp dummyprocess dummypython      \
-                      dummypythonqt initramfs initramfscfg interactiveterminal    \
-                      license plymouthcfg removeuser tracking webview"         ..
+print "\n--- running cmake ---\n"
+cd ./build
+cmake -DCMAKE_BUILD_TYPE=Debug                                                       \
+      -DCMAKE_INSTALL_PREFIX=/usr                                                    \
+      -DCMAKE_INSTALL_LIBDIR=lib                                                     \
+      -DSKIP_MODULES="dracut dracutlukscfg dummycpp dummyprocess dummypython         \
+                      dummypythonqt grubcfg initramfs initramfscfg tracking          \
+                      interactiveterminal license plymouthcfg removeuser webview" ..
 
 
-echo "\n--- running make uninstall ---\n"
-[ -d /usr/share/calamares/ ] && sudo make uninstall
-sudo rm -rf /usr/share/calamares/
+if [ -d /usr/share/calamares/ -o -f /usr/bin/calamares ]
+then print "\n--- running make uninstall ---\n"
+     sudo make uninstall
+     sudo rm -rf /usr/share/calamares/ /usr/bin/calamares
+fi
 
 
-echo "\n--- running make install ---\n"
-[ -f Makefile  ] && sudo make install
+if [ ! -f Makefile ]
+then print "\n--- Makefile does not exist - bailing ---\n"
+     cd ..
+     exit 1
+fi
+
+
+if (($RUN_INSTALLED))
+then print "\n--- running make install ---\n"
+     sudo make install
+else print "\n--- running make ---\n"
+     make
+fi
 cd ..
 
 
-echo "\n--- launching calamares ---\n"
-# [ "`lsmod | grep squashfs`" ] || sudo modprobe squashfs
-[ -f /usr/bin/calamares     ] && sudo calamares
-# [ -f build/calamares        ] && sudo build/calamares
+if (($RUN_INSTALLED)) && [ -f /usr/bin/calamares ]
+then print "\n--- launching calamares installed ---\n"
+     sudo calamares
+elif [ -f build/calamares ]
+then print "\n--- launching calamares uninstalled ---\n"
+     cp ./settings.conf ./build
+     cd ./build
+     sudo ./calamares -d
+     cd ..
+fi
