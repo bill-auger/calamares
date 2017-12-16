@@ -29,6 +29,7 @@
 
 #include <QApplication>
 #include <QBoxLayout>
+#include <QFile>
 #include <QMessageBox>
 #include <QMetaObject>
 
@@ -186,6 +187,30 @@ ViewManager::onInstallationFailed( const QString& message, const QString& detail
     if ( !details.isEmpty() )
         text += "<p>" + details + "</p>";
     msgBox->setInformativeText( text );
+
+    // parabola ISO bug report notice
+    if (QFile::exists("/home/parabola/Desktop/parabola-installer.desktop"))
+    {
+        QFile::copy(Logger::logFile(), "/home/parabola/Desktop/install.log");
+
+        text =  "A file named 'install.log' has been placed on the desktop which could be ";
+#ifndef NYI // TODO:
+        text += "useful in diagnosing the cause of this failure. ";
+        text += "You can open a bug report by logging into the Parabola Bug Tracker ";
+        text += "(the 'Report a Bug' desktop shortcut). If you do file a bug report, ";
+#else // NYI
+        text += "useful in diagnosing the cause of this failure. The \"Report Bug\" ";
+        text += "button below will send the 'install.log' to Parabola anonymously. ";
+        text += "If you would like to receive email regarding this issue, then you can ";
+        text += "(the 'Report a Bug' desktop shortcut). If you do file a bug report manually, ";
+#endif // NYI
+        text += "please include the 'Reason' given below in the bug report description; ";
+        text += "and use the \"Choose Files\" button to attach the 'install.log' file.";
+        text += "<p>Reason:<br />" + message + "</p>";
+        if ( !details.isEmpty() )
+            text += "<p>Details:<br />" + details + "</p>";
+        msgBox->setInformativeText( text );
+    }
 
     connect( msgBox, &QMessageBox::buttonClicked, qApp, &QApplication::quit );
     cLog() << "Calamares will quit when the dialog closes.";

@@ -41,12 +41,12 @@ fi
 
 print "\n--- running cmake ---\n"
 cd ./build
-cmake -DCMAKE_BUILD_TYPE=Debug                                                       \
-      -DCMAKE_INSTALL_PREFIX=/usr                                                    \
-      -DCMAKE_INSTALL_LIBDIR=lib                                                     \
-      -DSKIP_MODULES="dracut dracutlukscfg dummycpp dummyprocess dummypython         \
-                      dummypythonqt grubcfg initramfs initramfscfg tracking          \
-                      interactiveterminal license plymouthcfg removeuser webview" ..
+cmake -DCMAKE_BUILD_TYPE=Debug                                                 \
+      -DCMAKE_INSTALL_PREFIX=/usr                                              \
+      -DCMAKE_INSTALL_LIBDIR=lib                                               \
+      -DSKIP_MODULES="dracut dracutlukscfg dummycpp dummyprocess dummypython   \
+                      dummypythonqt initramfs initramfscfg interactiveterminal \
+                      license plymouthcfg removeuser tracking webview"           ..
 
 
 if [ -d /usr/share/calamares/ -o -f /usr/bin/calamares ]
