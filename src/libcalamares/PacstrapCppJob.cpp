@@ -83,7 +83,7 @@ const QString PacstrapCppJob::PACSTRAP_CLEANUP_CMD     = "umount %1/dev/pts %1/d
 const QString PacstrapCppJob::CHROOT_PREP_FMT          = "mkdir -m 0755 -p {%1,%2}" ;
 const QString PacstrapCppJob::DB_REFRESH_FMT           = "pacman -S --print --config %1 --root %2 --refresh" ;
 const QString PacstrapCppJob::LIST_PACKAGES_FMT        = "pacman -S --print --config %1 --root %2 %3" ;
-const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap -C %1 %2 %3 --noprogressbar" ;
+const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap-calamares -C %1 %2 %3 --noprogressbar" ;
 // const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm parabola-keyring" ;
 const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm archlinux-keyring       \
                                                                                  archlinux32-keyring     \
@@ -128,9 +128,14 @@ PacstrapCppJob::PacstrapCppJob(const char* job_name   , const char* status_msg ,
   this->nPreviousPackages = 0 ;             // deferred to exec()
   this->nPendingPackages  = 0 ;             // deferred to exec()
   this->progressPercent   = 0 ;
+
+  execStatus("sed 's|^chroot_setup |#chroot_setup |' /usr/bin/pacstrap > /usr/bin/pacstrap-calamares") ;
 }
 
-PacstrapCppJob::~PacstrapCppJob() {}
+PacstrapCppJob::~PacstrapCppJob()
+{
+  execStatus("rm /usr/bin/pacstrap-calamares") ;
+}
 
 
 /* PacstrapCppJob public getters/setters */

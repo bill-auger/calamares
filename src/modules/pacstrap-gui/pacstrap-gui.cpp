@@ -92,24 +92,24 @@ QString PacstrapGuiJob::chrootExec()
   QString welcome_title_cmd = QString(WELCOME_TITLE_FMT).arg(                  this->mountPoint) ;
   QString octopi_cmd        = QString(OCTOPI_FMT       ).arg(                  this->mountPoint) ;
 
-printf("[PACSTRAP-GUI]: ls host/etc/skel%s\n"                 , execOutput("ls -al /etc/skel"                           ).toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/  IN\n%s\n"    , execOutput("ls -al /tmp/pacstrap/etc/skel"              ).toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: ls chroot/usr/share/backgrounds/%s\n" , execOutput("ls -al /tmp/pacstrap/usr/share/backgrounds/").toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: ls chroot/etc/sudoers*%s\n"           , execOutput("ls -al /tmp/pacstrap/etc/sudoers"           ).toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: ls host/etc/skel%s\n"                 , execOutput(        "ls -al /etc/skel"                )                       .toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/  IN\n%s\n"    , execOutput(QString("ls -al %1/etc/skel"              ).arg(this->mountPoint)).toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: ls chroot/usr/share/backgrounds/%s\n" , execOutput(QString("ls -al %1/usr/share/backgrounds/").arg(this->mountPoint)).toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: ls chroot/etc/sudoers*%s\n"           , execOutput(QString("ls -al %1/etc/sudoers"           ).arg(this->mountPoint)).toStdString().c_str()) ;
 
 //   if (!!execStatus(wallpaper_cmd)) return WALLPAPER_ERROR_MSG ;
 
 // printf("[PACSTRAP-GUI]: ls chroot/etc/wallpaper.png\n") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(MOUNTPOINT)) ;
 
-printf("[PACSTRAP-GUI]: default_desktop=%s\n"              , default_desktop                            .toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: locale=%s\n"                       , locale                                     .toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: mountPoint=%s\n"                   , this->mountPoint                           .toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput("ls -al /tmp/pacstrap/etc/skel").toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput("echo 'touch ~/autostart-sh' >> /tmp/pacstrap/etc/skel/.config/autostart/autostart.sh").toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput("echo 'touch ~/autostart-lxde-sh' >> /tmp/pacstrap/etc/skel/.config/autostart/autostart-lxde.sh").toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: default_desktop=%s\n"              , default_desktop                                                                                                                 .toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: locale=%s\n"                       , locale                                                                                                                          .toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: mountPoint=%s\n"                   , this->mountPoint                                                                                                                .toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString("ls -al %1/etc/skel"                                                                 ).arg(this->mountPoint)).toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString("echo 'touch ~/autostart-sh' >> %1/etc/skel/.config/autostart/autostart.sh"          ).arg(this->mountPoint)).toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString("echo 'touch ~/autostart-lxde-sh' >> %1/etc/skel/.config/autostart/autostart-lxde.sh").arg(this->mountPoint)).toStdString().c_str()) ;
 
 //   if (!!execStatus(skel_cmd                             )) return "SKEL_FMT ERROR_MSG" ;
-// printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput("ls -al /tmp/pacstrap/etc/skel")) ;
+// printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString("ls -al %1/etc/skel").arg(this->mountPoint))) ;
 //   if (!!execStatus(set_prompt_cmd                       )) return "SET_PROMPT_FMT ERROR_MSG" ;
   if (!!execStatus(set_editor_cmd          )) return "SET_EDITOR_FMT ERROR_MSG" ;
   if (!!execStatus(set_lang_cmd            )) return "SET_LANG_FMT ERROR_MSG" ;
