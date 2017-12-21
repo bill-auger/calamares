@@ -46,6 +46,7 @@ QString PacstrapBaseJob::getPackageList()
 
   return (this->localStorage.value(BOOTLODER_PACKAGES_KEY).toStringList() +
           this->localStorage.value(KERNEL_PACKAGES_KEY   ).toStringList() +
+          this->localStorage.value(UTILITIES_PACKAGES_KEY).toStringList() +
           this->localStorage.value(init_key              ).toStringList() ).join(' ') ;
 }
 

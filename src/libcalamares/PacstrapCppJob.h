@@ -78,9 +78,9 @@ protected:
 
 private:
 
-  static        QString              FindTargetDevice  (const QVariantList& partitions) ;
-  static inline Calamares::JobResult JobError          (QString error_msg) ;
-  static inline Calamares::JobResult JobSuccess        () ;
+  static        QString              FindTargetDevice(const QVariantList& partitions) ;
+  static inline Calamares::JobResult JobError        (QString error_msg) ;
+  static inline Calamares::JobResult JobSuccess      () ;
 
   qint16 nPackagesInstalled() ;
   qreal  emitProgress      (qreal transient_percent) ;
@@ -93,13 +93,13 @@ public:
 
   static const QString BOOTLODER_PACKAGES_KEY ;
   static const QString KERNEL_PACKAGES_KEY ;
+  static const QString UTILITIES_PACKAGES_KEY ;
   static const QString OPENRC_PACKAGES_KEY ;
   static const QString SYSTEMD_PACKAGES_KEY ;
   static const QString APPLICATIONS_PACKAGES_KEY ;
   static const QString MULTIMEDIA_PACKAGES_KEY ;
   static const QString NETWORK_PACKAGES_KEY ;
   static const QString LOOKANDFEEL_PACKAGES_KEY ;
-  static const QString UTILITIES_PACKAGES_KEY ;
   static const QString XSERVER_PACKAGES_KEY ;
   static const QString LXDE_PACKAGES_KEY ;
   static const QString MATE_PACKAGES_KEY ;
