@@ -131,6 +131,7 @@ PacstrapCppJob::PacstrapCppJob(const char* job_name   , const char* status_msg ,
   this->progressPercent   = 0 ;
 
   execStatus("sed 's|^chroot_setup |#chroot_setup |' /usr/bin/pacstrap > /usr/bin/pacstrap-calamares") ;
+  execStatus("chmod +x /usr/bin/pacstrap-calamares") ;
 }
 
 PacstrapCppJob::~PacstrapCppJob()

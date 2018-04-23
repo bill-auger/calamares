@@ -8,7 +8,7 @@ readonly RUN_INSTALLED=1
 function print() { printf "\033[01;34m%s\033[00m\n" "$(echo -e $*)" ; }
 
 
-sudo echo
+sudo echo -n
 if pacman --version 2> /dev/null | grep libalpm > /dev/null
 then print "\n--- running pacman ---\n"
      BASE_PKGS="$(pacman -Qg base-devel | cut -d ' ' -f 2)"

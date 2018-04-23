@@ -188,13 +188,13 @@ private:
 #  define DEBUG_TRACE_BASEPACKAGES                       \
   printf("[PACSTRAP-GUI]: installing initsystem: %s\n" , \
          init_key.toStdString().c_str() )                ;
-#  define DEBUG_TRACE_DESKTOPPACKAGES                                      \
-  printf("[PACSTRAP-GUI]: installing initsystem: %s default_desktop: %s" , \
-         init_key   .toStdString().c_str() ,                               \
-         desktop_key.toStdString().c_str() ) ;                             \
-  printf("language_packs: %s for locale: %s\n"          ,                  \
-         language_packs.join(' ').toStdString().c_str() ,                  \
-         locale                  .toStdString().c_str() )                  ;
+#  define DEBUG_TRACE_DESKTOPPACKAGES                                        \
+  printf("[PACSTRAP-GUI]: installing initsystem: %s default_desktop: %s" ,   \
+         init_key   .toStdString().c_str()                               ,   \
+         desktop_key.toStdString().c_str()                               ) ; \
+  printf("language_packs: %s for locale: %s\n"                         ,     \
+         LANGUAGE_PACKS.values(locale).join(' ').toStdString().c_str() ,     \
+         locale                                 .toStdString().c_str() )     ;
 #else // QT_NO_DEBUG
 #  define DEBUG_TRACE_BASEPACKAGES ;
 #  define DEBUG_TRACE_DESKTOPPACKAGES ;
