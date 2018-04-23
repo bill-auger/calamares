@@ -38,7 +38,9 @@ const QString PacstrapGuiJob::SET_LANG_FMT      = "echo 'export LANG=%1'        
 const QString PacstrapGuiJob::SET_XKBMAP_FMT    = "echo 'setxkbmap %1'               >> %2/etc/skel/.bashrc" ;
 const QString PacstrapGuiJob::DM_DESKTOP_FMT    = "sed -i 's|^Session=.*|Session=%1|'   %2/etc/skel/.dmrc" ;
 const QString PacstrapGuiJob::DM_LANG_FMT       = "sed -i 's|^Language=.*|Language=%1|' %2/etc/skel/.dmrc" ;
-const QString PacstrapGuiJob::WELCOME_TITLE_FMT = "sed -i 's|_EDITION_TITLE_|Parabola Welcome|' %1/etc/skel/.config/autostart/autostart.sh" ;
+const QString PacstrapGuiJob::WELCOME_TITLE_FMT = "sed -i 's|_EDITION_TITLE_|Parabola GNU/Linux-libre News|' %1/etc/skel/.config/autostart/autostart.sh" ;
+const QString PacstrapGuiJob::WELCOME_TEXT_FMT  = "cp /usr/share/calamares/welcome %1/usr/lib/parabola-laf/news-0" ;
+const QString PacstrapGuiJob::WELCOME_SED_FMT   = "sed -i 's|_DEFAULT_DESKTOP_|%1|' %2/usr/lib/parabola-laf/news-0" ;
 const QString PacstrapGuiJob::OCTOPI_FMT        = "rm -f %1/etc/xdg/autostart/octopi-notifier.desktop" ;
 
 
@@ -89,6 +91,8 @@ QString PacstrapGuiJob::chrootExec()
   QString dm_desktop_cmd    = QString(DM_DESKTOP_FMT   ).arg(default_desktop , this->mountPoint) ;
   QString dm_lang_cmd       = QString(DM_LANG_FMT      ).arg(locale          , this->mountPoint) ;
   QString welcome_title_cmd = QString(WELCOME_TITLE_FMT).arg(                  this->mountPoint) ;
+  QString welcome_text_cmd  = QString(WELCOME_TEXT_FMT ).arg(                  this->mountPoint) ;
+  QString welcome_sed_cmd   = QString(WELCOME_SED_FMT  ).arg(default_desktop , this->mountPoint) ;
   QString octopi_cmd        = QString(OCTOPI_FMT       ).arg(                  this->mountPoint) ;
 
 printf("[PACSTRAP-GUI]: ls host/etc/skel%s\n"                 , execOutput(        "ls -al /etc/skel"                )                       .toStdString().c_str()) ;
@@ -116,6 +120,8 @@ printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString(
   if (!!execStatus(dm_desktop_cmd          )) return "DM_DESKTOP_FMT ERROR_MSG" ;
   if (!!execStatus(dm_lang_cmd             )) return "DM_LANG_FMT ERROR_MSG" ;
   if (!!execStatus(welcome_title_cmd       )) return "WELCOME_TITLE_FMT ERROR_MSG" ;
+  if (!!execStatus(welcome_text_cmd        )) return "WELCOME_TEXT_FMT ERROR_MSG" ;
+  if (!!execStatus(welcome_sed_cmd         )) return "WELCOME_SED_FMT ERROR_MSG" ;
   if (default_desktop == LXDE_PACKAGES_KEY &&
       !!execStatus(octopi_cmd              )) return "OCTOPI_FMT ERROR_MSG" ;
 

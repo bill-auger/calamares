@@ -55,6 +55,8 @@ private:
   static const QString DM_DESKTOP_FMT ;
   static const QString DM_LANG_FMT ;
   static const QString WELCOME_TITLE_FMT ;
+  static const QString WELCOME_TEXT_FMT ;
+  static const QString WELCOME_SED_FMT ;
   static const QString OCTOPI_FMT ;
 } ;
 
