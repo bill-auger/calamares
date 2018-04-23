@@ -54,23 +54,22 @@ PacstrapGuiJob::PacstrapGuiJob(QObject* parent) : PacstrapCppJob(GUI_JOB_NAME   
 
 QString PacstrapGuiJob::getPackageList()
 {
-  QString     init_key       = this->globalStorage->value(GS::INITSYSTEM_KEY).toString() ;
-  QString     desktop_key    = this->globalStorage->value(GS::DESKTOP_KEY   ).toString() ;
-  QString     locale         = this->globalStorage->value(GS::LOCALE_KEY    ).toMap()
-                                                   .value(GS::LANG_KEY      ).toString() ;
-  QStringList language_packs = LANGUAGE_PACKS.values(locale) ;
+  QString init_key    = this->globalStorage->value(GS::INITSYSTEM_KEY).toString() ;
+  QString desktop_key = this->globalStorage->value(GS::DESKTOP_KEY   ).toString() ;
+  QString locale      = this->globalStorage->value(GS::LOCALE_KEY    ).toMap()
+                                            .value(GS::LANG_KEY      ).toString() ;
 
 DEBUG_TRACE_DESKTOPPACKAGES
 
-  return (this->localStorage.value(APPLICATIONS_PACKAGES_KEY).toStringList() +
-          this->localStorage.value(MULTIMEDIA_PACKAGES_KEY  ).toStringList() +
-          this->localStorage.value(NETWORK_PACKAGES_KEY     ).toStringList() +
-          this->localStorage.value(LOOKANDFEEL_PACKAGES_KEY ).toStringList() +
-          this->localStorage.value(UTILITIES_PACKAGES_KEY   ).toStringList() +
-          this->localStorage.value(XSERVER_PACKAGES_KEY     ).toStringList() +
-          this->localStorage.value(init_key                 ).toStringList() +
-          this->localStorage.value(desktop_key              ).toStringList() +
-          language_packs                                                     ).join(' ') ;
+  return (this->localStorage.value (APPLICATIONS_PACKAGES_KEY).toStringList() +
+          this->localStorage.value (MULTIMEDIA_PACKAGES_KEY  ).toStringList() +
+          this->localStorage.value (NETWORK_PACKAGES_KEY     ).toStringList() +
+          this->localStorage.value (LOOKANDFEEL_PACKAGES_KEY ).toStringList() +
+          this->localStorage.value (UTILITIES_PACKAGES_KEY   ).toStringList() +
+          this->localStorage.value (XSERVER_PACKAGES_KEY     ).toStringList() +
+          this->localStorage.value (init_key                 ).toStringList() +
+          this->localStorage.value (desktop_key              ).toStringList() +
+          LANGUAGE_PACKS    .values(locale                   )                ).join(' ') ;
 }
 
 
