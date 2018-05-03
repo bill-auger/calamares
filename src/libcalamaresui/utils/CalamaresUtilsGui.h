@@ -123,7 +123,7 @@ UIDLLEXPORT QSize defaultIconSize();
 constexpr int windowMinimumWidth = 800;
 constexpr int windowMinimumHeight = 520;
 constexpr int windowPreferredWidth = 1024;
-constexpr int windowPreferredHeight = 520;
+constexpr int windowPreferredHeight = 530;
 }
 
 #endif // CALAMARESUTILSGUI_H
