@@ -53,7 +53,7 @@ QString PacstrapBaseJob::getPackageList()
 
 /* PacstrapBaseJob protected instance methods */
 
-QString PacstrapBaseJob::chrootExec()
+QString PacstrapBaseJob::chrootExecPostInstall()
 {
 //   QString grub_crypto_cmd = GRUB_CRYPTO_FMT.arg(this->mountPoint) ;
   QString grub_theme_cmd  = GRUB_THEME_FMT .arg(this->mountPoint) ;

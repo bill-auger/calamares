@@ -36,8 +36,8 @@ public:
 
 protected:
 
-  QString getPackageList() override ;
-  QString chrootExec    () override ;
+  QString getPackageList       () override ;
+  QString chrootExecPostInstall() override ;
 
 
 private:

@@ -57,8 +57,8 @@ protected:
   QString     execOutput      (QString command_line , qreal task_proportion = 0.0) ;
   QString     execError       (QString command_line , qreal task_proportion = 0.0) ;
 
-  virtual QString getPackageList() = 0 ;
-  virtual QString chrootExec    () = 0 ;
+  virtual QString getPackageList       () = 0 ;
+  virtual QString chrootExecPostInstall() = 0 ;
 
   QString                   jobName ;
   QString                   statusMsg ;

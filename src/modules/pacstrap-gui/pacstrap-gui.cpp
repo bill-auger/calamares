@@ -76,7 +76,7 @@ DEBUG_TRACE_DESKTOPPACKAGES
 
 /* PacstrapGuiJob protected instance methods */
 
-QString PacstrapGuiJob::chrootExec()
+QString PacstrapGuiJob::chrootExecPostInstall()
 {
 //   QString wallpaper_cmd     = WALLPAPER_FMT.arg(MOUNTPOINT) ;
   QString default_desktop   = this->globalStorage->value(GS::DESKTOP_KEY).toString() ;

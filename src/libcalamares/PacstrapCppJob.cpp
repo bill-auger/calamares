@@ -89,7 +89,6 @@ const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm
                                                                                  archlinux32-keyring     \
                                                                                  archlinuxarm-keyring    \
                                                                                  parabola-keyring     && \
-                                                          rm -rf /etc/pacman.d/gnupg/                 && \
                                                           pacman-key --init                           && \
                                                           pacman-key --populate archlinux                \
                                                                                 archlinux32              \
@@ -168,6 +167,7 @@ globalStorage->insert(GS::DESKTOP_KEY    , LXDE_PACKAGES_KEY   ) ; // TODO: per 
   bool         is_online   = this->globalStorage->value(GS::IS_ONLINE_KEY      ).toBool() ;
   this->mountPoint         = this->globalStorage->value(GS::ROOT_MOUNTPOINT_KEY).toString() ;
   this->targetDevice       = FindTargetDevice(partitions) ;
+is_online = false ; // TODO: per user option via globalStorage
   this->confFile           = (!has_isorepo) ? DEFAULT_CONF_FILENAME :
                              (is_online   ) ? ONLINE_CONF_FILENAME  : OFFLINE_CONF_FILENAME ;
   this->packages           = getPackageList() ;
@@ -194,7 +194,8 @@ DEBUG_TRACE_EXEC
   if (!!execStatus(chroot_prep_cmd                         )) return JobError(CHROOT_PREP_ERROR_MSG) ;
   if (!!execStatus(pacman_sync_cmd , PACMAN_SYNC_PROPORTION)) return JobError(PACMAN_SYNC_ERROR_MSG) ;
 
-execStatus(QString("touch %1/etc/os-release").arg(this->mountPoint)) ; //FIXME:
+printf("[PACSTRAP-JOB]: FIXME: this->mountPoint/etc/os-release: %s\n" , execOutput(QString("ls -l %1/etc/os-release").arg(this->mountPoint))) ; // FIXME:
+execStatus(QString("touch %1/etc/os-release").arg(this->mountPoint)) ; // FIXME:
 
   if (!this->packages.isEmpty())
   {
@@ -227,7 +228,7 @@ execStatus(QString("touch %1/etc/os-release").arg(this->mountPoint)) ; //FIXME:
       }
       if (!!pacstrap_status) return JobError(PACSTRAP_ERROR_MSG + pacstrap_error) ;
 
-      QString exec_error_msg = chrootExec() ;
+      QString exec_error_msg = chrootExecPostInstall() ;
 
       if (exec_error_msg.isEmpty()) this->nPendingPackages = 0 ;
       else                          return JobError(exec_error_msg) ;
