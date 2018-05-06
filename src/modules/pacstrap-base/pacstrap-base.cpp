@@ -53,6 +53,8 @@ QString PacstrapBaseJob::getPackageList()
 
 /* PacstrapBaseJob protected instance methods */
 
+QString PacstrapBaseJob::chrootExecPreInstall() {}
+
 QString PacstrapBaseJob::chrootExecPostInstall()
 {
 //   QString grub_crypto_cmd = GRUB_CRYPTO_FMT.arg(this->mountPoint) ;
@@ -60,6 +62,9 @@ QString PacstrapBaseJob::chrootExecPostInstall()
 
 //   if (!!execStatus(grub_crypto_cmd)) return GRUB_CRYPTO_ERROR_MSG ;
   if (!!execStatus(grub_theme_cmd )) return GRUB_THEME_ERROR_MSG ;
+
+printf("[PACSTRAP-JOB]: FIXME: this->mountPoint/etc/os-release: %s\n" , execOutput(QString("ls -l %1/etc/os-release").arg(this->mountPoint))) ; // FIXME:
+execStatus(QString("touch %1/etc/os-release").arg(this->mountPoint)) ; // FIXME:
 
   return QString("") ;
 }

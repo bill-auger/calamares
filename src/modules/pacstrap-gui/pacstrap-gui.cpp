@@ -76,6 +76,8 @@ DEBUG_TRACE_DESKTOPPACKAGES
 
 /* PacstrapGuiJob protected instance methods */
 
+QString PacstrapGuiJob::chrootExecPreInstall() {}
+
 QString PacstrapGuiJob::chrootExecPostInstall()
 {
 //   QString wallpaper_cmd     = WALLPAPER_FMT.arg(MOUNTPOINT) ;

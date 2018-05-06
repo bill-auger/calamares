@@ -194,9 +194,6 @@ DEBUG_TRACE_EXEC
   if (!!execStatus(chroot_prep_cmd                         )) return JobError(CHROOT_PREP_ERROR_MSG) ;
   if (!!execStatus(pacman_sync_cmd , PACMAN_SYNC_PROPORTION)) return JobError(PACMAN_SYNC_ERROR_MSG) ;
 
-printf("[PACSTRAP-JOB]: FIXME: this->mountPoint/etc/os-release: %s\n" , execOutput(QString("ls -l %1/etc/os-release").arg(this->mountPoint))) ; // FIXME:
-execStatus(QString("touch %1/etc/os-release").arg(this->mountPoint)) ; // FIXME:
-
   if (!this->packages.isEmpty())
   {
     QVariantMap result       = execWithProgress(list_packages_cmd , LIST_PACKAGES_PROPORTION) ;
