@@ -53,7 +53,7 @@ QString PacstrapBaseJob::getPackageList()
 
 /* PacstrapBaseJob protected instance methods */
 
-QString PacstrapBaseJob::chrootExecPreInstall() {}
+QString PacstrapBaseJob::chrootExecPreInstall() { return QString("") ; }
 
 QString PacstrapBaseJob::chrootExecPostInstall()
 {

@@ -135,7 +135,7 @@ PacstrapCppJob::PacstrapCppJob(const char* job_name   , const char* status_msg ,
 
 PacstrapCppJob::~PacstrapCppJob()
 {
-  execStatus("rm /usr/bin/pacstrap-calamares") ;
+  execStatus("rm /usr/bin/pacstrap-calamares || true") ;
 }
 
 
