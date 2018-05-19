@@ -51,6 +51,10 @@ public:
     // in the global storage. This should be called before displaying the page.
     void loadGroupList();
 
+    // Loads icon, friendly name, and packages key for WM/DE options
+    // from global storage and populate combobox options
+    void loadEnvironmentComboboxes(QVariantMap local_storage);
+
     // Sets the "required" state of netinstall data. Influences whether
     // corrupt or unavailable data causes checkReady() to be emitted
     // true (not-required) or false.
@@ -65,11 +69,17 @@ public:
     // this function does not have constant time.
     PackageModel::PackageItemDataList selectedPackages() const;
 
+    // Returns the value of the WD/DE combobox.
+    // This will determine which pacman.conf to use in the PacstrapCppJob modules.
+    QString getWmDeKey() const;
+
+
 public slots:
     void dataIsHere( QNetworkReply* );
 
 signals:
     void checkReady( bool );
+
 
 private:
     // Takes the YAML data representing the groups and reads them into the
@@ -84,6 +94,8 @@ private:
 
     PackageModel* m_groups;
     bool m_required;
+
+    static const char WMDE_COMBO_LABEL_TEXT[];
 };
 
 #endif // NETINSTALLPAGE_H

@@ -108,6 +108,9 @@ public:
   static const QString IS_ONLINE_KEY;
   static const QString INITSYSTEM_KEY;
   static const QString DESKTOP_KEY;
+  static const QString DESKTOPS_KEY;
+  static const QString DE_ICON_KEY;
+  static const QString DE_NAME_KEY;
   static const QString LOCALE_KEY;
   static const QString LANG_KEY;
   static const QString ROOT_MOUNTPOINT_KEY;

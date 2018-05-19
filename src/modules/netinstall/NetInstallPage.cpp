@@ -22,6 +22,7 @@
 #include "NetInstallPage.h"
 
 #include "PackageModel.h"
+#include "ViewManager.h"
 
 #include "ui_page_netinst.h"
 #include "GlobalStorage.h"
@@ -48,6 +49,10 @@
 
 using CalamaresUtils::yamlToVariant;
 
+
+const char NetInstallPage::WMDE_COMBO_LABEL_TEXT[] = "Select Graphical Environment";
+
+
 NetInstallPage::NetInstallPage( QWidget* parent )
     : QWidget( parent )
     , ui( new Ui::Page_NetInst )
@@ -55,6 +60,9 @@ NetInstallPage::NetInstallPage( QWidget* parent )
     , m_groups( nullptr )
 {
     ui->setupUi( this );
+
+    ui->wmDeLabel->setText( tr( WMDE_COMBO_LABEL_TEXT ) );
+    ui->wmDeCombobox->setToolTip( tr( WMDE_COMBO_LABEL_TEXT ) );
 }
 
 bool
@@ -115,6 +123,30 @@ NetInstallPage::dataIsHere( QNetworkReply* reply )
     emit checkReady( true );
 }
 
+void
+NetInstallPage::loadEnvironmentComboboxes(QVariantMap local_storage)
+{
+    QVariantMap desktops_data = local_storage.value( GS::DESKTOPS_KEY ).toMap();
+    QVariantMap::iterator desktops_iter = desktops_data.begin();
+
+    for ( ; desktops_iter != desktops_data.end(); ++desktops_iter )
+    {
+cLog() << "NetInstallPage::loadEnvironmentComboboxes() desktops_iter.key()=" << desktops_iter.key();
+
+        QVariantMap desktops_data = desktops_iter.value().toMap();
+        QVariant de_key = QVariant(desktops_iter.key());
+        QIcon de_icon = QIcon(desktops_data.value( GS::DE_ICON_KEY ).toString());
+        QString de_name = desktops_data.value( GS::DE_NAME_KEY ).toString();
+
+        ui->wmDeCombobox->addItem(de_icon, de_name, de_key);
+
+cLog() << "NetInstallPage::loadEnvironmentComboboxes() added de_icon=" <<
+        desktops_data.value( GS::DE_ICON_KEY ).toString() <<
+        " de_key=" << de_key << " de_name" << de_name;
+    }
+    ui->wmDeCombobox->setCurrentIndex( 0 );
+}
+
 PackageModel::PackageItemDataList
 NetInstallPage::selectedPackages() const
 {
@@ -125,6 +157,12 @@ NetInstallPage::selectedPackages() const
         cDebug() << "WARNING: no netinstall groups are available.";
         return PackageModel::PackageItemDataList();
     }
+}
+
+QString
+NetInstallPage::getWmDeKey() const
+{
+  return ui->wmDeCombobox->itemData(ui->wmDeCombobox->currentIndex()).toString();
 }
 
 void

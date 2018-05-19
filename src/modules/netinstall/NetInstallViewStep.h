@@ -64,6 +64,8 @@ public slots:
     void nextIsReady( bool );
 
 private:
+    static const char PAGE_TITLE[];
+
     NetInstallPage* m_widget;
     bool m_nextEnabled;
     QString m_prettyStatus;

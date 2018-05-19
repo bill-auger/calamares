@@ -28,6 +28,10 @@
 
 CALAMARES_PLUGIN_FACTORY_DEFINITION( NetInstallViewStepFactory, registerPlugin<NetInstallViewStep>(); )
 
+
+const char NetInstallViewStep::PAGE_TITLE[] = "Packages";
+
+
 NetInstallViewStep::NetInstallViewStep( QObject* parent )
     : Calamares::ViewStep( parent )
     , m_widget( new NetInstallPage() )
@@ -49,7 +53,7 @@ NetInstallViewStep::~NetInstallViewStep()
 QString
 NetInstallViewStep::prettyName() const
 {
-    return tr( "Package selection" );
+    return tr( PAGE_TITLE );
 }
 
 
@@ -173,6 +177,11 @@ NetInstallViewStep::onLeave()
         Calamares::GlobalStorage* gs = Calamares::JobQueue::instance()->globalStorage();
         gs->insert( "packageOperations", QVariant( packageOperations ) );
     }
+
+    Calamares::GlobalStorage* gs = Calamares::JobQueue::instance()->globalStorage();
+// globalStorage->insert(GS::DESKTOP_KEY    , MATE_PACKAGES_KEY   ) ; // TODO: per user option via globalStorage
+// globalStorage->insert(GS::DESKTOP_KEY , LXDE_PACKAGES_KEY) ; // TODO: per user option via globalStorage
+    gs->insert( GS::DESKTOP_KEY, m_widget->getWmDeKey() ) ; // TODO:
 }
 
 
@@ -191,6 +200,8 @@ NetInstallViewStep::setConfigurationMap( const QVariantMap& configurationMap )
             "groupsUrl", configurationMap.value( "groupsUrl" ).toString() );
         m_widget->loadGroupList();
     }
+
+    m_widget->loadEnvironmentComboboxes( configurationMap );
 }
 
 void

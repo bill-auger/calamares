@@ -155,8 +155,6 @@ Calamares::JobResult PacstrapCppJob::exec()
 {
 // globalStorage->insert(GS::INITSYSTEM_KEY , OPENRC_PACKAGES_KEY) ; // TODO: per user option via globalStorage
 globalStorage->insert(GS::INITSYSTEM_KEY , SYSTEMD_PACKAGES_KEY) ; // TODO: per user option via globalStorage
-globalStorage->insert(GS::DESKTOP_KEY    , LXDE_PACKAGES_KEY   ) ; // TODO: per user option via globalStorage
-// globalStorage->insert(GS::DESKTOP_KEY    , MATE_PACKAGES_KEY   ) ; // TODO: per user option via globalStorage
 
   // cleanup from possibly aborted previous runs
 //   Teardown() ;
