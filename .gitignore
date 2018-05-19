@@ -49,3 +49,6 @@ CMakeLists.txt.user
 
 # Kate
 *.kate-swp
+
+# ./mk
+LAST_BUILD_HOST

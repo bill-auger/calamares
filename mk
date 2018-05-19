@@ -2,7 +2,7 @@
 
 readonly NO_UPGRADE=1
 readonly RUN_INSTALLED=1
-# [ "`lsmod | grep squashfs`" ] || sudo modprobe squashfs
+readonly THIS_BUILD_HOST==$(grep '^ID=' /etc/os-release | cut -d '=' -f 2)
 
 
 function print() { printf "\033[01;34m%s\033[00m\n" "$(echo -e $*)" ; }
@@ -16,17 +16,19 @@ then print "\n--- running pacman ---\n"
                      plasma-framework qt5-tools polkit-qt5 yaml-cpp" # squashfs-tools os-prober
 #      PARABOLA_PKGS="arch-install-scripts"
      PKGS="$BASE_PKGS $CALAMARES_PKGS $PARABOLA_PKGS"
-     pacman -Qi calamares > /dev/null 2>&1 && sudo pacman -R calamares
-     pacman -Qi $PKGS > /dev/null && (($NO_UPGRADE)) || sudo pacman -Sy --needed $PKGS || exit 1
+     pacman -Qi calamares > /dev/null 2>&1               && sudo pacman -R calamares
+     pacman -Qi $PKGS     > /dev/null && (($NO_UPGRADE)) || sudo pacman -Sy --needed $PKGS || exit 1
 elif which apt-get &> /dev/null
 then print "\n--- running apt ---\n"
-     apt-get install extra-cmake-modules libatasmart-dev libboost-python-dev \
-                     libkf5coreaddons-dev libkf5kio-dev libkf5plasma-dev     \
-                     libkf5service-dev libkpmcore4-dev libparted-dev         \
-                     libpolkit-qt5-1-dev qtdeclarative5-dev                    || exit 1
+     sudo apt-get install -qqq extra-cmake-modules libatasmart-dev libboost-python-dev \
+                               libkf5coreaddons-dev libkf5kio-dev libkf5plasma-dev     \
+                               libkf5service-dev libkpmcore4-dev libparted-dev         \
+                               libpolkit-qt5-1-dev qtdeclarative5-dev                    || exit 1
 fi
 
 
+[ "$(cat ./LAST_BUILD_HOST)" == "$THIS_BUILD_HOST" ] || (echo "cleaning build/ dir" ; sudo rm -rf ./build)
+echo "$THIS_BUILD_HOST" > ./LAST_BUILD_HOST
 if [ ! -d ./build ]
 then print "\n--- preparing build environment ---\n"
      mkdir ./build
@@ -65,9 +67,9 @@ fi
 
 if (($RUN_INSTALLED))
 then print "\n--- running make install ---\n"
-     sudo make install
+     sudo make install || exit 1
 else print "\n--- running make ---\n"
-     make
+     make              || exit 1
 fi
 cd ..
 

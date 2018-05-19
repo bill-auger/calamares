@@ -78,12 +78,16 @@ const qreal   PacstrapCppJob::PACMAN_SYNC_PROPORTION   = 0.05 ; // per task prog
 const qreal   PacstrapCppJob::LIST_PACKAGES_PROPORTION = 0.05 ; // per task progress-bar proportion
 const qreal   PacstrapCppJob::CHROOT_TASK_PROPORTION   = 0.9 ;  // per task progress-bar proportion
 const QString PacstrapCppJob::SYSTEM_EXEC_FMT          = "/bin/sh -c \"%1\"" ;
-const QString PacstrapCppJob::PACSTRAP_CLEANUP_CMD     = "umount %1/dev/pts %1/dev/shm %1/dev %1/proc %1/run %1/sys %1/tmp %1 2> /dev/null" ;
+const QString PacstrapCppJob::PACSTRAP_FILENAME        = "/usr/bin/pacstrap-calamares" ;
+const QString PacstrapCppJob::PACSTRAP_PREP_CMD        = "sed 's|^chroot_setup |#chroot_setup |' /usr/bin/pacstrap > %1 && \
+                                                          chmod +x %1" ;
+const QString PacstrapCppJob::PACSTRAP_RM_CMD          = "rm %1" ;
+// const QString PacstrapCppJob::PACSTRAP_CLEANUP_CMD     = "umount %1/dev/pts %1/dev/shm %1/dev %1/proc %1/run %1/sys %1/tmp %1 2> /dev/null" ;
 // const QString PacstrapCppJob::MOUNT_FMT                = "mkdir %2 2> /dev/null || true && mount %1 %2" ;
 const QString PacstrapCppJob::CHROOT_PREP_FMT          = "mkdir -m 0755 -p {%1,%2}" ;
 const QString PacstrapCppJob::DB_REFRESH_FMT           = "pacman -S --print --config %1 --root %2 --refresh" ;
 const QString PacstrapCppJob::LIST_PACKAGES_FMT        = "pacman -S --print --config %1 --root %2 %3" ;
-const QString PacstrapCppJob::PACSTRAP_FMT             = "pacstrap-calamares -M -C %1 %2 %3 --noprogressbar" ;
+const QString PacstrapCppJob::PACSTRAP_FMT             = "%1 -M -C %2 %3 %4 --noprogressbar" ;
 // const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm parabola-keyring" ;
 const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm archlinux-keyring       \
                                                                                  archlinux32-keyring     \
@@ -96,6 +100,7 @@ const QString PacstrapCppJob::KEYRING_CMD              = "pacman -Sy --noconfirm
                                                                                 parabola              && \
                                                           pacman-key --refresh-keys                      " ;
 // const QString PacstrapCppJob::UMOUNT_FMT               = "umount %1" ;
+const QString PacstrapCppJob::PACSTRAP_PREP_ERROR_MSG  = "Could not create custom 'pacstrap-calamares' script." ;
 const QString PacstrapCppJob::CONFIG_ERROR_MSG         = "Invalid configuration map." ;
 const QString PacstrapCppJob::TARGET_ERROR_MSG         = "Target device for root filesystem is unspecified." ;
 const QString PacstrapCppJob::CONFFILE_ERROR_MSG       = "Pacman configuration not found: '%1'." ;
@@ -128,15 +133,9 @@ PacstrapCppJob::PacstrapCppJob(const char* job_name   , const char* status_msg ,
   this->nPreviousPackages = 0 ;             // deferred to exec()
   this->nPendingPackages  = 0 ;             // deferred to exec()
   this->progressPercent   = 0 ;
-
-  execStatus("sed 's|^chroot_setup |#chroot_setup |' /usr/bin/pacstrap > /usr/bin/pacstrap-calamares") ;
-  execStatus("chmod +x /usr/bin/pacstrap-calamares") ;
 }
 
-PacstrapCppJob::~PacstrapCppJob()
-{
-  execStatus("rm /usr/bin/pacstrap-calamares || true") ;
-}
+PacstrapCppJob::~PacstrapCppJob() {}
 
 
 /* PacstrapCppJob public getters/setters */
@@ -191,8 +190,8 @@ DEBUG_TRACE_EXEC
 
 //   if (!!execStatus(keyring_cmd    )) return JobError(KEYRING_ERROR_MSG) ;
 //   if (!!execStatus(mount_cmd                               )) return JobError(MOUNT_ERROR_MSG      ) ;
-  if (!!execStatus(chroot_prep_cmd                         )) return JobError(CHROOT_PREP_ERROR_MSG) ;
-  if (!!execStatus(pacman_sync_cmd , PACMAN_SYNC_PROPORTION)) return JobError(PACMAN_SYNC_ERROR_MSG) ;
+  if (!!execStatus(chroot_prep_cmd                         )) return JobError(CHROOT_PREP_ERROR_MSG  ) ;
+  if (!!execStatus(pacman_sync_cmd , PACMAN_SYNC_PROPORTION)) return JobError(PACMAN_SYNC_ERROR_MSG  ) ;
 
   if (!this->packages.isEmpty())
   {
@@ -207,7 +206,13 @@ DEBUG_TRACE_EXEC
 
     if (this->nPendingPackages > 0)
     {
-      QString     pacstrap_cmd    = PACSTRAP_FMT.arg(this->confFile , this->mountPoint , this->packages) ;
+      QString pacstrap_prep_cmd = PACSTRAP_PREP_CMD.arg(PACSTRAP_FILENAME) ;
+      QString pacstrap_cmd      = PACSTRAP_FMT     .arg(PACSTRAP_FILENAME , this->confFile ,
+                                                        this->mountPoint  , this->packages ) ;
+      QString pacstrap_rm_cmd   = PACSTRAP_RM_CMD  .arg(PACSTRAP_FILENAME) ;
+
+      if (!!execStatus(pacstrap_prep_cmd)) return JobError(PACSTRAP_PREP_ERROR_MSG) ;
+
       QVariantMap pacstrap_result = execWithProgress(pacstrap_cmd , CHROOT_TASK_PROPORTION) ;
       int         pacstrap_status = pacstrap_result.value(STATUS_KEY).toInt() ;
       QString     pacstrap_error  = pacstrap_result.value(STDERR_KEY).toString().trimmed() ;
@@ -223,6 +228,8 @@ DEBUG_TRACE_EXEC
         pacstrap_status = pacstrap_result.value(STATUS_KEY).toInt() ;
         pacstrap_error  = pacstrap_result.value(STDERR_KEY).toString().trimmed() ;
       }
+
+      execStatus(pacstrap_rm_cmd) ;
       if (!!pacstrap_status) return JobError(PACSTRAP_ERROR_MSG + pacstrap_error) ;
 
       QString exec_error_msg = chrootExecPostInstall() ;

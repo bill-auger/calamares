@@ -129,7 +129,10 @@ private:
   static const qreal   LIST_PACKAGES_PROPORTION ;
   static const qreal   CHROOT_TASK_PROPORTION ;
   static const QString SYSTEM_EXEC_FMT ;
-  static const QString PACSTRAP_CLEANUP_CMD ;
+  static const QString PACSTRAP_FILENAME ;
+  static const QString PACSTRAP_PREP_CMD ;
+  static const QString PACSTRAP_RM_CMD ;
+//   static const QString PACSTRAP_CLEANUP_CMD ;
   static const QString KEYRING_CMD ;
   static const QString MOUNT_FMT ;
   static const QString CHROOT_PREP_FMT ;
@@ -137,6 +140,7 @@ private:
   static const QString LIST_PACKAGES_FMT ;
   static const QString PACSTRAP_FMT ;
   static const QString UMOUNT_FMT ;
+  static const QString PACSTRAP_PREP_ERROR_MSG ;
   static const QString CONFIG_ERROR_MSG ;
   static const QString TARGET_ERROR_MSG ;
   static const QString CONFFILE_ERROR_MSG ;
