@@ -38,7 +38,7 @@ const QString PacstrapGuiJob::SET_LANG_FMT      = "echo 'export LANG=%1'        
 const QString PacstrapGuiJob::SET_XKBMAP_FMT    = "echo 'setxkbmap %1'               >> %2/etc/skel/.bashrc" ;
 const QString PacstrapGuiJob::DM_DESKTOP_FMT    = "sed -i 's|^Session=.*|Session=%1|'   %2/etc/skel/.dmrc" ;
 const QString PacstrapGuiJob::DM_LANG_FMT       = "sed -i 's|^Language=.*|Language=%1|' %2/etc/skel/.dmrc" ;
-const QString PacstrapGuiJob::WELCOME_TITLE_FMT = "sed -i 's|_EDITION_TITLE_|Parabola GNU/Linux-libre News|' %1/etc/skel/.config/autostart/autostart.sh" ;
+const QString PacstrapGuiJob::WELCOME_TITLE_FMT = "sed -i 's|_EDITION_TITLE_|Parabola GNU/Linux-libre News|' %1/usr/bin/autostart.sh" ;
 const QString PacstrapGuiJob::WELCOME_TEXT_FMT  = "sed 's|_DEFAULT_DESKTOP_|%1|' /usr/share/calamares/welcome > %2/usr/share/parabola-laf/news/news-0" ;
 const QString PacstrapGuiJob::OCTOPI_FMT        = "rm -f %1/etc/xdg/autostart/octopi-notifier.desktop" ;
 
@@ -104,12 +104,11 @@ printf("[PACSTRAP-GUI]: ls chroot/etc/sudoers*%s\n"           , execOutput(QStri
 
 // printf("[PACSTRAP-GUI]: ls chroot/etc/wallpaper.png\n") ; QProcess::execute(QString("/bin/sh -c \"ls -al %1/etc/wallpaper.png\"").arg(MOUNTPOINT)) ;
 
-printf("[PACSTRAP-GUI]: default_desktop=%s\n"              , default_desktop                                                                                                                 .toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: locale=%s\n"                       , locale                                                                                                                          .toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: mountPoint=%s\n"                   , this->mountPoint                                                                                                                .toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString("ls -al %1/etc/skel"                                                                 ).arg(this->mountPoint)).toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString("echo 'touch ~/autostart-sh' >> %1/etc/skel/.config/autostart/autostart.sh"          ).arg(this->mountPoint)).toStdString().c_str()) ;
-printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString("echo 'touch ~/autostart-lxde-sh' >> %1/etc/skel/.config/autostart/autostart-lxde.sh").arg(this->mountPoint)).toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: default_desktop=%s\n"              , default_desktop                                                                                                       .toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: locale=%s\n"                       , locale                                                                                                                .toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: mountPoint=%s\n"                   , this->mountPoint                                                                                                      .toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString("ls -al %1/etc/skel"                                                       ).arg(this->mountPoint)).toStdString().c_str()) ;
+printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString("echo 'touch ~/autostart-sh' >> %1/etc/skel/.config/autostart/autostart.sh").arg(this->mountPoint)).toStdString().c_str()) ;
 
 //   if (!!execStatus(skel_cmd                             )) return "SKEL_FMT ERROR_MSG" ;
 // printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/ OUT\n%s\n" , execOutput(QString("ls -al %1/etc/skel").arg(this->mountPoint))) ;
