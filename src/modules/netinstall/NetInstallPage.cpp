@@ -70,6 +70,7 @@ NetInstallPage::NetInstallPage( QWidget* parent )
     ui->netinstallCheckbox->setText( tr( NETINSTALL_CHECK_TEXT ) );
     ui->netinstallCheckbox->setChecked( false ); // deferred to onActivate();
     ui->netinstallCheckbox->setEnabled( false ); // deferred to onActivate();
+    ui->groupswidget->setHeaderHidden(true);
 }
 
 bool

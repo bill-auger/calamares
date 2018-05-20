@@ -47,8 +47,6 @@ public:
   QString              prettyStatusMessage()                          const override ;
   Calamares::JobResult exec               ()                                override ;
 
-  static const QString DESKTOP_PACKAGES_KEY ;
-
 
 protected:
 
@@ -95,13 +93,13 @@ public:
   static const QString BOOTLODER_PACKAGES_KEY ;
   static const QString KERNEL_PACKAGES_KEY ;
   static const QString UTILITIES_PACKAGES_KEY ;
-  static const QString OPENRC_PACKAGES_KEY ;
-  static const QString SYSTEMD_PACKAGES_KEY ;
   static const QString APPLICATIONS_PACKAGES_KEY ;
   static const QString MULTIMEDIA_PACKAGES_KEY ;
   static const QString NETWORK_PACKAGES_KEY ;
   static const QString LOOKANDFEEL_PACKAGES_KEY ;
   static const QString XSERVER_PACKAGES_KEY ;
+  static const QString OPENRC_PACKAGES_KEY ;
+  static const QString SYSTEMD_PACKAGES_KEY ;
   static const QString LXDE_PACKAGES_KEY ;
   static const QString MATE_PACKAGES_KEY ;
 
@@ -116,6 +114,8 @@ protected:
   static const qreal      BASE_JOB_WEIGHT ;
   static const qreal      GUI_JOB_WEIGHT ;
   static const QSTRINGMAP LANGUAGE_PACKS ;
+  static const QString    PREINST_ERROR_MSG ;
+  static const QString    POSTINST_ERROR_MSG ;
 
 
 private:

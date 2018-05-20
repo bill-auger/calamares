@@ -24,6 +24,8 @@
 #include "GlobalStorage.h"
 #include "utils/Logger.h"
 
+#include <QVariantList>
+
 #include "NetInstallPage.h"
 
 CALAMARES_PLUGIN_FACTORY_DEFINITION( NetInstallViewStepFactory, registerPlugin<NetInstallViewStep>(); )
@@ -196,6 +198,55 @@ NetInstallViewStep::setConfigurationMap( const QVariantMap& configurationMap )
     if ( configurationMap.contains( "groupsUrl" ) &&
             configurationMap.value( "groupsUrl" ).type() == QVariant::String )
     {
+cDebug() << "NetInstallViewStep::setConfigurationMap() groupsUrl=" << configurationMap.value( "groupsUrl" ).toString();
+
+        // load package groups from netinstall.conf localStorage
+        if ( configurationMap.contains( GS::PACKAGE_GROUPS_KEY ) &&
+             configurationMap.value( GS::PACKAGE_GROUPS_KEY ).type() == QVariant::List &&
+             configurationMap.value( "groupsUrl" ).toString() == PACKAGE_GROUPS_FILE )
+        {
+            // convert local storage packages lists to YAML
+            QVariantList package_groups = configurationMap.value( GS::PACKAGE_GROUPS_KEY ).toList();
+            YAML::Emitter package_groups_yaml;
+            package_groups_yaml.SetOutputCharset(YAML::EscapeNonAscii);
+            package_groups_yaml << YAML::BeginSeq;
+            for ( int groups_n = 0; groups_n < package_groups.length(); ++groups_n )
+            {
+                QVariantMap package_group = package_groups.value(groups_n).toMap();
+                std::string group_name = package_group["name"].toString().toStdString();
+                std::string group_desc = package_group["description"].toString().toStdString();
+                std::string group_critical = package_group["critical"].toString().toStdString();
+                QStringList group_packages = package_group.value( "packages" ).toStringList();
+                std::vector< std::string > packages;
+                foreach ( const QString& package , group_packages )
+                    packages.push_back( package.toStdString() );
+
+cDebug() << "NetInstallViewStep::setConfigurationMap() package_group[name]=" << QString::fromStdString(group_name);
+cDebug() << "NetInstallViewStep::setConfigurationMap() package_group[description]=" << QString::fromStdString(group_desc);
+cDebug() << "NetInstallViewStep::setConfigurationMap() package_group[critical]=" << QString::fromStdString(group_critical);
+cDebug() << "NetInstallViewStep::setConfigurationMap() package_group[packages]=" << group_packages;
+
+                package_groups_yaml << YAML::BeginMap;
+                package_groups_yaml << YAML::Key << "name"        << YAML::Value << group_name;
+                package_groups_yaml << YAML::Key << "description" << YAML::Value << group_desc;
+                package_groups_yaml << YAML::Key << "critical"    << YAML::Value << group_critical;
+                package_groups_yaml << YAML::Key << "packages"    << YAML::Value << packages;
+                package_groups_yaml << YAML::EndMap;
+            }
+            package_groups_yaml << YAML::EndSeq;
+
+// DBG << "NetInstallViewStep::setConfigurationMap() err=" << QString(package_groups_yaml.GetLastError());
+
+            QFile package_groups_file( QString( PACKAGE_GROUPS_FILE ).remove(0, 7) );
+            if (package_groups_file.open( QIODevice::WriteOnly | QIODevice::Text ))
+            {
+                QTextStream out( &package_groups_file );
+                out << package_groups_yaml.c_str(); // TODO:
+            }
+            cDebug() << "wrote package groups from netinstall.conf to" << PACKAGE_GROUPS_FILE;
+        }
+        else cDebug() << "no package groups defined in netinstall.conf - trying 'groupsUrl'";
+
         Calamares::JobQueue::instance()->globalStorage()->insert(
             "groupsUrl", configurationMap.value( "groupsUrl" ).toString() );
         m_widget->loadGroupList();

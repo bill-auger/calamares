@@ -113,6 +113,13 @@ public:
   static const QString DESKTOPS_KEY;
   static const QString DE_ICON_KEY;
   static const QString DE_NAME_KEY;
+  static const QString PACKAGE_GROUPS_KEY;
+  static const QString PACKAGES_KEY;
+  static const QString PACKAGES_CRITICAL_KEY;
+  static const QString PACKAGES_NONCRITICAL_KEY;
+  static const QString PACKAGE_PRE_KEY;
+  static const QString PACKAGE_KEY;
+  static const QString PACKAGE_POST_KEY;
   static const QString LOCALE_KEY;
   static const QString LANG_KEY;
   static const QString ROOT_MOUNTPOINT_KEY;

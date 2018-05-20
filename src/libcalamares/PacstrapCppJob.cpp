@@ -30,13 +30,13 @@
 const QString PacstrapCppJob::BOOTLODER_PACKAGES_KEY    = "bootloader" ;
 const QString PacstrapCppJob::KERNEL_PACKAGES_KEY       = "kernel" ;
 const QString PacstrapCppJob::UTILITIES_PACKAGES_KEY    = "utilities" ;
-const QString PacstrapCppJob::OPENRC_PACKAGES_KEY       = "openrc" ;
-const QString PacstrapCppJob::SYSTEMD_PACKAGES_KEY      = "systemd" ;
 const QString PacstrapCppJob::APPLICATIONS_PACKAGES_KEY = "applications" ;
 const QString PacstrapCppJob::MULTIMEDIA_PACKAGES_KEY   = "multimedia" ;
 const QString PacstrapCppJob::NETWORK_PACKAGES_KEY      = "network" ;
 const QString PacstrapCppJob::LOOKANDFEEL_PACKAGES_KEY  = "look-and-feel" ;
 const QString PacstrapCppJob::XSERVER_PACKAGES_KEY      = "x-server" ;
+const QString PacstrapCppJob::OPENRC_PACKAGES_KEY       = "openrc" ;
+const QString PacstrapCppJob::SYSTEMD_PACKAGES_KEY      = "systemd" ;
 const QString PacstrapCppJob::LXDE_PACKAGES_KEY         = "lxde" ;
 const QString PacstrapCppJob::MATE_PACKAGES_KEY         = "mate" ;
 
@@ -63,6 +63,8 @@ const QSTRINGMAP PacstrapCppJob::LANGUAGE_PACKS  = { {"eo"          , "iceweasel
                                                      {"pt_BR.UTF-8" , "iceweasel-l10n-pt-br" } ,
                                                      {"pl_PL.UTF-8" , "icedove-l10n-pl"      } ,
                                                      {"pl_PL.UTF-8" , "iceweasel-l10n-pl"    } } ;
+const QString    PacstrapCppJob::PREINST_ERROR_MSG  = "Error running pre-install script:\n%1" ;
+const QString    PacstrapCppJob::POSTINST_ERROR_MSG = "Error running post-install script:\n%1" ;
 
 
 /* PacstrapCppJob private class constants */
