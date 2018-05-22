@@ -46,10 +46,28 @@ public:
 
     void onActivate();
 
-    // Retrieves the groups, with name, description and packages, from
-    // the remote URL configured in the settings. Assumes the URL is already
-    // in the global storage. This should be called before displaying the page.
+    /** @brief Retrieves the package groups and their metadata
+     *
+     * Loads package data from the given URL.
+     * This should be called before displaying the page.
+     * Mutually exclusive with parseGroupList().
+     */
     void loadGroupList();
+
+    /** @brief Retrieves the package groups and their metadata
+     *
+     * Parses package data from netinstall.conf
+     * and converts it to YAML as equivalent to loadGroupList().
+     * This should be called before displaying the page.
+     * Mutually exclusive with loadGroupList().
+     */
+    void parseGroupList( const QVariantList& package_groups );
+
+    /** @brief Populates the package groups tree widget and enables the "next" button
+     *
+     * Should be called as the final step of loadGroupList() and parseGroupList().
+     */
+    void populateGroupsWidget( bool is_valid_package_data );
 
     // Loads icon, friendly name, and packages key for WM/DE options
     // from global storage and populate combobox options

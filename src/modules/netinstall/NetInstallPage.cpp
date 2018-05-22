@@ -22,11 +22,11 @@
 #include "NetInstallPage.h"
 
 #include "PackageModel.h"
-#include "ViewManager.h"
 
 #include "ui_page_netinst.h"
 #include "GlobalStorage.h"
 #include "JobQueue.h"
+#include "ViewManager.h" // TODO: remove this
 #include "utils/Logger.h"
 #include "utils/Retranslator.h"
 #include "utils/YamlUtils.h"
@@ -134,7 +134,6 @@ void
 NetInstallPage::parseGroupList( const QVariantList& package_groups )
 {
     // Convert netinstall.conf packages lists to YAML
-    QVariantList package_groups = configurationMap.value( GS::PACKAGE_GROUPS_KEY ).toList();
     YAML::Emitter package_groups_yaml;
     package_groups_yaml.SetOutputCharset(YAML::EscapeNonAscii);
     package_groups_yaml << YAML::BeginSeq;

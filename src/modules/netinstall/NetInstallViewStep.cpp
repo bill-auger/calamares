@@ -24,8 +24,6 @@
 #include "GlobalStorage.h"
 #include "utils/Logger.h"
 
-#include <QVariantList>
-
 #include "NetInstallPage.h"
 
 CALAMARES_PLUGIN_FACTORY_DEFINITION( NetInstallViewStepFactory, registerPlugin<NetInstallViewStep>(); )
