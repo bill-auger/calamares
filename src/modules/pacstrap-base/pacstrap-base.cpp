@@ -25,9 +25,11 @@
 /* PacstrapBaseJob private class constants */
 
 // const QString PacstrapBaseJob::GRUB_CRYPTO_FMT       = "sed -i 's|^#GRUB_ENABLE_CRYPTODISK=y|GRUB_ENABLE_CRYPTODISK=y|'                 %1/etc/default/grub" ;
-const QString PacstrapBaseJob::GRUB_THEME_FMT        = "sed -i 's|^#GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/parabola-laf/theme.txt|' %1/etc/default/grub" ;
+const QString PacstrapBaseJob::GRUB_THEME_FMT        = "sed -i 's|^#GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/GNUAxiom/theme.txt|' %1/etc/default/grub" ;
+const QString PacstrapBaseJob::GRUB_CONFIG_FMT       = "grub-mkconfig -o %1/boot/grub/grub.cfg" ;
 // const QString PacstrapBaseJob::GRUB_CRYPTO_ERROR_MSG = "The grub enable crypto command has failed." ;
-const QString PacstrapBaseJob::GRUB_THEME_ERROR_MSG  = "The grub define theme command has failed." ;
+const QString PacstrapBaseJob::GRUB_THEME_ERROR_MSG  = "The grub theme command has failed." ;
+const QString PacstrapBaseJob::GRUB_CONFIG_ERROR_MSG = "The grub-mkconfig command has failed." ;
 
 
 /* PacstrapBaseJob public instance methods */
@@ -59,9 +61,11 @@ QString PacstrapBaseJob::chrootExecPostInstall()
 {
 //   QString grub_crypto_cmd = GRUB_CRYPTO_FMT.arg(this->mountPoint) ;
   QString grub_theme_cmd  = GRUB_THEME_FMT .arg(this->mountPoint) ;
+  QString grub_config_cmd = GRUB_CONFIG_FMT.arg(this->mountPoint) ;
 
 //   if (!!execStatus(grub_crypto_cmd)) return GRUB_CRYPTO_ERROR_MSG ;
   if (!!execStatus(grub_theme_cmd )) return GRUB_THEME_ERROR_MSG ;
+  if (!!execStatus(grub_config_cmd)) return GRUB_CONFIG_ERROR_MSG ;
 
 printf("[PACSTRAP-JOB]: FIXME: this->mountPoint/etc/os-release: %s\n" , execOutput(QString("ls -l %1/etc/os-release").arg(this->mountPoint))) ; // FIXME:
 execStatus(QString("touch %1/etc/os-release").arg(this->mountPoint)) ; // FIXME:

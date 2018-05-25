@@ -45,8 +45,10 @@ private:
 
 //   static const QString GRUB_CRYPTO_FMT ;
   static const QString GRUB_THEME_FMT ;
+  static const QString GRUB_CONFIG_FMT ;
 //   static const QString GRUB_CRYPTO_ERROR_MSG ;
   static const QString GRUB_THEME_ERROR_MSG ;
+  static const QString GRUB_CONFIG_ERROR_MSG ;
 } ;
 
 

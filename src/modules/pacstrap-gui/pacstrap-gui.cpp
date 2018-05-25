@@ -41,6 +41,10 @@ const QString PacstrapGuiJob::DM_LANG_FMT       = "sed -i 's|^Language=.*|Langua
 const QString PacstrapGuiJob::WELCOME_TITLE_FMT = "sed -i 's|_EDITION_TITLE_|Parabola GNU/Linux-libre News|' %1/usr/bin/autostart.sh" ;
 const QString PacstrapGuiJob::WELCOME_TEXT_FMT  = "sed 's|_DEFAULT_DESKTOP_|%1|' /usr/share/calamares/welcome > %2/usr/share/parabola-laf/news/news-0" ;
 const QString PacstrapGuiJob::OCTOPI_FMT        = "rm -f %1/etc/xdg/autostart/octopi-notifier.desktop" ;
+const QString PacstrapGuiJob::GRUB_THEME_FMT        = "sed -i 's|^#GRUB_THEME=.*|GRUB_THEME=/boot/grub/themes/parabola-laf/theme.txt|' %1/etc/default/grub" ; // TODO:: delegate this to parabola-laf
+const QString PacstrapGuiJob::GRUB_CONFIG_FMT       = "grub-mkconfig -o %1/boot/grub/grub.cfg" ; // TODO:: delegate this to parabola-laf
+const QString PacstrapGuiJob::GRUB_THEME_ERROR_MSG  = "The grub theme command has failed." ; // TODO:: delegate this to parabola-laf
+const QString PacstrapGuiJob::GRUB_CONFIG_ERROR_MSG = "The grub-mkconfig command has failed." ; // TODO:: delegate this to parabola-laf
 
 
 /* PacstrapGuiJob public instance methods */
@@ -94,6 +98,10 @@ QString PacstrapGuiJob::chrootExecPostInstall()
   QString welcome_title_cmd = QString(WELCOME_TITLE_FMT).arg(                  this->mountPoint) ;
   QString welcome_text_cmd  = QString(WELCOME_TEXT_FMT ).arg(default_desktop , this->mountPoint) ;
   QString octopi_cmd        = QString(OCTOPI_FMT       ).arg(                  this->mountPoint) ;
+  // TODO: above *_FMT already are QString - no need to wrap them
+  QString grub_config_cmd   = GRUB_CONFIG_FMT.arg(this->mountPoint) ; // TODO:: delegate this to parabola-laf
+
+  if (!!execStatus(grub_config_cmd)) return GRUB_CONFIG_ERROR_MSG ; // TODO:: delegate this to parabola-laf
 
 printf("[PACSTRAP-GUI]: ls host/etc/skel%s\n"                 , execOutput(        "ls -al /etc/skel"                )                       .toStdString().c_str()) ;
 printf("[PACSTRAP-GUI]: ls -al chroot/etc/skel/  IN\n%s\n"    , execOutput(QString("ls -al %1/etc/skel"              ).arg(this->mountPoint)).toStdString().c_str()) ;

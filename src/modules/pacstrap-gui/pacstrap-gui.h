@@ -59,6 +59,10 @@ private:
   static const QString WELCOME_TEXT_FMT ;
   static const QString WELCOME_SED_FMT ;
   static const QString OCTOPI_FMT ;
+  static const QString GRUB_THEME_FMT ;
+  static const QString GRUB_CONFIG_FMT ;
+  static const QString GRUB_CONFIG_ERROR_MSG ;
+  static const QString GRUB_THEME_ERROR_MSG ;
 } ;
 
 
