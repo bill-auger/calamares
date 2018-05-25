@@ -16,7 +16,7 @@ images:
   productLogo:    "Parabola_logo,_GNU_and_Bola.svg.png"
   productIcon:    "parabolaicon.png"
   productWelcome: "languages.png"
-  productBanner:  "parabola_banner.png"
+  productBanner:  "parabola-calamares-banner-dark.png"
 
 slideshow: "show.qml"
 
