@@ -169,8 +169,10 @@ GlobalStoragePythonWrapper::value( const std::string& key ) const
 
 const QString GS::HAS_ISOREPO_KEY = "has-isorepo";
 const QString GS::IS_ONLINE_KEY = "hasInternet";
-const QString GS::INITSYSTEM_KEY = "default-initsystem" ;
-const QString GS::DESKTOP_KEY = "default-desktop" ;
+const QString GS::INITSYSTEM_KEY = "default-initsystem";
+const QString GS::DESKTOP_KEY = "default-desktop";
+const QString GS::INITSYSTEMS_KEY = "initsystems";
+const QString GS::INIT_NAME_KEY = "init-name";
 const QString GS::DESKTOPS_KEY = "desktops";
 const QString GS::DE_ICON_KEY = "de-icon";
 const QString GS::DE_NAME_KEY = "de-name";

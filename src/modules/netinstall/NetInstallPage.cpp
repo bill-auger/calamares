@@ -50,6 +50,7 @@
 using CalamaresUtils::yamlToVariant;
 
 
+const char NetInstallPage::INIT_COMBO_LABEL_TEXT[] = "Select Init System";
 const char NetInstallPage::WMDE_COMBO_LABEL_TEXT[] = "Select Graphical Environment";
 
 
@@ -61,7 +62,9 @@ NetInstallPage::NetInstallPage( QWidget* parent )
 {
     ui->setupUi( this );
 
+    ui->initLabel->setText( tr( INIT_COMBO_LABEL_TEXT ) );
     ui->wmDeLabel->setText( tr( WMDE_COMBO_LABEL_TEXT ) );
+    ui->initCombobox->setToolTip( tr( INIT_COMBO_LABEL_TEXT ) );
     ui->wmDeCombobox->setToolTip( tr( WMDE_COMBO_LABEL_TEXT ) );
 }
 
@@ -124,14 +127,29 @@ NetInstallPage::dataIsHere( QNetworkReply* reply )
 }
 
 void
-NetInstallPage::loadEnvironmentComboboxes(QVariantMap local_storage)
+NetInstallPage::populateComboboxes(QVariantMap local_storage)
 {
+    QVariantMap initsystems_data = local_storage.value( GS::INITSYSTEMS_KEY ).toMap();
     QVariantMap desktops_data = local_storage.value( GS::DESKTOPS_KEY ).toMap();
+    QVariantMap::iterator initsystems_iter = initsystems_data.begin();
     QVariantMap::iterator desktops_iter = desktops_data.begin();
+
+    for ( ; initsystems_iter != initsystems_data.end(); ++initsystems_iter )
+    {
+cLog() << "NetInstallPage::populateComboboxes() initsystems_iter.key()=" << initsystems_iter.key();
+
+        QVariantMap initsystems_data = initsystems_iter.value().toMap();
+        QVariant init_key = QVariant(initsystems_iter.key());
+        QString init_name = initsystems_data.value( GS::INIT_NAME_KEY ).toString();
+
+        ui->initCombobox->addItem(init_name, init_key);
+
+cLog() << "NetInstallPage::populateComboboxes() added init_key=" << init_key << " init_name" << init_name;
+    }
 
     for ( ; desktops_iter != desktops_data.end(); ++desktops_iter )
     {
-cLog() << "NetInstallPage::loadEnvironmentComboboxes() desktops_iter.key()=" << desktops_iter.key();
+cLog() << "NetInstallPage::populateComboboxes() desktops_iter.key()=" << desktops_iter.key();
 
         QVariantMap desktops_data = desktops_iter.value().toMap();
         QVariant de_key = QVariant(desktops_iter.key());
@@ -140,10 +158,10 @@ cLog() << "NetInstallPage::loadEnvironmentComboboxes() desktops_iter.key()=" << 
 
         ui->wmDeCombobox->addItem(de_icon, de_name, de_key);
 
-cLog() << "NetInstallPage::loadEnvironmentComboboxes() added de_icon=" <<
-        desktops_data.value( GS::DE_ICON_KEY ).toString() <<
-        " de_key=" << de_key << " de_name" << de_name;
+cLog() << "NetInstallPage::populateComboboxes() added de_icon=" << desktops_data.value( GS::DE_ICON_KEY ).toString() << " de_key=" << de_key << " de_name" << de_name;
     }
+
+    ui->initCombobox->setCurrentIndex( 1 );
     ui->wmDeCombobox->setCurrentIndex( 0 );
 }
 
@@ -157,6 +175,12 @@ NetInstallPage::selectedPackages() const
         cDebug() << "WARNING: no netinstall groups are available.";
         return PackageModel::PackageItemDataList();
     }
+}
+
+QString
+NetInstallPage::getInitSystem() const
+{
+  return ui->initCombobox->itemData(ui->initCombobox->currentIndex()).toString();
 }
 
 QString

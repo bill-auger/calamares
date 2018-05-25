@@ -179,9 +179,8 @@ NetInstallViewStep::onLeave()
     }
 
     Calamares::GlobalStorage* gs = Calamares::JobQueue::instance()->globalStorage();
-// globalStorage->insert(GS::DESKTOP_KEY    , MATE_PACKAGES_KEY   ) ; // TODO: per user option via globalStorage
-// globalStorage->insert(GS::DESKTOP_KEY , LXDE_PACKAGES_KEY) ; // TODO: per user option via globalStorage
-    gs->insert( GS::DESKTOP_KEY, m_widget->getWmDeKey() ) ; // TODO:
+    gs->insert( GS::INITSYSTEM_KEY, m_widget->getInitSystem() ) ;
+    gs->insert( GS::DESKTOP_KEY, m_widget->getWmDeKey() ) ;
 }
 
 
@@ -201,7 +200,7 @@ NetInstallViewStep::setConfigurationMap( const QVariantMap& configurationMap )
         m_widget->loadGroupList();
     }
 
-    m_widget->loadEnvironmentComboboxes( configurationMap );
+    m_widget->populateComboboxes( configurationMap );
 }
 
 void

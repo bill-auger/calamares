@@ -53,7 +53,7 @@ public:
 
     // Loads icon, friendly name, and packages key for WM/DE options
     // from global storage and populate combobox options
-    void loadEnvironmentComboboxes(QVariantMap local_storage);
+    void populateComboboxes(QVariantMap local_storage);
 
     // Sets the "required" state of netinstall data. Influences whether
     // corrupt or unavailable data causes checkReady() to be emitted
@@ -69,8 +69,13 @@ public:
     // this function does not have constant time.
     PackageModel::PackageItemDataList selectedPackages() const;
 
+    // Returns the value of the InitSystem combobox.
+    // This will determine which init-specific packages to install.
+    QString getInitSystem() const;
+
     // Returns the value of the WD/DE combobox.
-    // This will determine which pacman.conf to use in the PacstrapCppJob modules.
+    // This will determine which pacman.conf to use
+    // and also which desktop-specific packages to install.
     QString getWmDeKey() const;
 
 
@@ -95,6 +100,7 @@ private:
     PackageModel* m_groups;
     bool m_required;
 
+    static const char INIT_COMBO_LABEL_TEXT[];
     static const char WMDE_COMBO_LABEL_TEXT[];
 };
 
