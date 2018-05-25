@@ -78,6 +78,10 @@ public:
     // and also which desktop-specific packages to install.
     QString getWmDeKey() const;
 
+    // Returns the state of the "net install" checkbox.
+    // This will determine which pacman.conf to use in the PacstrapCppJob modules.
+    bool getShouldNetInstall() const;
+
 
 public slots:
     void dataIsHere( QNetworkReply* );
@@ -102,6 +106,7 @@ private:
 
     static const char INIT_COMBO_LABEL_TEXT[];
     static const char WMDE_COMBO_LABEL_TEXT[];
+    static const char NETINSTALL_CHECK_TEXT[];
 };
 
 #endif // NETINSTALLPAGE_H

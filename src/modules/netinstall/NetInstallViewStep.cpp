@@ -181,6 +181,7 @@ NetInstallViewStep::onLeave()
     Calamares::GlobalStorage* gs = Calamares::JobQueue::instance()->globalStorage();
     gs->insert( GS::INITSYSTEM_KEY, m_widget->getInitSystem() ) ;
     gs->insert( GS::DESKTOP_KEY, m_widget->getWmDeKey() ) ;
+    gs->insert( GS::IS_ONLINE_KEY, m_widget->getShouldNetInstall() );
 }
 
 

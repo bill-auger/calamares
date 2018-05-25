@@ -52,6 +52,7 @@ using CalamaresUtils::yamlToVariant;
 
 const char NetInstallPage::INIT_COMBO_LABEL_TEXT[] = "Select Init System";
 const char NetInstallPage::WMDE_COMBO_LABEL_TEXT[] = "Select Graphical Environment";
+const char NetInstallPage::NETINSTALL_CHECK_TEXT[] = "NetInstall";
 
 
 NetInstallPage::NetInstallPage( QWidget* parent )
@@ -66,6 +67,9 @@ NetInstallPage::NetInstallPage( QWidget* parent )
     ui->wmDeLabel->setText( tr( WMDE_COMBO_LABEL_TEXT ) );
     ui->initCombobox->setToolTip( tr( INIT_COMBO_LABEL_TEXT ) );
     ui->wmDeCombobox->setToolTip( tr( WMDE_COMBO_LABEL_TEXT ) );
+    ui->netinstallCheckbox->setText( tr( NETINSTALL_CHECK_TEXT ) );
+    ui->netinstallCheckbox->setChecked( false ); // deferred to onActivate();
+    ui->netinstallCheckbox->setEnabled( false ); // deferred to onActivate();
 }
 
 bool
@@ -189,6 +193,12 @@ NetInstallPage::getWmDeKey() const
   return ui->wmDeCombobox->itemData(ui->wmDeCombobox->currentIndex()).toString();
 }
 
+bool
+NetInstallPage::getShouldNetInstall() const
+{
+  return ui->netinstallCheckbox->isChecked();
+}
+
 void
 NetInstallPage::loadGroupList()
 {
@@ -215,9 +225,14 @@ NetInstallPage::setRequired( bool b )
     m_required = b;
 }
 
-
 void
 NetInstallPage::onActivate()
 {
+    Calamares::GlobalStorage* gs = Calamares::JobQueue::instance()->globalStorage();
+    bool has_isorepo = gs->value( GS::HAS_ISOREPO_KEY ).toBool();
+    bool is_online = gs->value( GS::IS_ONLINE_KEY ).toBool();
+
+    ui->netinstallCheckbox->setChecked( !has_isorepo );
+    ui->netinstallCheckbox->setEnabled( has_isorepo && is_online );
     ui->groupswidget->setFocus();
 }

@@ -161,7 +161,6 @@ Calamares::JobResult PacstrapCppJob::exec()
   bool         is_online   = this->globalStorage->value(GS::IS_ONLINE_KEY      ).toBool() ;
   this->mountPoint         = this->globalStorage->value(GS::ROOT_MOUNTPOINT_KEY).toString() ;
   this->targetDevice       = FindTargetDevice(partitions) ;
-is_online = false ; // TODO: per user option via globalStorage
   this->confFile           = (!has_isorepo) ? DEFAULT_CONF_FILENAME :
                              (is_online   ) ? ONLINE_CONF_FILENAME  : OFFLINE_CONF_FILENAME ;
   this->packages           = getPackageList() ;
