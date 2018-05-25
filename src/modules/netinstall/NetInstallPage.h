@@ -106,6 +106,7 @@ public slots:
 
 signals:
     void checkReady( bool );
+void skipThis(); // TODO: remove this
 
 
 private:

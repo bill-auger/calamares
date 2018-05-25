@@ -71,6 +71,9 @@ NetInstallPage::NetInstallPage( QWidget* parent )
     ui->netinstallCheckbox->setChecked( false ); // deferred to onActivate();
     ui->netinstallCheckbox->setEnabled( false ); // deferred to onActivate();
     ui->groupswidget->setHeaderHidden(true);
+
+connect(this, &NetInstallPage::skipThis,
+        Calamares::ViewManager::instance(), &Calamares::ViewManager::next); // TODO: remove this
 }
 
 bool
@@ -291,4 +294,10 @@ NetInstallPage::onActivate()
     ui->netinstallCheckbox->setChecked( !has_isorepo );
     ui->netinstallCheckbox->setEnabled( has_isorepo && is_online );
     ui->groupswidget->setFocus();
+
+// DEBUG: new features
+ui->initCombobox      ->setEnabled( false ); // TODO: remove this
+ui->wmDeCombobox      ->setEnabled( false ); // TODO: remove this
+ui->netinstallCheckbox->setEnabled( false ); // TODO: remove this
+emit skipThis();                             // TODO: remove this
 }
