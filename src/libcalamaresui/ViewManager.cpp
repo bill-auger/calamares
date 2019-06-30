@@ -234,68 +234,77 @@ quint16 fichePort = 9999;           // TODO: config var
     msgBox->show();
 
     cDebug() << "Calamares will quit when the dialog closes.";
-    connect( msgBox, &QMessageBox::buttonClicked, [msgBox, ficheHost, fichePort] ( QAbstractButton* button )
+    connect( msgBox, &QMessageBox::buttonClicked,
+             [msgBox, ficheHost, fichePort] ( QAbstractButton* button )
     {
         if ( button->text() != tr( "&Yes" ) )
-            QApplication::quit();
-        else
         {
-            QFile pasteSourceFile( Logger::logFile() );
-            if ( !pasteSourceFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
-                cError() << "Could not open log file";
-            else
-            {
-                QByteArray pasteData;
-                while ( !pasteSourceFile.atEnd() )
-                {
-                    pasteData += pasteSourceFile.readLine();
-                }
-
-                QTcpSocket* socket = new QTcpSocket(msgBox);
-                socket->connectToHost( ficheHost, fichePort );
-
-                if ( !socket->waitForConnected() )
-                    cError() << "Could not connect to paste server";
-                else
-                {
-                    cDebug() << "Connected to paste server";
-
-                    socket->write( pasteData );
-
-                    if ( !socket->waitForBytesWritten() )
-                        cError() << "Could not write to paste server";
-                    else
-                    {
-                        cDebug() << "Paste data written to paste server";
-
-                        if ( !socket->waitForReadyRead() )
-                            cError() << "No data from paste server";
-                        else
-                        {
-                            cDebug() << "Reading response from paste server";
-
-                            char resp[1024];
-                            socket->readLine(resp, 1024);
-                            socket->close();
-
-                            QString pasteUrl = QString( resp ) ;
-                            QString pasteUrlMsg = QString( pasteUrlFmt ).arg( pasteUrl );
-
-                            cDebug() << pasteUrlMsg;
-
-                            QMessageBox* pasteUrlMsgBox = new QMessageBox();
-                            pasteUrlMsgBox->setIcon( QMessageBox::Critical );
-                            pasteUrlMsgBox->setWindowTitle( tr( pasteUrlTitle ) );
-                            pasteUrlMsgBox->setStandardButtons( QMessageBox::Close );
-                            pasteUrlMsgBox->setInformativeText( pasteUrlMsg );
-                            pasteUrlMsgBox->show();
-
-                            connect( pasteUrlMsgBox, &QMessageBox::buttonClicked, qApp, &QApplication::quit );
-                        }
-                    }
-                }
-            }
+            QApplication::quit();
+            return;
         }
+
+        QFile pasteSourceFile( Logger::logFile() );
+        if ( !pasteSourceFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
+        {
+            cError() << "Could not open log file";
+            return;
+        }
+
+        QByteArray pasteData;
+        while ( !pasteSourceFile.atEnd() )
+        {
+            pasteData += pasteSourceFile.readLine();
+        }
+
+        QTcpSocket* socket = new QTcpSocket(msgBox);
+        socket->connectToHost( ficheHost, fichePort );
+
+        if ( !socket->waitForConnected() )
+        {
+            cError() << "Could not connect to paste server";
+            socket->close();
+            return;
+        }
+
+        cDebug() << "Connected to paste server";
+
+        socket->write( pasteData );
+
+        if ( !socket->waitForBytesWritten() )
+        {
+            cError() << "Could not write to paste server";
+            socket->close();
+            return;
+        }
+
+        cDebug() << "Paste data written to paste server";
+
+        if ( !socket->waitForReadyRead() )
+        {
+            cError() << "No data from paste server";
+            socket->close();
+            return;
+        }
+
+        cDebug() << "Reading response from paste server";
+
+        char resp[1024];
+        socket->readLine(resp, 1024);
+        socket->close();
+
+        QString pasteUrl = QString( resp ) ;
+        QString pasteUrlMsg = QString( pasteUrlFmt ).arg( pasteUrl );
+
+        cDebug() << pasteUrlMsg;
+
+        QMessageBox* pasteUrlMsgBox = new QMessageBox();
+        pasteUrlMsgBox->setIcon( QMessageBox::Critical );
+        pasteUrlMsgBox->setWindowTitle( pasteUrlTitle  );
+        pasteUrlMsgBox->setStandardButtons( QMessageBox::Close );
+        pasteUrlMsgBox->setInformativeText( pasteUrlMsg );
+        pasteUrlMsgBox->show();
+
+        connect( pasteUrlMsgBox, &QMessageBox::buttonClicked, qApp, &QApplication::quit );
     });
 }
 
